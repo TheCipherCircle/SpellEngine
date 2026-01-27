@@ -180,6 +180,31 @@ class GameClient:
         """Request game exit."""
         self._running = False
 
+    def _take_screenshot(self) -> None:
+        """Capture and save a screenshot of the current frame."""
+        from datetime import datetime
+        import pygame
+
+        if not self._screen:
+            return
+
+        # Create screenshots directory
+        screenshots_dir = Path.home() / ".storysmith" / "screenshots"
+        screenshots_dir.mkdir(parents=True, exist_ok=True)
+
+        # Generate filename with timestamp and scene name
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        scene_name = self._current_scene_name or "unknown"
+        filename = f"storysmith_{scene_name}_{timestamp}.png"
+        filepath = screenshots_dir / filename
+
+        # Save screenshot
+        try:
+            pygame.image.save(self._screen, str(filepath))
+            print(f"Screenshot saved: {filepath}")
+        except Exception as e:
+            print(f"Failed to save screenshot: {e}")
+
     def run(self, resume: bool = False) -> None:
         """Run the game.
 
@@ -221,6 +246,9 @@ class GameClient:
                         self._running = False
                     else:
                         self.change_scene("title", campaign=self.campaign, has_save=self.has_save())
+                # Screenshot capture (F12)
+                elif event.type == pygame.KEYDOWN and event.key == pygame.K_F12:
+                    self._take_screenshot()
                 elif self._current_scene:
                     try:
                         self._current_scene.handle_event(event)
