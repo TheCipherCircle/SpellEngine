@@ -1,0 +1,486 @@
+# The Dread Citadel Campaign
+# PROPRIETARY - All Rights Reserved
+#
+# A beginner-friendly campaign teaching hash cracking fundamentals
+
+id: dread_citadel
+title: "The Dread Citadel"
+description: "Storm the Dread Citadel and crack its ancient vaults. Learn password analysis through dark fantasy adventure."
+version: "1.0.0"
+author: "The Cipher Circle"
+difficulty: beginner
+estimated_time: "45 minutes"
+
+intro_text: |
+  The Dread Citadel looms before you, its obsidian towers piercing the blood-red sky.
+
+  For centuries, the Citadel Lord has hoarded the secrets of authentication—
+  hash algorithms, password patterns, the very keys to digital kingdoms.
+
+  You are an Infiltrator of the Cipher Circle, trained in the ancient arts
+  of pattern analysis. Your mission: breach the Citadel's defenses and
+  prove that no hash is truly uncrackable.
+
+  The journey will teach you:
+  • How password hashes work
+  • Common password patterns and why they fail
+  • Techniques for cracking MD5 and SHA1 hashes
+
+  Steel yourself. The Citadel awaits.
+
+outro_text: |
+  The Citadel Lord falls, his fortress breached, his secrets laid bare.
+
+  You have proven yourself a true Infiltrator of the Cipher Circle.
+  The knowledge you gained here—the patterns, the techniques, the instincts—
+  will serve you well in battles yet to come.
+
+  But remember: with great power comes great responsibility.
+  Use your skills to defend, to educate, to illuminate.
+
+  The Circle remembers those who walk the righteous path.
+
+  Until we meet again, Infiltrator.
+
+first_chapter: ch_outer_gates
+
+chapters:
+  # =========================================================================
+  # CHAPTER 1: THE OUTER GATES
+  # =========================================================================
+  - id: ch_outer_gates
+    title: "The Outer Gates"
+    description: "Breach the first defenses of the Citadel"
+    intro_text: |
+      The massive gates of the Citadel stand before you, sealed with
+      ancient hash locks. These are the simplest defenses—designed to
+      keep out the uninitiated.
+
+      But you are no ordinary traveler. You know the truth:
+      most passwords are painfully predictable.
+    outro_text: |
+      The Outer Gates groan open, revealing the path deeper into the Citadel.
+
+      You've proven that even the most common defenses crumble before
+      knowledge of human password habits. But harder challenges await...
+    first_encounter: enc_first_lock
+
+    encounters:
+      - id: enc_first_lock
+        title: "The First Lock"
+        type: flash
+        tier: 0
+        xp_reward: 10
+        intro_text: |
+          A rusted lock bars your way. Etched into its surface is an MD5 hash:
+
+          `5f4dcc3b5aa765d61d8327deb882cf99`
+
+          This hash protects... something. But what word created it?
+        objective: "Crack the MD5 hash to find the password"
+        hash: "5f4dcc3b5aa765d61d8327deb882cf99"
+        hash_type: md5
+        solution: "password"
+        hint: "The most common password in history. Sometimes the obvious answer is correct."
+        success_text: |
+          The lock clicks open. Of course—"password". The most predictable
+          choice in the history of authentication.
+
+          You've learned your first lesson: never underestimate human laziness.
+        failure_text: "The lock remains sealed. Think simpler—what's the most obvious password?"
+        next_encounter: enc_common_tongue
+
+      - id: enc_common_tongue
+        title: "The Common Tongue"
+        type: flash
+        tier: 0
+        xp_reward: 10
+        intro_text: |
+          A second lock appears, this one newer but no wiser:
+
+          `e10adc3949ba59abbe56e057f20f883e`
+
+          Numbers this time. What sequence do humans reach for first?
+        objective: "Crack this MD5 hash"
+        hash: "e10adc3949ba59abbe56e057f20f883e"
+        hash_type: md5
+        solution: "123456"
+        hint: "Sequential digits. The most common numeric password."
+        success_text: |
+          "123456"—six digits that have compromised millions of accounts.
+
+          Pattern recognition is your greatest weapon.
+        failure_text: "Not quite. Think of the simplest numeric sequence."
+        next_encounter: enc_servants_key
+
+      - id: enc_servants_key
+        title: "The Servant's Key"
+        type: flash
+        tier: 0
+        xp_reward: 15
+        intro_text: |
+          A small door—the servant's entrance. Its lock bears:
+
+          `21232f297a57a5a743894a0e4a801fc3`
+
+          This door was meant for those with system access...
+        objective: "Find the password that opens the servant's door"
+        hash: "21232f297a57a5a743894a0e4a801fc3"
+        hash_type: md5
+        solution: "admin"
+        hint: "The default password for administrators everywhere."
+        success_text: |
+          "admin"—the password of a thousand compromised systems.
+
+          Default credentials are the first thing attackers check.
+        failure_text: "Who uses this door? What role would they have?"
+        next_encounter: enc_gatekeeper
+
+      - id: enc_gatekeeper
+        title: "The Gatekeeper"
+        type: flash
+        tier: 1
+        xp_reward: 25
+        is_checkpoint: true
+        intro_text: |
+          A spectral Gatekeeper materializes, blocking your path.
+
+          "Prove your worth, Infiltrator. Crack my seal."
+
+          `0d107d09f5bbe40cade3de5c71e9e9b7`
+        objective: "Defeat the Gatekeeper by cracking their hash"
+        hash: "0d107d09f5bbe40cade3de5c71e9e9b7"
+        hash_type: md5
+        solution: "letmein"
+        hint: "A polite request for access. Three words, no spaces."
+        success_text: |
+          The Gatekeeper fades. "You have earned passage to the Crypts."
+
+          Chapter complete! The deeper chambers await.
+        failure_text: "The Gatekeeper stands firm. Think about what someone might say to get in..."
+        next_encounter: enc_simple_patterns
+
+  # =========================================================================
+  # CHAPTER 2: THE CRYPTS
+  # =========================================================================
+  - id: ch_the_crypts
+    title: "The Crypts"
+    description: "Navigate the burial chambers and their ancient locks"
+    intro_text: |
+      The Crypts stretch before you, filled with the bones of forgotten
+      passwords and the ghosts of breached accounts.
+
+      Here the hashes grow stronger. You'll need to recognize patterns:
+      • Names combined with years
+      • Common words from gaming and fantasy
+      • The shift from MD5 to SHA1
+    outro_text: |
+      The Crypt Guardian crumbles. You've mastered the intermediate arts.
+
+      Only the Inner Sanctum remains—and the Citadel Lord himself.
+    first_encounter: enc_simple_patterns
+
+    encounters:
+      - id: enc_simple_patterns
+        title: "Simple Patterns"
+        type: flash
+        tier: 1
+        xp_reward: 15
+        intro_text: |
+          A tomb sealed with a 4-digit code, hashed for protection:
+
+          `81dc9bdb52d04dc20036dbd8313ed055`
+
+          Four digits. Sequential. Classic.
+        objective: "Crack the 4-digit PIN"
+        hash: "81dc9bdb52d04dc20036dbd8313ed055"
+        hash_type: md5
+        solution: "1234"
+        hint: "The most common 4-digit PIN."
+        success_text: |
+          "1234"—protecting bank accounts and phone locks everywhere.
+
+          PIN codes follow the same predictable patterns as passwords.
+        failure_text: "Four digits, starting from the beginning..."
+        next_encounter: enc_name_game
+
+      - id: enc_name_game
+        title: "The Name Game"
+        type: flash
+        tier: 3
+        xp_reward: 25
+        intro_text: |
+          A memorial stone bears a hash—someone's legacy:
+
+          `40bb26af9910da09e17e141e1ab93a97`
+
+          People love to combine names with years...
+        objective: "Crack this name+year pattern"
+        hash: "40bb26af9910da09e17e141e1ab93a97"
+        hash_type: md5
+        solution: "John2024"
+        hint: "A common male name followed by the current year."
+        success_text: |
+          "John2024"—the Name+Year pattern. Incredibly common, easily cracked.
+
+          Personal information makes terrible password material.
+        failure_text: "Think of a common first name, then add a recent year."
+        next_encounter: enc_ancient_scroll
+
+      - id: enc_ancient_scroll
+        title: "The Ancient Scroll"
+        type: flash
+        tier: 1
+        xp_reward: 20
+        intro_text: |
+          An ancient scroll, its seal protected by:
+
+          `8621ffdbc5698829397d97767ac13db3`
+
+          Fantasy themes are popular with certain demographics...
+        objective: "What creature protects this scroll?"
+        hash: "8621ffdbc5698829397d97767ac13db3"
+        hash_type: md5
+        solution: "dragon"
+        hint: "A mythical fire-breathing creature."
+        success_text: |
+          "dragon"—fantasy words rank highly in password lists.
+
+          Wordlists built from pop culture crack these instantly.
+        failure_text: "Think fantasy. Think fire. Think scales."
+        next_encounter: enc_pattern_lock
+
+      - id: enc_pattern_lock
+        title: "The Pattern Lock"
+        type: flash
+        tier: 1
+        xp_reward: 20
+        intro_text: |
+          A complex-looking lock, but the hash tells another story:
+
+          `eb0a191797624dd3a48fa681d3061212`
+
+          Some passwords suggest authority...
+        objective: "Who does this password belong to?"
+        hash: "eb0a191797624dd3a48fa681d3061212"
+        hash_type: md5
+        solution: "master"
+        hint: "One who has skill or authority."
+        success_text: |
+          "master"—another common dictionary word falls.
+
+          Dictionary attacks are devastatingly effective.
+        failure_text: "Think of someone in charge, in control..."
+        next_encounter: enc_sha1_intro
+
+      - id: enc_sha1_intro
+        title: "New Algorithms"
+        type: tour
+        tier: 0
+        xp_reward: 10
+        intro_text: |
+          You notice the hash format changing. The locks ahead use SHA1:
+
+          SHA1 produces longer hashes (40 hex characters vs MD5's 32).
+          But don't be intimidated—the same password weaknesses apply.
+
+          MD5:  `5f4dcc3b5aa765d61d8327deb882cf99` (32 chars)
+          SHA1: `5baa61e4c9b93f3f0682250b6cf8331b7ee68fd8` (40 chars)
+
+          Same password ("password"), different algorithm.
+        objective: "Understand SHA1 hashes"
+        success_text: |
+          SHA1 is cryptographically stronger than MD5, but weak passwords
+          are weak regardless of the hashing algorithm.
+
+          The vulnerability is human nature, not mathematics.
+        next_encounter: enc_sha1_first_test
+
+      - id: enc_sha1_first_test
+        title: "SHA1 First Test"
+        type: flash
+        tier: 0
+        xp_reward: 15
+        intro_text: |
+          Your first SHA1 challenge:
+
+          `aaf4c61ddcc5e8a2dabede0f3b482cd9aea9434d`
+
+          A simple greeting, hashed with a stronger algorithm.
+        objective: "Crack this SHA1 hash"
+        hash: "aaf4c61ddcc5e8a2dabede0f3b482cd9aea9434d"
+        hash_type: sha1
+        solution: "hello"
+        hint: "A common greeting."
+        success_text: |
+          "hello"—SHA1 doesn't save weak passwords.
+
+          Algorithm strength is irrelevant when the password is in every wordlist.
+        failure_text: "How do you greet someone?"
+        next_encounter: enc_safe_crack
+
+      - id: enc_safe_crack
+        title: "The Safe"
+        type: flash
+        tier: 1
+        xp_reward: 20
+        intro_text: |
+          A treasure vault, its combination hashed:
+
+          `3bf1114a986ba87ed28fc1b5884fc2f8`
+
+          Something dark, something that follows...
+        objective: "Open the vault"
+        hash: "3bf1114a986ba87ed28fc1b5884fc2f8"
+        hash_type: md5
+        solution: "shadow"
+        hint: "It follows you in the light."
+        success_text: |
+          "shadow"—another common word, another cracked vault.
+
+          The pattern continues: common words, common failure.
+        failure_text: "Think about what follows you when the sun is out..."
+        next_encounter: enc_risky_crack
+
+      - id: enc_risky_crack
+        title: "The Risky Choice"
+        type: flash
+        tier: 1
+        xp_reward: 25
+        intro_text: |
+          A cryptic inscription accompanies this SHA1 hash:
+
+          `e68e11be8b70e435c65aef8ba9798ff7775c361e`
+
+          "The truth is out there... but whom can you believe?"
+        objective: "Decode the X-Files reference"
+        hash: "e68e11be8b70e435c65aef8ba9798ff7775c361e"
+        hash_type: sha1
+        solution: "trustno1"
+        hint: "Famous X-Files password. Ironic advice about trust."
+        success_text: |
+          "trustno1"—Fox Mulder's password from The X-Files.
+
+          Pop culture references make terrible passwords.
+        failure_text: "Think paranoid. Think 90s TV. Trust issues..."
+        next_encounter: enc_crypt_guardian
+
+      - id: enc_crypt_guardian
+        title: "The Crypt Guardian"
+        type: flash
+        tier: 1
+        xp_reward: 35
+        is_checkpoint: true
+        intro_text: |
+          The Crypt Guardian rises—a skeletal warrior bound by a SHA1 seal:
+
+          `e5e9fa1ba31ecd1ae84f75caaa474f3a663f05f4`
+
+          "You seek passage to the Inner Sanctum? Prove you understand
+          what passwords are meant to be!"
+        objective: "Defeat the Crypt Guardian"
+        hash: "e5e9fa1ba31ecd1ae84f75caaa474f3a663f05f4"
+        hash_type: sha1
+        solution: "secret"
+        hint: "What are passwords supposed to be?"
+        success_text: |
+          "secret"—the irony is not lost on you.
+
+          The Crypt Guardian falls. The Inner Sanctum awaits.
+        failure_text: "What should a password be, but rarely is?"
+        next_encounter: enc_left_hand
+
+  # =========================================================================
+  # CHAPTER 3: THE INNER SANCTUM
+  # =========================================================================
+  - id: ch_inner_sanctum
+    title: "The Inner Sanctum"
+    description: "Face the Citadel Lord and his champions"
+    intro_text: |
+      The Inner Sanctum. Here dwell the Citadel Lord and his lieutenants—
+      the Left Hand and the Right Hand.
+
+      These final challenges will test everything you've learned:
+      • Pattern recognition
+      • Hybrid attacks (word + numbers + symbols)
+      • The courage to face the unknown
+    outro_text: |
+      The Citadel Lord is vanquished. The Dread Citadel falls silent.
+
+      You have completed your first campaign, Infiltrator.
+      But this is only the beginning...
+    first_encounter: enc_left_hand
+
+    encounters:
+      - id: enc_left_hand
+        title: "The Left Hand"
+        type: flash
+        tier: 1
+        xp_reward: 30
+        intro_text: |
+          The Left Hand emerges from shadow, wielding a SHA1 blade:
+
+          `8d6e34f987851aa599257d3831a1af040886842f`
+
+          "I am warmth. I am light. Can you see through me?"
+        objective: "Defeat the Left Hand"
+        hash: "8d6e34f987851aa599257d3831a1af040886842f"
+        hash_type: sha1
+        solution: "sunshine"
+        hint: "Warmth and light from above."
+        success_text: |
+          "sunshine"—another common password illuminated.
+
+          The Left Hand dissipates. One lieutenant remains.
+        failure_text: "What brings warmth and light from the sky?"
+        next_encounter: enc_right_hand
+
+      - id: enc_right_hand
+        title: "The Right Hand"
+        type: flash
+        tier: 3
+        xp_reward: 35
+        intro_text: |
+          The Right Hand steps forward, MD5-forged armor gleaming:
+
+          `e90664c0af74160644d29e4d6147969b`
+
+          "Season and year! The pattern of renewal—and predictability!"
+        objective: "Defeat the Right Hand"
+        hash: "e90664c0af74160644d29e4d6147969b"
+        hash_type: md5
+        solution: "Summer2024"
+        hint: "A warm season followed by the current year."
+        success_text: |
+          "Summer2024"—the Season+Year pattern, cracked.
+
+          Both lieutenants have fallen. Only the Citadel Lord remains!
+        failure_text: "Think seasons. Think this year. Capital letter starts..."
+        next_encounter: enc_citadel_lord
+
+      - id: enc_citadel_lord
+        title: "The Citadel Lord"
+        type: flash
+        tier: 2
+        xp_reward: 50
+        is_checkpoint: true
+        intro_text: |
+          The Citadel Lord rises from his throne, ancient and terrible.
+
+          "You have come far, Infiltrator. But can you crack MY seal?"
+
+          `cbfdac6008f9cab4083784cbd1874f76618d2a97`
+
+          "The most classic combination of all. Prove your worth!"
+        objective: "Defeat the Citadel Lord and claim victory"
+        hash: "cbfdac6008f9cab4083784cbd1874f76618d2a97"
+        hash_type: sha1
+        solution: "password123"
+        hint: "The most common password... plus the most common numbers."
+        success_text: |
+          "password123"—the Citadel Lord's seal shatters!
+
+          The lord crumbles to dust, his fortress breached, his secrets yours.
+
+          VICTORY! You have conquered the Dread Citadel!
+        failure_text: "Think about what you learned at the very beginning... plus a bit more."

@@ -9,7 +9,7 @@ Usage:
     patternforge game dread_citadel
 """
 
-from patternforge.game.client import GameClient
-from patternforge.game.audio import AudioManager
+from storysmith.engine.game.client import GameClient
+from storysmith.engine.game.audio import AudioManager
 
 __all__ = ["GameClient", "AudioManager"]

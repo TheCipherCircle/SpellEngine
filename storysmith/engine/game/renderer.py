@@ -7,7 +7,7 @@ integrating with the new UI theme system.
 from typing import TYPE_CHECKING
 
 # Import colors from the new theme for backward compatibility
-from patternforge.game.ui.theme import Colors, Typography, get_fonts
+from storysmith.engine.game.ui.theme import Colors, Typography, get_fonts
 
 if TYPE_CHECKING:
     import pygame

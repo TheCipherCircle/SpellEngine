@@ -6,7 +6,7 @@ Square corners, no rounding - corrupted SNES aesthetic.
 
 from typing import TYPE_CHECKING
 
-from patternforge.game.ui.theme import Colors, LAYOUT, Typography, get_fonts
+from storysmith.engine.game.ui.theme import Colors, LAYOUT, Typography, get_fonts
 
 if TYPE_CHECKING:
     import pygame

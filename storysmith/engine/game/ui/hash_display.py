@@ -5,7 +5,7 @@ Displays hashes with color-coded type indicators and state management.
 
 from typing import TYPE_CHECKING
 
-from patternforge.game.ui.theme import Colors, Typography, get_fonts, LAYOUT
+from storysmith.engine.game.ui.theme import Colors, Typography, get_fonts, LAYOUT
 
 if TYPE_CHECKING:
     import pygame

@@ -8,11 +8,11 @@ Each scene handles rendering and input for a specific game state:
 - Victory: Campaign completion
 """
 
-from patternforge.game.scenes.base import Scene
-from patternforge.game.scenes.title import TitleScene
-from patternforge.game.scenes.encounter import EncounterScene
-from patternforge.game.scenes.game_over import GameOverScene
-from patternforge.game.scenes.victory import VictoryScene
+from storysmith.engine.game.scenes.base import Scene
+from storysmith.engine.game.scenes.title import TitleScene
+from storysmith.engine.game.scenes.encounter import EncounterScene
+from storysmith.engine.game.scenes.game_over import GameOverScene
+from storysmith.engine.game.scenes.victory import VictoryScene
 
 __all__ = [
     "Scene",

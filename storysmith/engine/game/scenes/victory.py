@@ -5,8 +5,8 @@ Displayed on campaign completion with stats and rating.
 
 from typing import TYPE_CHECKING, Any
 
-from patternforge.game.scenes.base import Scene
-from patternforge.game.ui import (
+from storysmith.engine.game.scenes.base import Scene
+from storysmith.engine.game.ui import (
     Colors,
     LAYOUT,
     Typography,
@@ -20,7 +20,7 @@ from patternforge.game.ui import (
 
 if TYPE_CHECKING:
     import pygame
-    from patternforge.game.client import GameClient
+    from storysmith.engine.game.client import GameClient
 
 
 class VictoryScene(Scene):

@@ -11,14 +11,14 @@ The Forge Council:
 "Knowledge forged into action. Action tempered by knowledge."
 """
 
-from patternforge.agents.math_validator import (
+from storysmith.agents.math_validator import (
     MathValidationAgent,
     ValidationResult,
     ComponentConfidence,
     ObservationRecord,
 )
 
-from patternforge.agents.cosmic import (
+from storysmith.agents.cosmic import (
     Cosmic,
     Observation,
     Pattern,
@@ -30,7 +30,7 @@ from patternforge.agents.cosmic import (
     ProposalStatus,
 )
 
-from patternforge.agents.scribe import (
+from storysmith.agents.scribe import (
     Scribe,
     ChangeReport,
     SampleHashSet,
@@ -44,7 +44,7 @@ from patternforge.agents.scribe import (
     CorpusAnalysis,
 )
 
-from patternforge.agents.mirth import (
+from storysmith.agents.mirth import (
     Mirth,
     QuestHook,
     EncounterDesign,

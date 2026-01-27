@@ -1,6 +1,6 @@
 """PTHAdventures - Choose-your-own-adventure password cracking education."""
 
-from patternforge.adventures.models import (
+from storysmith.adventures.models import (
     Campaign,
     Chapter,
     Choice,
@@ -10,9 +10,9 @@ from patternforge.adventures.models import (
     OutcomeType,
     PlayerState,
 )
-from patternforge.adventures.state import AdventureState
-from patternforge.adventures.loader import load_campaign
-from patternforge.adventures.achievements import (
+from storysmith.adventures.state import AdventureState
+from storysmith.adventures.loader import load_campaign
+from storysmith.adventures.achievements import (
     Achievement,
     AchievementCategory,
     AchievementManager,
@@ -25,7 +25,7 @@ from patternforge.adventures.achievements import (
     get_achievement_by_id,
     get_achievements_by_trigger,
 )
-from patternforge.adventures.hashlib_designed import (
+from storysmith.adventures.hashlib_designed import (
     DesignedHash,
     HashCategory,
     ALL_TIERS,
@@ -39,7 +39,7 @@ from patternforge.adventures.hashlib_designed import (
     get_library_stats,
     iterate_by_tier,
 )
-from patternforge.adventures.experience_grading import (
+from storysmith.adventures.experience_grading import (
     # Enums
     GradingDimension,
     PacingRating,
@@ -64,7 +64,7 @@ from patternforge.adventures.experience_grading import (
     create_dread_citadel_campaign_grade,
     create_grading_manifest,
 )
-from patternforge.adventures.dice import (
+from storysmith.adventures.dice import (
     DieType,
     RollResult,
     roll,
@@ -81,7 +81,7 @@ from patternforge.adventures.dice import (
     coin_flip,
     oracle,
 )
-from patternforge.adventures.assets import (
+from storysmith.adventures.assets import (
     AssetLoader,
     ArtStyle,
     DEFAULT_ART_STYLE,

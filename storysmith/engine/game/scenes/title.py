@@ -11,8 +11,8 @@ Features:
 
 from typing import TYPE_CHECKING, Any
 
-from patternforge.game.scenes.base import Scene
-from patternforge.game.ui import (
+from storysmith.engine.game.scenes.base import Scene
+from storysmith.engine.game.ui import (
     Colors,
     LAYOUT,
     Typography,
@@ -26,8 +26,8 @@ from patternforge.game.ui import (
 
 if TYPE_CHECKING:
     import pygame
-    from patternforge.adventures.models import Campaign
-    from patternforge.game.client import GameClient
+    from storysmith.adventures.models import Campaign
+    from storysmith.engine.game.client import GameClient
 
 
 class TitleScene(Scene):

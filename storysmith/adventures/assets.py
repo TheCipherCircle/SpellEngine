@@ -11,7 +11,7 @@ if TYPE_CHECKING:
     import pygame
 
 # Asset directories
-ASSETS_DIR = Path(__file__).parent.parent.parent.parent / "assets"
+ASSETS_DIR = Path(__file__).parent.parent.parent / "assets"
 IMAGES_DIR = ASSETS_DIR / "images"
 
 # Art style type

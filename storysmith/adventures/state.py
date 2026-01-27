@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import Callable
 import json
 
-from patternforge.adventures.models import (
+from storysmith.adventures.models import (
     Campaign,
     Chapter,
     Encounter,
@@ -17,7 +17,7 @@ from patternforge.adventures.models import (
     OutcomeType,
     PlayerState,
 )
-from patternforge.adventures.achievements import (
+from storysmith.adventures.achievements import (
     AchievementManager,
     TriggerType,
     UnlockedAchievement,

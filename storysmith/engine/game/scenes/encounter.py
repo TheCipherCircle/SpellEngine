@@ -11,8 +11,8 @@ import subprocess
 import threading
 from typing import TYPE_CHECKING, Any
 
-from patternforge.game.scenes.base import Scene
-from patternforge.game.ui import (
+from storysmith.engine.game.scenes.base import Scene
+from storysmith.engine.game.ui import (
     Colors,
     LAYOUT,
     Typography,
@@ -23,13 +23,13 @@ from patternforge.game.ui import (
     PromptBar,
     get_fonts,
 )
-from patternforge.adventures.models import EncounterType, OutcomeType
+from storysmith.adventures.models import EncounterType, OutcomeType
 
 if TYPE_CHECKING:
     import pygame
-    from patternforge.adventures.models import Encounter, Choice
-    from patternforge.game.client import GameClient
-    from patternforge.game.ui.theme import FontManager
+    from storysmith.adventures.models import Encounter, Choice
+    from storysmith.engine.game.client import GameClient
+    from storysmith.engine.game.ui.theme import FontManager
 
 
 # Boss encounter IDs mapped to boss sprite names
@@ -414,7 +414,7 @@ class EncounterScene(Scene):
         # Check answer
         correct = False
         if encounter.hash and encounter.hash_type:
-            from patternforge.adventures.validation import validate_crack
+            from storysmith.adventures.validation import validate_crack
             correct = validate_crack(answer, encounter.hash, encounter.hash_type)
         elif encounter.solution:
             correct = answer.lower().strip() == encounter.solution.lower().strip()

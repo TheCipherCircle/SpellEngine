@@ -15,7 +15,7 @@ from enum import Enum
 from typing import Any
 from pydantic import BaseModel, Field
 
-from patternforge.adventures.models import (
+from storysmith.adventures.models import (
     Campaign,
     Chapter,
     Encounter,

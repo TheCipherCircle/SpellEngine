@@ -41,7 +41,8 @@ dev = [
 ]
 
 [project.scripts]
-storysmith = "storysmith.content.cli:main"
+storysmith = "storysmith.cli:main"
+storysmith-content = "storysmith.content.cli:main"
 
 [project.urls]
 "Homepage" = "https://github.com/TheCipherCircle/Storysmith"

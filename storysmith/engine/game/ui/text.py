@@ -6,7 +6,7 @@ Corrupted SNES aesthetic with hard pixel edges.
 
 from typing import TYPE_CHECKING
 
-from patternforge.game.ui.theme import Colors, Typography, get_fonts
+from storysmith.engine.game.ui.theme import Colors, Typography, get_fonts
 
 if TYPE_CHECKING:
     import pygame

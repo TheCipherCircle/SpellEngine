@@ -8,11 +8,11 @@ from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     import pygame
-    from patternforge.adventures.models import Campaign
-    from patternforge.adventures.state import AdventureState
-    from patternforge.adventures.assets import AssetLoader
-    from patternforge.game.scenes.base import Scene
-    from patternforge.game.audio import AudioManager
+    from storysmith.adventures.models import Campaign
+    from storysmith.adventures.state import AdventureState
+    from storysmith.adventures.assets import AssetLoader
+    from storysmith.engine.game.scenes.base import Scene
+    from storysmith.engine.game.audio import AudioManager
 
 
 # Default window size
@@ -103,10 +103,10 @@ class GameClient:
 
     def _init_scenes(self) -> None:
         """Initialize all scene objects."""
-        from patternforge.game.scenes.title import TitleScene
-        from patternforge.game.scenes.encounter import EncounterScene
-        from patternforge.game.scenes.game_over import GameOverScene
-        from patternforge.game.scenes.victory import VictoryScene
+        from storysmith.engine.game.scenes.title import TitleScene
+        from storysmith.engine.game.scenes.encounter import EncounterScene
+        from storysmith.engine.game.scenes.game_over import GameOverScene
+        from storysmith.engine.game.scenes.victory import VictoryScene
 
         self._scenes = {
             "title": TitleScene(self),
@@ -121,7 +121,7 @@ class GameClient:
         Args:
             resume: Whether to resume from save
         """
-        from patternforge.adventures.state import AdventureState
+        from storysmith.adventures.state import AdventureState
 
         self.save_dir.mkdir(parents=True, exist_ok=True)
 
@@ -136,13 +136,13 @@ class GameClient:
 
     def _init_assets(self) -> None:
         """Initialize the asset loader."""
-        from patternforge.adventures.assets import AssetLoader
+        from storysmith.adventures.assets import AssetLoader
 
         self.assets = AssetLoader()
 
     def _init_audio(self) -> None:
         """Initialize the audio manager."""
-        from patternforge.game.audio import AudioManager
+        from storysmith.engine.game.audio import AudioManager
 
         self.audio = AudioManager()
 

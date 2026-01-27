@@ -14,7 +14,7 @@ Components:
 """
 
 # Theme and constants
-from patternforge.game.ui.theme import (
+from storysmith.engine.game.ui.theme import (
     Colors,
     LAYOUT,
     Typography,
@@ -24,12 +24,12 @@ from patternforge.game.ui.theme import (
 )
 
 # Components
-from patternforge.game.ui.button import Button
-from patternforge.game.ui.textbox import TextBox
-from patternforge.game.ui.panel import Panel, StatusPanel
-from patternforge.game.ui.text import TextRenderer, TypewriterText, draw_double_border_title
-from patternforge.game.ui.menu import Menu, MenuItem, PromptBar
-from patternforge.game.ui.hash_display import HashDisplay, HashInputPanel
+from storysmith.engine.game.ui.button import Button
+from storysmith.engine.game.ui.textbox import TextBox
+from storysmith.engine.game.ui.panel import Panel, StatusPanel
+from storysmith.engine.game.ui.text import TextRenderer, TypewriterText, draw_double_border_title
+from storysmith.engine.game.ui.menu import Menu, MenuItem, PromptBar
+from storysmith.engine.game.ui.hash_display import HashDisplay, HashInputPanel
 
 __all__ = [
     # Theme

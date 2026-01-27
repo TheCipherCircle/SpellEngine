@@ -5,7 +5,7 @@ Styled for corrupted SNES aesthetic with red arrow indicator.
 
 from typing import Callable, TYPE_CHECKING
 
-from patternforge.game.ui.theme import Colors, Typography, get_fonts, LAYOUT
+from storysmith.engine.game.ui.theme import Colors, Typography, get_fonts, LAYOUT
 
 if TYPE_CHECKING:
     import pygame

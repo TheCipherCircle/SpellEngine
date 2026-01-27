@@ -9,7 +9,7 @@ from typing import Any
 
 import yaml
 
-from patternforge.adventures.models import (
+from storysmith.adventures.models import (
     Campaign,
     Chapter,
     Choice,
