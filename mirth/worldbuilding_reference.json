@@ -1,0 +1,120 @@
+{
+  "title": "AdventureZone Hub Naming Reference",
+  "created": "2026-01-24",
+  "purpose": "Portal-adjacent place concepts for the central adventure hub",
+  "source": "pitl0rd worldbuilding session",
+
+  "design_principles": {
+    "function": "Transition hub - moves players between worlds, stories, challenges",
+    "feel": "Believable, not marketing-speak",
+    "expandability": "Many adventures, many tones, long-lived",
+    "alignment": "D&D, WoW, Wizards-of-the-Coast compatible"
+  },
+
+  "place_categories": {
+    "inns_taverns_waystations": {
+      "why_they_work": [
+        "Adventurers gather there",
+        "Stories branch there",
+        "Travel begins there"
+      ],
+      "examples": [
+        {"name": "The Wayward Sigil", "notes": "Sigil = magical marker/gateway key, wayward = unpredictability", "repo": "the-wayward-sigil"},
+        {"name": "The Crossroads Keep", "notes": "Crossroads = choice/transition, Keep = stable/defended", "repo": "the-crossroads-keep"},
+        {"name": "The Last Wayhouse", "notes": "Before somewhere dangerous, slightly ominous but warm", "repo": "the-last-wayhouse"}
+      ]
+    },
+
+    "arcane_infrastructure": {
+      "why_they_work": [
+        "Places built to manage portals",
+        "Magic as infrastructure",
+        "Technical and magical"
+      ],
+      "examples": [
+        {"name": "The Leyway", "notes": "Ley lines as magical highways, short/elegant", "repo": "the-leyway", "rating": "quietly excellent"},
+        {"name": "The Conflux", "notes": "Merging energies, many stories through one place", "repo": "the-conflux"},
+        {"name": "The Gatehall", "notes": "Hall of gates, ancient/official, expandable", "repo": "the-gatehall"}
+      ]
+    },
+
+    "archives_knowledge_hubs": {
+      "why_they_work": [
+        "Knowledge enables travel",
+        "Less 'magic happened', more 'understanding enables'",
+        "Strong Hashtopia alignment"
+      ],
+      "examples": [
+        {"name": "The Grand Index", "notes": "Navigation, lookup, structure", "repo": "the-grand-index"},
+        {"name": "The Map of Doors", "notes": "Poetic, exploration through understanding", "repo": "the-map-of-doors"},
+        {"name": "The Open Codex", "notes": "Collected works, accessibility", "repo": "the-open-codex"}
+      ]
+    },
+
+    "liminal_spaces": {
+      "why_they_work": [
+        "Thresholds, boundaries, in-between places",
+        "Perfect for portals",
+        "Intuitive understanding"
+      ],
+      "examples": [
+        {"name": "The Threshold", "notes": "Minimalist, powerful, umbrella name", "repo": "the-threshold"},
+        {"name": "The Far Step", "notes": "One step away, intent and consequence", "repo": "the-far-step"},
+        {"name": "The Between", "notes": "Space between worlds, abstract/elegant", "repo": "the-between"}
+      ]
+    },
+
+    "many_worlds_hubs": {
+      "why_they_work": [
+        "Many realities intersect",
+        "Planescape/WoW energy",
+        "Mythic but not heavy"
+      ],
+      "examples": [
+        {"name": "The Manyroad", "notes": "Roads not doors, lived-in feel", "repo": "the-manyroad"},
+        {"name": "The Turning World", "notes": "Recurrence and variation", "repo": "the-turning-world"},
+        {"name": "The Axis Hall", "notes": "Axis mundi, central reference point", "repo": "the-axis-hall"}
+      ]
+    }
+  },
+
+  "top_recommendations": [
+    {"name": "The Wayward Sigil", "reason": "Top pick - unpredictability meets magical infrastructure"},
+    {"name": "The Leyway", "reason": "Elegant, subtle, systemic"},
+    {"name": "The Conflux", "reason": "Perfect multi-adventure container"},
+    {"name": "The Threshold", "reason": "Minimalist and powerful"},
+    {"name": "The Gatehall", "reason": "Literal, expandable, timeless"}
+  ],
+
+  "design_tension": {
+    "question": "Magic as infrastructure OR travel as choice?",
+    "infrastructure_examples": ["The Leyway", "The Conflux", "The Gatehall"],
+    "choice_examples": ["The Threshold", "The Crossroads Keep", "The Wayward Sigil"]
+  },
+
+  "full_candidate_list": [
+    "The Wayward Sigil",
+    "The Leyway",
+    "The Conflux",
+    "The Threshold",
+    "The Gatehall",
+    "The Crossroads Keep",
+    "The Manyroad",
+    "The Far Step",
+    "The Open Vault",
+    "The Salted Archive",
+    "The Quiet Anvil",
+    "The Black Ledger",
+    "The Last Wayhouse",
+    "The Axis Hall",
+    "The Map of Doors",
+    "The Open Codex"
+  ],
+
+  "patternforge_specific_additions": [
+    {"name": "The Salted Archive", "notes": "Salting is a password security concept - domain-appropriate"},
+    {"name": "The Quiet Anvil", "notes": "Forge theme, contemplative"},
+    {"name": "The Black Ledger", "notes": "Record-keeping, slightly dangerous, hash-cracking adjacent"},
+    {"name": "The Open Vault", "notes": "Vault of Broken Secrets callback"}
+  ]
+}

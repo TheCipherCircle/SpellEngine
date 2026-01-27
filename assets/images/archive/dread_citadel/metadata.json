@@ -1,0 +1,174 @@
+{
+  "archive_info": {
+    "campaign": "dread_citadel",
+    "created": "2026-01-25",
+    "generator": "Replicate retro-diffusion/rd-fast",
+    "style_reference": "Crawl by Powerhoof",
+    "quality_ceiling": "LucasArts (Day of the Tentacle, Full Throttle)"
+  },
+  "images": [
+    {
+      "filename": "splash_dread_citadel_v1_20260125_154528.png",
+      "asset_type": "splash_screen",
+      "campaign": "dread_citadel",
+      "dimensions": {"width": 384, "height": 216},
+      "prompt": "dark fantasy castle, massive gothic fortress silhouette against blood-red sunset sky, ominous black towers with pointed spires, muted earth tones, dramatic orange and crimson sky gradients, foreboding atmosphere, dungeon crawler game title screen, wide cinematic composition, retro game art",
+      "tags": ["splash", "title_screen", "castle", "silhouette", "sunset", "gothic", "dark_fantasy", "pixel_art"],
+      "color_palette": ["blood_red", "orange", "black", "gray"],
+      "mood": "ominous",
+      "approved": true,
+      "selected_for_production": false,
+      "date_generated": "2026-01-25T15:45:28Z"
+    },
+    {
+      "filename": "splash_dread_citadel_v2_20260125_154528.png",
+      "asset_type": "splash_screen",
+      "campaign": "dread_citadel",
+      "dimensions": {"width": 384, "height": 216},
+      "prompt": "ancient fortress gates, massive weathered stone entrance with cryptic glowing amber runes, dark fantasy style, imposing iron gates revealing darkness within, torchlight on stone walls, sunset orange sky, muted browns and grays, ominous mood, game splash screen",
+      "tags": ["splash", "title_screen", "gates", "runes", "fortress", "torchlight", "dark_fantasy", "pixel_art"],
+      "color_palette": ["amber", "orange", "brown", "gray", "black"],
+      "mood": "imposing",
+      "approved": true,
+      "selected_for_production": false,
+      "date_generated": "2026-01-25T15:46:28Z"
+    },
+    {
+      "filename": "splash_dread_citadel_v3_20260125_154528.png",
+      "asset_type": "splash_screen",
+      "campaign": "dread_citadel",
+      "dimensions": {"width": 384, "height": 216},
+      "prompt": "lone hooded figure approaching dark citadel, small adventurer on winding path toward massive gothic fortress, dramatic scale contrast, dark fantasy, blood moon behind castle spires, muted earth tones with deep red accents, mist at ground level, retro dungeon crawler, cinematic wide shot",
+      "tags": ["splash", "title_screen", "hooded_figure", "adventurer", "blood_moon", "path", "mist", "scale_contrast", "dark_fantasy", "pixel_art"],
+      "color_palette": ["blood_red", "gray", "black", "earth_tones"],
+      "mood": "atmospheric",
+      "approved": true,
+      "selected_for_production": true,
+      "production_filename": "splash_dread_citadel.png",
+      "date_generated": "2026-01-25T15:49:28Z"
+    },
+    {
+      "filename": "chapter_outer_gates_v2_20260125_155407.png",
+      "asset_type": "chapter_card",
+      "campaign": "dread_citadel",
+      "chapter": 1,
+      "chapter_name": "The Outer Gates",
+      "dimensions": {"width": 384, "height": 288},
+      "prompt": "ancient citadel entrance, towering stone gate with carved runes glowing amber, dark fantasy style, dramatic sunset sky behind fortress walls, shadows and torchlight, muted earth tones with orange highlights, ominous mood",
+      "tags": ["chapter_card", "gates", "entrance", "runes", "amber_glow", "sunset", "stone", "dark_fantasy", "pixel_art"],
+      "color_palette": ["amber", "orange", "stone_gray", "sunset_red"],
+      "mood": "dramatic",
+      "approved": true,
+      "selected_for_production": true,
+      "production_filename": "chapter_outer_gates.png",
+      "date_generated": "2026-01-25T15:55:07Z"
+    },
+    {
+      "filename": "chapter_crypts_v1_20260125_161748.png",
+      "asset_type": "chapter_card",
+      "campaign": "dread_citadel",
+      "chapter": 2,
+      "chapter_name": "The Crypts",
+      "dimensions": {"width": 384, "height": 288},
+      "prompt": "underground crypt entrance, spiral stone stairs descending into darkness, phosphorescent blue-green moss on walls, skull carvings, eerie cyan glow, dark fantasy dungeon, bone white and shadow blue palette, retro game chapter card",
+      "tags": ["chapter_card", "crypts", "stairs", "underground", "moss", "phosphorescent", "skull", "cyan_glow", "dark_fantasy", "pixel_art"],
+      "color_palette": ["cyan", "blue_green", "bone_white", "dark_gray"],
+      "mood": "eerie",
+      "approved": true,
+      "selected_for_production": false,
+      "date_generated": "2026-01-25T16:17:48Z"
+    },
+    {
+      "filename": "chapter_crypts_v2_20260125_161748.png",
+      "asset_type": "chapter_card",
+      "campaign": "dread_citadel",
+      "chapter": 2,
+      "chapter_name": "The Crypts",
+      "dimensions": {"width": 384, "height": 288},
+      "prompt": "ancient tomb chamber, stone sarcophagi with glowing cyan runes, phosphorescent moss providing dim light, dark underground crypt, blue-green and bone white colors, gothic arches, dungeon crawler scene, mysterious atmosphere",
+      "tags": ["chapter_card", "crypts", "tomb", "sarcophagi", "runes", "moss", "arches", "gothic", "dark_fantasy", "pixel_art"],
+      "color_palette": ["cyan", "blue_green", "bone_white", "gray"],
+      "mood": "mysterious",
+      "approved": true,
+      "selected_for_production": false,
+      "date_generated": "2026-01-25T16:18:48Z"
+    },
+    {
+      "filename": "chapter_crypts_v3_20260125_161748.png",
+      "asset_type": "chapter_card",
+      "campaign": "dread_citadel",
+      "chapter": 2,
+      "chapter_name": "The Crypts",
+      "dimensions": {"width": 384, "height": 288},
+      "prompt": "crypt descent, winding stairs going deep underground, bioluminescent fungi on walls casting cyan glow, carved warnings in stone, dark fantasy catacomb, shadowy with blue-green highlights, retro game aesthetic",
+      "tags": ["chapter_card", "crypts", "stairs", "descent", "mushrooms", "bioluminescent", "fungi", "warnings", "catacomb", "dark_fantasy", "pixel_art"],
+      "color_palette": ["cyan", "teal", "dark_gray", "black"],
+      "mood": "atmospheric",
+      "approved": true,
+      "selected_for_production": true,
+      "production_filename": "chapter_crypts.png",
+      "date_generated": "2026-01-25T16:19:48Z"
+    },
+    {
+      "filename": "chapter_inner_sanctum_v3_20260125_161940.png",
+      "asset_type": "chapter_card",
+      "campaign": "dread_citadel",
+      "chapter": 3,
+      "chapter_name": "The Inner Sanctum",
+      "dimensions": {"width": 384, "height": 288},
+      "prompt": "evil throne room, throne made of crystallized magical energy, purple and gold light, gothic architecture, dark pillars with glowing runes, royal chamber of dark lord, dramatic shadows, dungeon crawler final area",
+      "tags": ["chapter_card", "sanctum", "throne_room", "throne", "crystal", "purple", "gold", "gothic", "final_boss", "dark_fantasy", "pixel_art"],
+      "color_palette": ["purple", "gold", "crystal_white", "dark_gray"],
+      "mood": "majestic",
+      "approved": true,
+      "selected_for_production": true,
+      "production_filename": "chapter_inner_sanctum.png",
+      "date_generated": "2026-01-25T16:21:40Z"
+    },
+    {
+      "filename": "icon_v1.png",
+      "asset_type": "app_icon",
+      "campaign": null,
+      "dimensions": {"width": 128, "height": 128},
+      "prompt": "pixel art anvil icon, blacksmith forge, orange flame glow, dark background, game app icon, 32x32 pixel art, clean simple design, dark fantasy style",
+      "tags": ["icon", "app_icon", "forge", "anvil", "flames", "blacksmith", "branding", "pixel_art"],
+      "color_palette": ["orange", "flame_red", "dark_gray", "brown"],
+      "mood": "warm",
+      "approved": true,
+      "selected_for_production": true,
+      "production_filename": "patternforge_icon.png",
+      "date_generated": "2026-01-25T16:36:00Z"
+    }
+  ],
+  "training_data_notes": {
+    "style": "16-bit pixel art, Crawl game aesthetic",
+    "consistent_elements": ["dark outlines", "muted earth tones", "warm accent lighting", "atmospheric fog/mist"],
+    "quality_markers": ["clean pixel edges", "limited color palette", "readable at small sizes"],
+    "negative_patterns": ["text artifacts", "blurry edges", "inconsistent pixel density"]
+  },
+  "search_index": {
+    "by_asset_type": {
+      "splash_screen": ["splash_dread_citadel_v1_20260125_154528.png", "splash_dread_citadel_v2_20260125_154528.png", "splash_dread_citadel_v3_20260125_154528.png"],
+      "chapter_card": ["chapter_outer_gates_v2_20260125_155407.png", "chapter_crypts_v1_20260125_161748.png", "chapter_crypts_v2_20260125_161748.png", "chapter_crypts_v3_20260125_161748.png", "chapter_inner_sanctum_v3_20260125_161940.png"],
+      "app_icon": ["icon_v1.png"]
+    },
+    "by_mood": {
+      "ominous": ["splash_dread_citadel_v1_20260125_154528.png"],
+      "imposing": ["splash_dread_citadel_v2_20260125_154528.png"],
+      "atmospheric": ["splash_dread_citadel_v3_20260125_154528.png", "chapter_crypts_v3_20260125_161748.png"],
+      "dramatic": ["chapter_outer_gates_v2_20260125_155407.png"],
+      "eerie": ["chapter_crypts_v1_20260125_161748.png"],
+      "mysterious": ["chapter_crypts_v2_20260125_161748.png"],
+      "majestic": ["chapter_inner_sanctum_v3_20260125_161940.png"],
+      "warm": ["icon_v1.png"]
+    },
+    "by_color": {
+      "purple": ["chapter_inner_sanctum_v3_20260125_161940.png"],
+      "cyan": ["chapter_crypts_v1_20260125_161748.png", "chapter_crypts_v2_20260125_161748.png", "chapter_crypts_v3_20260125_161748.png"],
+      "amber": ["splash_dread_citadel_v2_20260125_154528.png", "chapter_outer_gates_v2_20260125_155407.png"],
+      "blood_red": ["splash_dread_citadel_v1_20260125_154528.png", "splash_dread_citadel_v3_20260125_154528.png"],
+      "orange": ["icon_v1.png"]
+    },
+    "production_files": ["splash_dread_citadel_v3_20260125_154528.png", "chapter_outer_gates_v2_20260125_155407.png", "chapter_crypts_v3_20260125_161748.png", "chapter_inner_sanctum_v3_20260125_161940.png", "icon_v1.png"]
+  }
+}

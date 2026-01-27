@@ -1,0 +1,48 @@
+{
+  "change_0": {
+    "report_id": "change_0",
+    "created_at": "2026-01-24T11:43:05.926960",
+    "change_type": "enrich",
+    "target_file": "15. Misc/Example Hashes.md",
+    "target_section": null,
+    "current_content": "\n### Example Captured Hashes\n\n**NetNTLMv1 (SSP Enabled):**\n\n`hashcat::admin-SAA37877:85DSBC2CE95161CD00000000000000000000000000000000:892F905962F76D323837F613F88DE27C2BBD6C9ABCD021D0:11223344556677BB`\n\n**NetNTLMv1 (No SSP):**\n\n`hashcat::admin-SAA37877:76365E2D14285612980C67D057EB9EFEEESEF6EB6FF6E04D:727B4E35F947129EA5289CDEDAE869348823EF89F50FC595:1122334455667788`\n\n**NetNTLMv2:**\n\n`admin::N46iSNekpT:08ca45b7d7ea58ee:88dcbe4446168966a153a0064958dac6:...`\n\n[[Home]]\n#education #research ",
+    "proposed_content": "\n### Example Captured Hashes\n\n**NetNTLMv1 (SSP Enabled):**\n\n`hashcat::admin-SAA37877:85DSBC2CE95161CD00000000000000000000000000000000:892F905962F76D323837F613F88DE27C2BBD6C9ABCD021D0:11223344556677BB`\n\n**NetNTLMv1 (No SSP):**\n\n`hashcat::admin-SAA37877:76365E2D14285612980C67D057EB9EFEEESEF6EB6FF6E04D:727B4E35F947129EA5289CDEDAE869348823EF89F50FC595:1122334455667788`\n\n**NetNTLMv2:**\n\n`admin::N46iSNekpT:08ca45b7d7ea58ee:88dcbe4446168966a153a0064958dac6:...`\n\n---\n\n## Training Sample Hashes\n\n*Provided by PatternForge for community training. These are synthetic hashes - crack them!*\n\n### MD5 (Mode 0)\n\nFast hash (~60 GH/s). Good for beginners.\n\n```\n5f4dcc3b5aa765d61d8327deb882cf99\ne10adc3949ba59abbe56e057f20f883e\nd8578edf8458ce06fbc5bb76a58c5ca4\n0d107d09f5bbe40cade3de5c71e9e9b7\n40be4e59b9a2a2b5dffb918c0e86b3d7\nd0763edaa9d9bd2a9516280e9044d885\n8621ffdbc5698829397d97767ac13db3\neb0a191797624dd3a48fa681d3061212\n21232f297a57a5a743894a0e4a801fc3\n3bf1114a986ba87ed28fc1b5884fc2f8\n```\n\n### SHA-256 (Mode 1400)\n\nMedium speed (~8 GH/s). Common in web apps.\n\n```\n5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8\n8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92\n8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918\n65e84be33532fb784c48129675f9eff3a682b27168c0ea744b2cf58ee02337c5\n1c8bfe8f801d79745c4631d09fff36c82aa37fc4cce4fc946683d7b336b63032\n```\n\n### md5crypt (Mode 500)\n\nSlow hash with salt (~30 MH/s). Unix /etc/shadow format.\n\n```\n$1$salt1234$mdTPqHoA0SfnCug0hqR1M0\n$1$abcdefgh$hGGndps75hhROKqu/zh9q1\n$1$xyz12345$T9p8LqolAwuBV1KjFJm4V1\n$1$rounds55$bD1KLq0GgJdK7hPkCnQ8Z.\n$1$testsalt$J3K7A2L9wRn.8qL2bZmPU.\n```\n\n### NTLMv2 (Mode 5600) - BigLunchCorp Dataset\n\nChallenge-response hashes. 1000 samples available from `biglunchcorp.com` domain.\n\n```\ndanderson::BIGLUNCHCORP:37311796d9d13a3e:7b1fa9e14d4a916b44301918e07cab54:56afcc2c2a521506\nppatel::BIGLUNCHCORP:58553a48f1a71fda:c59afeefcda24dd59d7a43be0d9c9008:78586ad36fe8600d\nrobinsonj::BIGLUNCHCORP:fa58654642a97fb3:e80592626da99aebf150782de3d7fffb:dd870aa37147e606\nlaura_cooper::BIGLUNCHCORP:fb4d5afb31b59331:6950bf4824fb0e852f666d33cca70b10:71fd6a2ff00f2b48\nlaurad::BIGLUNCHCORP:5e961631fcd511fb:9637d303313ad2448ad3bea10877ec39:a9a0ad46ead91d5c\npbaker::BIGLUNCHCORP:b1df55680c065b78:1a75ceb2ae7c951d10fdcedc408d481c:f05e84ba8da19bdc\nchristinegarcia::BIGLUNCHCORP:4a89383a88e1e28f:30beb6e21e42ca18df3c6be52fe2d226:7e2f355a83194e27\nedwardb::BIGLUNCHCORP:78b4c9feb2a0fb48:3c41e5dc7b65740d7c58023e745a1a47:ed1427cf1d49d777\nkylec::BIGLUNCHCORP:e6243200cf2e881a:f084a173025e5af82f3c6780f3efe1f9:6da8b48674004f4e\nrachelj::BIGLUNCHCORP:f44e2171bd43cd08:0d0fe853ab7e7599dc2ef92f5e736427:333e5e482ab0efe5\n```\n\n> [!tip] Full Dataset\n> The complete BigLunchCorp dataset (1000 NTLMv2 hashes) is available in [PatternForge](https://github.com/pitl0rd/PatternForge) at `tests/qa_data/demo_ntlmv2_hashes.txt`\n\n[[Home]]\n#education #research #training\n",
+    "rationale": "Enrich Example Hashes page with training samples for community use.",
+    "data_sources": [
+      "PatternForge NTLMv2 generator",
+      "Common password lists"
+    ],
+    "data_qualification": "synthetic",
+    "supporting_evidence": {},
+    "status": "applied",
+    "reviewed_at": "2026-01-24T11:43:48.377225",
+    "reviewed_by": "user",
+    "decision_notes": "Approved for staging vault",
+    "applied_at": "2026-01-24T11:43:48.385204"
+  },
+  "change_1": {
+    "report_id": "change_1",
+    "created_at": "2026-01-24T11:50:51.190046",
+    "change_type": "promote",
+    "target_file": "15. Misc/Example Hashes.md",
+    "target_section": null,
+    "current_content": "\n### Example Captured Hashes\n\n**NetNTLMv1 (SSP Enabled):**\n\n`hashcat::admin-SAA37877:85DSBC2CE95161CD00000000000000000000000000000000:892F905962F76D323837F613F88DE27C2BBD6C9ABCD021D0:11223344556677BB`\n\n**NetNTLMv1 (No SSP):**\n\n`hashcat::admin-SAA37877:76365E2D14285612980C67D057EB9EFEEESEF6EB6FF6E04D:727B4E35F947129EA5289CDEDAE869348823EF89F50FC595:1122334455667788`\n\n**NetNTLMv2:**\n\n`admin::N46iSNekpT:08ca45b7d7ea58ee:88dcbe4446168966a153a0064958dac6:...`\n\n[[Home]]\n#education #research ",
+    "proposed_content": "\n### Example Captured Hashes\n\n**NetNTLMv1 (SSP Enabled):**\n\n`hashcat::admin-SAA37877:85DSBC2CE95161CD00000000000000000000000000000000:892F905962F76D323837F613F88DE27C2BBD6C9ABCD021D0:11223344556677BB`\n\n**NetNTLMv1 (No SSP):**\n\n`hashcat::admin-SAA37877:76365E2D14285612980C67D057EB9EFEEESEF6EB6FF6E04D:727B4E35F947129EA5289CDEDAE869348823EF89F50FC595:1122334455667788`\n\n**NetNTLMv2:**\n\n`admin::N46iSNekpT:08ca45b7d7ea58ee:88dcbe4446168966a153a0064958dac6:...`\n\n---\n\n## Training Sample Hashes\n\n*Provided by PatternForge for community training. These are synthetic hashes - crack them!*\n\n### MD5 (Mode 0)\n\nFast hash (~60 GH/s). Good for beginners.\n\n```\n5f4dcc3b5aa765d61d8327deb882cf99\ne10adc3949ba59abbe56e057f20f883e\nd8578edf8458ce06fbc5bb76a58c5ca4\n0d107d09f5bbe40cade3de5c71e9e9b7\n40be4e59b9a2a2b5dffb918c0e86b3d7\nd0763edaa9d9bd2a9516280e9044d885\n8621ffdbc5698829397d97767ac13db3\neb0a191797624dd3a48fa681d3061212\n21232f297a57a5a743894a0e4a801fc3\n3bf1114a986ba87ed28fc1b5884fc2f8\n```\n\n### SHA-256 (Mode 1400)\n\nMedium speed (~8 GH/s). Common in web apps.\n\n```\n5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8\n8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92\n8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918\n65e84be33532fb784c48129675f9eff3a682b27168c0ea744b2cf58ee02337c5\n1c8bfe8f801d79745c4631d09fff36c82aa37fc4cce4fc946683d7b336b63032\n```\n\n### md5crypt (Mode 500)\n\nSlow hash with salt (~30 MH/s). Unix /etc/shadow format.\n\n```\n$1$salt1234$mdTPqHoA0SfnCug0hqR1M0\n$1$abcdefgh$hGGndps75hhROKqu/zh9q1\n$1$xyz12345$T9p8LqolAwuBV1KjFJm4V1\n$1$rounds55$bD1KLq0GgJdK7hPkCnQ8Z.\n$1$testsalt$J3K7A2L9wRn.8qL2bZmPU.\n```\n\n### NTLMv2 (Mode 5600) - BigLunchCorp Dataset\n\nChallenge-response hashes. 1000 samples available from `biglunchcorp.com` domain.\n\n```\ndanderson::BIGLUNCHCORP:37311796d9d13a3e:7b1fa9e14d4a916b44301918e07cab54:56afcc2c2a521506\nppatel::BIGLUNCHCORP:58553a48f1a71fda:c59afeefcda24dd59d7a43be0d9c9008:78586ad36fe8600d\nrobinsonj::BIGLUNCHCORP:fa58654642a97fb3:e80592626da99aebf150782de3d7fffb:dd870aa37147e606\nlaura_cooper::BIGLUNCHCORP:fb4d5afb31b59331:6950bf4824fb0e852f666d33cca70b10:71fd6a2ff00f2b48\nlaurad::BIGLUNCHCORP:5e961631fcd511fb:9637d303313ad2448ad3bea10877ec39:a9a0ad46ead91d5c\npbaker::BIGLUNCHCORP:b1df55680c065b78:1a75ceb2ae7c951d10fdcedc408d481c:f05e84ba8da19bdc\nchristinegarcia::BIGLUNCHCORP:4a89383a88e1e28f:30beb6e21e42ca18df3c6be52fe2d226:7e2f355a83194e27\nedwardb::BIGLUNCHCORP:78b4c9feb2a0fb48:3c41e5dc7b65740d7c58023e745a1a47:ed1427cf1d49d777\nkylec::BIGLUNCHCORP:e6243200cf2e881a:f084a173025e5af82f3c6780f3efe1f9:6da8b48674004f4e\nrachelj::BIGLUNCHCORP:f44e2171bd43cd08:0d0fe853ab7e7599dc2ef92f5e736427:333e5e482ab0efe5\n```\n\n> [!tip] Full Dataset\n> The complete BigLunchCorp dataset (1000 NTLMv2 hashes) is available in [PatternForge](https://github.com/pitl0rd/PatternForge) at `tests/qa_data/demo_ntlmv2_hashes.txt`\n\n[[Home]]\n#education #research #training\n",
+    "rationale": "Promote 15. Misc/Example Hashes.md from staging to production",
+    "data_sources": [
+      "staging_vault"
+    ],
+    "data_qualification": "production",
+    "supporting_evidence": {
+      "staging_vault": "/users/petermckernan/documents/Hashtopia-PatternForge",
+      "production_vault": "/users/petermckernan/documents/hashtopia.net",
+      "staging_size": 2931,
+      "production_size": 490
+    },
+    "status": "applied",
+    "reviewed_at": "2026-01-24T11:50:51.194145",
+    "reviewed_by": "user",
+    "decision_notes": "",
+    "applied_at": "2026-01-24T11:50:51.198429"
+  }
+}

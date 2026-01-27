@@ -1,0 +1,24 @@
+{
+  "hook_0": {
+    "hook_id": "hook_0",
+    "learning_objective": "Complete PatternForge and prepare for AdventureZone",
+    "quest_title": "The Trial of Complete Patternforge Prepare",
+    "quest_description": "Your objective: Complete PatternForge and prepare for AdventureZone You must overcome obstacles that test your understanding. Hidden knowledge awaits those who search carefully. Each step forward reveals new capabilities.",
+    "engagement_types": [
+      "challenge",
+      "progression",
+      "discovery"
+    ],
+    "difficulty": "hard",
+    "rewards": [
+      "Understanding of the core concept",
+      "Mastery achievement unlocked",
+      "Advanced technique revealed",
+      "Experience toward next level"
+    ],
+    "flavor_text": "The ancient texts speak of this knowledge. Many have sought it; few have truly grasped it.",
+    "mechanics_suggestion": "Skill checks against difficulty class; Investigation rolls to uncover hidden information; Experience points for completed steps",
+    "lore_reference": "dnd",
+    "created_at": "2026-01-24T13:58:44.304678"
+  }
+}
