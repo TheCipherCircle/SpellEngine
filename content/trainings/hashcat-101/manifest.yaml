@@ -1,0 +1,42 @@
+# Hashcat 101 - Fundamentals training course
+#
+# PROPRIETARY - All Rights Reserved
+
+id: hashcat-101
+type: training
+title: "Hashcat 101: Fundamentals"
+version: "1.0.0"
+engine: ">=1.0.0"
+
+# Discovery
+difficulty: beginner
+duration_minutes: 30
+tags:
+  - hashcat
+  - fundamentals
+  - dictionary-attack
+  - md5
+  - sha1
+  - tutorial
+hash_types:
+  - md5
+  - sha1
+tools:
+  - hashcat
+
+# Metadata
+author: cipher-circle
+description: "Learn the basics of hashcat - attack modes, hash types, and your first cracks."
+created: "2026-01-27"
+updated: "2026-01-27"
+
+# Balance (EIE triangle) - training is more educational
+balance:
+  educational: 0.6
+  informative: 0.3
+  entertaining: 0.1
+
+# Structure
+modules: 4
+lessons: 12
+assessments: 2

@@ -1,0 +1,69 @@
+{
+  "version": "1.0.0",
+  "generated": "2026-01-27T06:07:39.821450+00:00",
+  "schema_version": "1.0.0",
+  "adventures": [
+    {
+      "id": "dread-citadel",
+      "type": "adventure",
+      "path": "adventures/dread-citadel",
+      "title": "The Dread Citadel",
+      "version": "1.0.0",
+      "engine": ">=1.0.0",
+      "difficulty": "beginner",
+      "duration_minutes": 45,
+      "tags": [
+        "hashcat",
+        "wordlist",
+        "mask-attack",
+        "md5",
+        "sha1",
+        "dark-fantasy",
+        "flagship"
+      ],
+      "hash_types": [
+        "md5",
+        "sha1"
+      ],
+      "tools": [
+        "hashcat",
+        "patternforge"
+      ],
+      "author": "cipher-circle",
+      "description": "Storm the Dread Citadel and crack its ancient vaults. Learn password analysis through dark fantasy adventure.",
+      "chapters": 3,
+      "encounters": 24
+    }
+  ],
+  "trainings": [
+    {
+      "id": "hashcat-101",
+      "type": "training",
+      "path": "trainings/hashcat-101",
+      "title": "Hashcat 101: Fundamentals",
+      "version": "1.0.0",
+      "engine": ">=1.0.0",
+      "difficulty": "beginner",
+      "duration_minutes": 30,
+      "tags": [
+        "hashcat",
+        "fundamentals",
+        "dictionary-attack",
+        "md5",
+        "sha1",
+        "tutorial"
+      ],
+      "hash_types": [
+        "md5",
+        "sha1"
+      ],
+      "tools": [
+        "hashcat"
+      ],
+      "author": "cipher-circle",
+      "description": "Learn the basics of hashcat - attack modes, hash types, and your first cracks.",
+      "modules": 4,
+      "lessons": 12
+    }
+  ]
+}

@@ -1,0 +1,41 @@
+# Storysmith Content Manifest Schema
+# All content items (adventures, trainings) must include a manifest.yaml
+#
+# PROPRIETARY - All Rights Reserved
+# This schema is part of the Storysmith closed-source content system.
+
+# Required fields
+id: string                    # Unique identifier (kebab-case, e.g., "dread-citadel")
+type: adventure | training    # Content type
+title: string                 # Display name
+version: string               # Semantic version (e.g., "1.0.0")
+engine: string                # Required engine version (e.g., ">=1.0.0")
+
+# Discovery fields (all optional but recommended)
+difficulty: beginner | intermediate | advanced | expert
+duration_minutes: integer     # Estimated completion time
+tags: [string]                # Searchable tags
+hash_types: [string]          # Hash algorithms used (md5, sha1, sha256, etc.)
+tools: [string]               # Tools required (hashcat, patternforge, etc.)
+
+# Metadata (optional)
+author: string                # Creator/team
+description: string           # Short description (1-2 sentences)
+created: string               # ISO date (YYYY-MM-DD)
+updated: string               # ISO date of last update
+
+# Balance scoring (optional, 0.0-1.0 each, should sum to ~1.0)
+balance:
+  educational: float          # Teaching new concepts
+  informative: float          # Providing reference knowledge
+  entertaining: float         # Fun/engagement factor
+
+# Content structure (type-specific)
+# For adventures:
+chapters: integer             # Number of chapters
+encounters: integer           # Total encounter count
+
+# For trainings:
+modules: integer              # Number of modules
+lessons: integer              # Total lesson count
+assessments: integer          # Number of quizzes/tests

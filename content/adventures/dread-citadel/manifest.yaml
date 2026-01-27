@@ -1,0 +1,43 @@
+# The Dread Citadel - Storysmith's flagship campaign
+#
+# PROPRIETARY - All Rights Reserved
+
+id: dread-citadel
+type: adventure
+title: "The Dread Citadel"
+version: "1.0.0"
+engine: ">=1.0.0"
+
+# Discovery
+difficulty: beginner
+duration_minutes: 45
+tags:
+  - hashcat
+  - wordlist
+  - mask-attack
+  - md5
+  - sha1
+  - dark-fantasy
+  - flagship
+hash_types:
+  - md5
+  - sha1
+tools:
+  - hashcat
+  - patternforge
+
+# Metadata
+author: cipher-circle
+description: "Storm the Dread Citadel and crack its ancient vaults. Learn password analysis through dark fantasy adventure."
+created: "2024-01-01"
+updated: "2026-01-27"
+
+# Balance (EIE triangle)
+balance:
+  educational: 0.3
+  informative: 0.3
+  entertaining: 0.4
+
+# Structure
+chapters: 3
+encounters: 24
