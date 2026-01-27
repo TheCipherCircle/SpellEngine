@@ -70,7 +70,7 @@ python3 -m storysmith --help
 ### Option A: Full GUI Mode (Recommended)
 
 ```bash
-python3 -m python3 -m storysmith play dread_citadel
+python3 -m storysmith play dread_citadel
 ```
 
 ### Option B: Terminal Mode (Two Covers)
@@ -82,7 +82,7 @@ python3 -m storysmith play dread_citadel
 ### Option C: Text-Only Mode (Minimal)
 
 ```bash
-python3 -m python3 -m storysmith play dread_citadel --text
+python3 -m storysmith play dread_citadel --text
 ```
 
 ---
