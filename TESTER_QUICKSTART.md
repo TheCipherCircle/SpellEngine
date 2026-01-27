@@ -60,7 +60,7 @@ pip install pygame           # For graphical mode
 patternforge --version
 
 # Check Storysmith
-storysmith --help
+python3 -m storysmith --help
 ```
 
 ---
@@ -70,19 +70,19 @@ storysmith --help
 ### Option A: Full GUI Mode (Recommended)
 
 ```bash
-storysmith play dread_citadel --gui
+python3 -m python3 -m storysmith play dread_citadel
 ```
 
 ### Option B: Terminal Mode (Two Covers)
 
 ```bash
-storysmith play dread_citadel
+python3 -m storysmith play dread_citadel
 ```
 
 ### Option C: Text-Only Mode (Minimal)
 
 ```bash
-storysmith play dread_citadel --text
+python3 -m python3 -m storysmith play dread_citadel --text
 ```
 
 ---
