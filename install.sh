@@ -118,7 +118,7 @@ if [ -d "Storysmith" ]; then
     cd ..
 else
     print_info "Cloning Storysmith..."
-    git clone git@github.com:TheCipherCircle/Storysmith.git
+    git clone git@github.com:pitl0rd/Storysmith.git
 fi
 print_success "Storysmith ready"
 
