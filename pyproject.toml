@@ -1,0 +1,80 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "storysmith"
+version = "0.1.0"
+description = "The Narrative Engine for PatternForge - Educational adventures for password security"
+readme = "README.md"
+license = {text = "Proprietary"}
+requires-python = ">=3.10"
+authors = [
+    {name = "The Cipher Circle", email = "contact@cipher-circle.local"},
+]
+keywords = ["password", "security", "education", "game", "adventure"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "Intended Audience :: Education",
+    "License :: Other/Proprietary License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Security",
+    "Topic :: Games/Entertainment",
+]
+dependencies = [
+    "patternforge>=0.1.0",
+    "pygame>=2.5.0",
+    "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+    "mypy>=1.0",
+    "ruff>=0.1.0",
+]
+
+[project.scripts]
+storysmith = "storysmith.content.cli:main"
+
+[project.urls]
+"Homepage" = "https://github.com/TheCipherCircle/Storysmith"
+"Bug Tracker" = "https://github.com/TheCipherCircle/Storysmith/issues"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["storysmith*"]
+
+[tool.setuptools.package-data]
+"storysmith" = [
+    "campaigns/**/*.yaml",
+    "campaigns/**/*.yml",
+]
+"*" = [
+    "assets/**/*",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B"]
+ignore = ["E501"]
+
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = true
+warn_unused_configs = true
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+addopts = "-v --tb=short"
