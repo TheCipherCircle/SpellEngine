@@ -106,8 +106,8 @@ def play_text_mode(campaign: dict, args: argparse.Namespace) -> int:
     """Play in text-only mode."""
     print(f"Starting {campaign['title']} in text mode...")
     print()
-    print("Text mode is not yet implemented.")
-    print("Please use GUI mode: storysmith play {campaign['id']} --gui")
+    print("Text mode coming soon!")
+    print(f"For now, use: python3 -m storysmith play {campaign['id']}")
     return 1
 
 
@@ -195,12 +195,12 @@ def main(argv: list[str] | None = None) -> int:
     play_parser.add_argument(
         "--text", "-t",
         action="store_true",
-        help="Text-only mode (no graphics)",
+        help=argparse.SUPPRESS,  # Hidden - not implemented yet
     )
     play_parser.add_argument(
         "--gui", "-g",
         action="store_true",
-        help="GUI mode with pygame (default)",
+        help=argparse.SUPPRESS,  # Hidden - GUI is default, no need to show
     )
     play_parser.set_defaults(func=cmd_play)
 
