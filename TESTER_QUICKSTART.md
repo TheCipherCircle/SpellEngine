@@ -92,7 +92,6 @@ python3 -m storysmith play dread_citadel --text
 | Key | Action |
 |-----|--------|
 | **Enter** | Submit answer / Continue |
-| **[F]** | Launch PatternForge crack tool |
 | **[H]** | Show/hide hint |
 | **[B]** | Retreat (boss encounters) |
 | **ESC** | Quit to title |
@@ -103,7 +102,6 @@ python3 -m storysmith play dread_citadel --text
 ## If You Get Stuck
 
 - Press **[H]** for hints
-- Press **[F]** to auto-crack the hash
 - Check the answer key below (spoilers!)
 
 ---

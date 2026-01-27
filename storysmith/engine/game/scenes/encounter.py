@@ -665,10 +665,10 @@ class EncounterScene(Scene):
                 # Skip typewriter effect
                 if self.typewriter:
                     self.typewriter.skip()
-            elif event.key == pygame.K_f:
-                # [F] key - Launch PatternForge crack in new terminal (for crack encounters)
-                if encounter.hash and not self._cracking:
-                    self._launch_patternforge_crack()
+            # [F] key disabled - crack command not yet implemented
+            # elif event.key == pygame.K_f:
+            #     if encounter.hash and not self._cracking:
+            #         self._launch_patternforge_crack()
 
             elif event.key == pygame.K_b:
                 # [B] key - Retreat from boss encounter (costs a death)
@@ -1046,16 +1046,16 @@ class EncounterScene(Scene):
             self._draw_cracking_overlay(surface, content, fonts)
             return  # Skip normal input drawing while cracking
 
-        # Draw [F] Crack with PatternForge prompt (if hash exists)
-        if encounter.hash:
-            forge_font = fonts.get_small_font()
-            forge_text = "[F] Crack with PatternForge"
-            forge_surface = forge_font.render(
-                forge_text, Typography.ANTIALIAS, Colors.BLUE
-            )
-            forge_x = content.x + (content.width - forge_surface.get_width()) // 2
-            forge_y = y + 4
-            surface.blit(forge_surface, (forge_x, forge_y))
+        # [F] Crack disabled - command not yet implemented
+        # if encounter.hash:
+        #     forge_font = fonts.get_small_font()
+        #     forge_text = "[F] Crack with PatternForge"
+        #     forge_surface = forge_font.render(
+        #         forge_text, Typography.ANTIALIAS, Colors.BLUE
+        #     )
+        #     forge_x = content.x + (content.width - forge_surface.get_width()) // 2
+        #     forge_y = y + 4
+        #     surface.blit(forge_surface, (forge_x, forge_y))
 
         # Draw text input or choice buttons
         if self.textbox:
