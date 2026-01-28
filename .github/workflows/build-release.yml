@@ -80,7 +80,7 @@ jobs:
 
       - name: Send Discord notification
         env:
-          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_TESTERS }}
+          DISCORD_WEBHOOK: ${{ secrets.TESTERS_WEBHOOK }}
         run: |
           curl -H "Content-Type: application/json" \
             -d "{\"content\": \"**New Build Available!**\n\nCommit: \`${{ steps.commit.outputs.sha_short }}\`\n${{ steps.commit.outputs.message }}\n\nDownload from GitHub Actions artifacts.\n\n— Forge\"}" \
