@@ -1,0 +1,47 @@
+name: Build Windows Installer
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'storysmith/**'
+      - 'assets/**'
+      - 'content/**'
+      - 'scripts/build_windows_exe.py'
+      - 'storysmith_windows.spec'
+  workflow_dispatch:  # Manual trigger
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyinstaller pygame pyyaml psutil
+
+      - name: Build executable
+        run: python scripts/build_windows_exe.py
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: DreadCitadel-Windows
+          path: dist/DreadCitadel*.zip
+          retention-days: 30
+
+      - name: Upload raw exe
+        uses: actions/upload-artifact@v4
+        with:
+          name: DreadCitadel-exe
+          path: dist/DreadCitadel.exe
+          retention-days: 30

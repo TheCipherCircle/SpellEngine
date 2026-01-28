@@ -75,6 +75,9 @@ class AudioManager:
         self._current_music: str | None = None
         self._current_ambiance: str | None = None
         self._ambiance_channel: "pygame.mixer.Channel | None" = None
+        self._sfx_channels: dict[str, "pygame.mixer.Channel"] = {}
+        self._last_play_time: dict[str, float] = {}
+        self._min_replay_interval = 0.05  # 50ms minimum between same sound
 
         # Determine audio root
         if audio_root is None:
@@ -208,22 +211,52 @@ class AudioManager:
     def play_sfx(self, name: str) -> None:
         """Play a sound effect.
 
+        Uses dedicated channels per sound to prevent stacking.
+        Includes debouncing to prevent rapid-fire sounds.
+
         Args:
             name: Logical name of the sound effect
         """
+        import time
+
         sound = self._load_sound(name)
         if sound is None:
             return
 
+        # Debounce: don't replay same sound too quickly
+        current_time = time.time()
+        last_time = self._last_play_time.get(name, 0)
+        if current_time - last_time < self._min_replay_interval:
+            return
+        self._last_play_time[name] = current_time
+
         category = AUDIO_CATEGORIES.get(name, "sfx")
         volume = self._volumes.get(category, 1.0)
         sound.set_volume(volume)
-        sound.play()
+
+        # Use dedicated channel for this sound to prevent stacking
+        if name not in self._sfx_channels:
+            try:
+                import pygame.mixer
+                # Get a free channel (channels 0-14, 15 is reserved for ambiance)
+                channel = pygame.mixer.find_channel()
+                if channel:
+                    self._sfx_channels[name] = channel
+            except Exception:
+                pass
+
+        channel = self._sfx_channels.get(name)
+        if channel:
+            channel.stop()  # Stop previous instance of this sound
+            channel.play(sound)
+        else:
+            sound.play()  # Fallback to default behavior
 
     def play_music(self, name: str, loop: bool = True) -> None:
         """Play background music.
 
         Music is streamed and only one track can play at a time.
+        Automatically stops any currently playing music first.
 
         Args:
             name: Logical name of the music track
@@ -231,6 +264,15 @@ class AudioManager:
         """
         if not self._initialized:
             return
+
+        # Don't restart same track if already playing
+        if name == self._current_music:
+            try:
+                import pygame.mixer
+                if pygame.mixer.music.get_busy():
+                    return  # Already playing this track
+            except Exception:
+                pass
 
         if name not in AUDIO_FILES:
             return
@@ -242,6 +284,9 @@ class AudioManager:
 
         try:
             import pygame.mixer
+
+            # Stop current music before starting new
+            pygame.mixer.music.stop()
 
             pygame.mixer.music.load(str(path))
             pygame.mixer.music.set_volume(self._volumes.get("music", 0.6))
@@ -268,7 +313,7 @@ class AudioManager:
         """Play ambient background sound.
 
         Ambiance plays on a dedicated channel at lower volume and
-        can play alongside music.
+        can play alongside music. Won't restart if same track already playing.
 
         Args:
             name: Logical name of the ambiance track
@@ -277,9 +322,16 @@ class AudioManager:
         if not self._initialized or self._ambiance_channel is None:
             return
 
+        # Don't restart same ambiance if already playing
+        if name == self._current_ambiance and self._ambiance_channel.get_busy():
+            return
+
         sound = self._load_sound(name)
         if sound is None:
             return
+
+        # Stop current ambiance before starting new
+        self._ambiance_channel.stop()
 
         volume = self._volumes.get("ambiance", 0.4)
         sound.set_volume(volume)
