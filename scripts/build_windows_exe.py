@@ -48,17 +48,20 @@ def check_platform():
 
 def check_dependencies():
     """Verify required packages are installed."""
-    required = ["pyinstaller", "pygame", "yaml", "psutil"]
+    # Map package names to their import names
+    required = {
+        "pyinstaller": "PyInstaller",
+        "pygame": "pygame",
+        "pyyaml": "yaml",
+        "psutil": "psutil",
+    }
     missing = []
 
-    for pkg in required:
+    for pkg_name, import_name in required.items():
         try:
-            if pkg == "yaml":
-                import yaml
-            else:
-                __import__(pkg.replace("-", "_"))
+            __import__(import_name)
         except ImportError:
-            missing.append(pkg if pkg != "yaml" else "pyyaml")
+            missing.append(pkg_name)
 
     if missing:
         print("Missing required packages:")
