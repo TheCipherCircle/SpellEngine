@@ -129,6 +129,7 @@ class EncounterScene(Scene):
         self._crack_duration: float = 2.0  # Total crack animation time
         self._crack_complete: bool = False  # Shows cleartext after crack
         self._cracked_solution: str = ""  # The revealed password
+        self._crack_result: str | None = None  # Result from background crack thread
 
         # Boss encounter attempt tracking
         self._boss_attempts: int = 0
@@ -154,6 +155,7 @@ class EncounterScene(Scene):
         self._crack_timer = 0.0
         self._crack_complete = False
         self._cracked_solution = ""
+        self._crack_result = None
         self._boss_attempts = 0  # Reset attempts for new encounter
         self._hint_used_this_encounter = False
         self._attempts_this_encounter = 0
@@ -366,9 +368,15 @@ class EncounterScene(Scene):
         else:
             # For hash-cracking encounters - show submission and hint
             prompts.append(("Enter", "Submit"))
+
+            # Show [F] Crack option if we have tools and a hash
+            game_mode = getattr(self.client, 'game_mode', 'full')
+            if game_mode != 'observer' and encounter.hash:
+                prompts.append(("F", "Crack"))
+
             if encounter.hint:
                 # In observer mode, label shows "Answer" instead of "Hint"
-                if getattr(self.client, 'game_mode', 'full') == 'observer':
+                if game_mode == 'observer':
                     prompts.append(("H", "Answer"))
                 else:
                     prompts.append(("H", "Hint"))
@@ -565,72 +573,81 @@ class EncounterScene(Scene):
         if self.show_hint and self.client.audio:
             self.client.audio.play_sfx("hint_reveal")
 
-    def _launch_patternforge_crack(self) -> None:
-        """Launch PatternForge in a terminal window to crack the hash.
+    def _run_crack_command(self) -> None:
+        """Run PatternForge crack command and capture the result.
 
-        Opens macOS Terminal.app with the crack command. Reuses existing
-        PatternForge window if one exists, otherwise creates a new one.
-        Window auto-closes when crack completes.
+        Calls `patternforge crack <hash> --json` in a background thread,
+        captures the JSON output, and updates game state when complete.
+        The cracking animation plays while the command runs.
         """
         encounter = self.client.adventure_state.current_encounter
 
-        # Only crack if there's a hash and solution available
-        if not encounter.hash or not encounter.solution:
+        # Only crack if there's a hash
+        if not encounter.hash:
             return
 
         # Don't start if already cracking
         if self._cracking:
             return
 
+        # Check if we have cracking tools available
+        game_mode = getattr(self.client, 'game_mode', 'full')
+        if game_mode == 'observer':
+            return  # No cracking in observer mode
+
         hash_value = encounter.hash
-        hash_type = (encounter.hash_type or "md5").lower()
 
-        # Launch PatternForge crack command with the hash
-        # Add 'exit' at end so terminal closes when done
-        pf_command = f"python3 -m patternforge crack {hash_value} -t {hash_type}; exit"
-
-        def run_terminal() -> None:
+        def run_crack() -> None:
+            """Background thread that runs the crack command."""
+            import sys
             try:
-                # AppleScript that:
-                # 1. Closes any existing PatternForge Crack window
-                # 2. Opens a new window with the crack command
-                # 3. Sets window title for identification
-                applescript = f'''
-                tell application "Terminal"
-                    -- Close any existing PatternForge Crack windows
-                    repeat with w in windows
-                        if name of w contains "PatternForge Crack" then
-                            close w
-                        end if
-                    end repeat
-
-                    -- Open new window with crack command
-                    do script "{pf_command}"
-
-                    -- Set custom title on the new window
-                    set custom title of front window to "PatternForge Crack"
-
-                    activate
-                end tell
-                '''
-                subprocess.run(
-                    ["osascript", "-e", applescript],
+                # Run patternforge crack with JSON output
+                # Use sys.executable to ensure we use the same Python interpreter
+                result = subprocess.run(
+                    [sys.executable, "-m", "patternforge", "crack", hash_value, "--json"],
                     capture_output=True,
-                    timeout=10,
+                    text=True,
+                    timeout=30,  # 30 second timeout
                 )
-            except (subprocess.TimeoutExpired, subprocess.SubprocessError) as e:
-                print(f"Terminal launch failed: {e}")
 
-        # Start terminal in background thread
-        threading.Thread(target=run_terminal, daemon=True).start()
+                if result.returncode == 0 and result.stdout:
+                    import json
+                    try:
+                        data = json.loads(result.stdout)
+                        status = data.get("status", "NOT_FOUND")
+                        plaintext = data.get("plain", "")
 
-        # Start the cracking animation timer
+                        if status == "CRACKED" and plaintext:
+                            self._cracked_solution = plaintext
+                            self._crack_result = "success"
+                        else:
+                            self._crack_result = "not_found"
+                    except json.JSONDecodeError:
+                        self._crack_result = "error"
+                else:
+                    self._crack_result = "error"
+
+            except subprocess.TimeoutExpired:
+                self._crack_result = "timeout"
+            except FileNotFoundError:
+                # patternforge command not found
+                self._crack_result = "not_installed"
+            except Exception as e:
+                print(f"Crack command failed: {e}")
+                self._crack_result = "error"
+
+        # Initialize crack state
         self._cracking = True
         self._crack_timer = 0.0
+        self._crack_result = None  # Will be set by background thread
+        self._cracked_solution = ""
 
         # Clear any existing text
         if self.textbox:
             self.textbox.clear()
+
+        # Start crack in background thread
+        threading.Thread(target=run_crack, daemon=True).start()
 
     def handle_event(self, event: "pygame.event.Event") -> None:
         """Handle events."""
@@ -669,10 +686,11 @@ class EncounterScene(Scene):
                 # Skip typewriter effect
                 if self.typewriter:
                     self.typewriter.skip()
-            # [F] key disabled - crack command not yet implemented
-            # elif event.key == pygame.K_f:
-            #     if encounter.hash and not self._cracking:
-            #         self._launch_patternforge_crack()
+            elif event.key == pygame.K_f:
+                # [F] key - Crack with PatternForge
+                game_mode = getattr(self.client, 'game_mode', 'full')
+                if game_mode != 'observer' and encounter.hash and not self._cracking:
+                    self._run_crack_command()
 
             elif event.key == pygame.K_b:
                 # [B] key - Retreat from boss encounter (costs a death)
@@ -729,16 +747,41 @@ class EncounterScene(Scene):
         # Update cracking animation
         if self._cracking:
             self._crack_timer += dt
-            if self._crack_timer >= self._crack_duration:
-                # Cracking complete - show result, don't auto-submit yet
+
+            # Check if background thread has finished
+            crack_result = getattr(self, '_crack_result', None)
+
+            # Minimum animation time of 1.5 seconds for UX
+            min_crack_time = 1.5
+
+            if crack_result is not None and self._crack_timer >= min_crack_time:
+                # Cracking complete - show result
                 self._cracking = False
                 self._crack_timer = 0.0
                 self._crack_complete = True
-                encounter = self.client.adventure_state.current_encounter
-                if encounter.solution:
-                    self._cracked_solution = encounter.solution
+
+                if crack_result == "success" and self._cracked_solution:
+                    # Fill in the cracked password
                     if self.textbox:
-                        self.textbox.set_text(encounter.solution)
+                        self.textbox.set_text(self._cracked_solution)
+                elif crack_result == "not_found":
+                    self.feedback_message = "Hash not in wordlist. Try [H] for hint."
+                    self.feedback_color = Colors.WARNING
+                    self.feedback_timer = 3.0
+                    self._crack_complete = False
+                    self._cracked_solution = ""
+                elif crack_result == "not_installed":
+                    self.feedback_message = "PatternForge not installed."
+                    self.feedback_color = Colors.ERROR
+                    self.feedback_timer = 3.0
+                    self._crack_complete = False
+                elif crack_result in ("error", "timeout"):
+                    self.feedback_message = "Crack failed. Try manual entry."
+                    self.feedback_color = Colors.ERROR
+                    self.feedback_timer = 3.0
+                    self._crack_complete = False
+
+                self._crack_result = None  # Reset for next crack
 
         # Auto-submit after showing cracked result for 1.5 seconds
         if self._crack_complete:
@@ -1057,16 +1100,17 @@ class EncounterScene(Scene):
             self._draw_cracking_overlay(surface, content, fonts)
             return  # Skip normal input drawing while cracking
 
-        # [F] Crack disabled - command not yet implemented
-        # if encounter.hash:
-        #     forge_font = fonts.get_small_font()
-        #     forge_text = "[F] Crack with PatternForge"
-        #     forge_surface = forge_font.render(
-        #         forge_text, Typography.ANTIALIAS, Colors.BLUE
-        #     )
-        #     forge_x = content.x + (content.width - forge_surface.get_width()) // 2
-        #     forge_y = y + 4
-        #     surface.blit(forge_surface, (forge_x, forge_y))
+        # [F] Crack option - only show when tools available
+        game_mode = getattr(self.client, 'game_mode', 'full')
+        if encounter.hash and game_mode != 'observer':
+            forge_font = fonts.get_small_font()
+            forge_text = "[F] Crack with PatternForge"
+            forge_surface = forge_font.render(
+                forge_text, Typography.ANTIALIAS, Colors.BLUE
+            )
+            forge_x = content.x + (content.width - forge_surface.get_width()) // 2
+            forge_y = y + 4
+            surface.blit(forge_surface, (forge_x, forge_y))
 
         # Draw text input or choice buttons
         if self.textbox:
