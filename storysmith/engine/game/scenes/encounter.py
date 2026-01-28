@@ -573,11 +573,47 @@ class EncounterScene(Scene):
         if self.show_hint and self.client.audio:
             self.client.audio.play_sfx("hint_reveal")
 
+    def _open_crack_terminal(self, hash_value: str) -> None:
+        """Open a terminal window showing the crack command running.
+
+        This lets testers SEE the real tool (hashcat/john) working.
+        The terminal stays open briefly after completion.
+        """
+        import sys
+        import shlex
+
+        # Build the command that will run in terminal
+        # Use full path to Python executable to ensure correct environment
+        python_path = sys.executable
+        # Add clear and banner so it's obvious what's happening
+        crack_cmd = f'clear; echo "=== PATTERNFORGE CRACK ==="; echo "Hash: {hash_value}"; echo ""; {python_path} -m patternforge crack {hash_value}; echo ""; echo "=== COMPLETE ==="; sleep 5'
+
+        # Escape for AppleScript string
+        crack_cmd_escaped = crack_cmd.replace('\\', '\\\\').replace('"', '\\"')
+
+        # AppleScript to open Terminal with the crack command visible
+        applescript = f'''
+        tell application "Terminal"
+            do script "{crack_cmd_escaped}"
+            set custom title of front window to "PatternForge Crack"
+            activate
+        end tell
+        '''
+
+        try:
+            subprocess.run(
+                ["osascript", "-e", applescript],
+                capture_output=True,
+                timeout=5,
+            )
+        except Exception as e:
+            print(f"[verbose] Failed to open terminal: {e}")
+
     def _run_crack_command(self) -> None:
         """Run PatternForge crack command and capture the result.
 
-        Calls `patternforge crack <hash> --json` in a background thread,
-        captures the JSON output, and updates game state when complete.
+        Opens a terminal window showing the real tool running (BETTER mode),
+        while also capturing JSON output for auto-fill.
         The cracking animation plays while the command runs.
         """
         encounter = self.client.adventure_state.current_encounter
@@ -597,14 +633,23 @@ class EncounterScene(Scene):
 
         hash_value = encounter.hash
 
+        # Open terminal window so tester can SEE the tool working
+        self._open_crack_terminal(hash_value)
+
+        # Also print to stdout for verbose troubleshooting
+        print(f"\n[PatternForge] Cracking: {hash_value}")
+
         def run_crack() -> None:
             """Background thread that runs the crack command."""
             import sys
             try:
                 # Run patternforge crack with JSON output
                 # Use sys.executable to ensure we use the same Python interpreter
+                cmd = [sys.executable, "-m", "patternforge", "crack", hash_value, "--json"]
+                print(f"[PatternForge] Running: {' '.join(cmd)}")
+
                 result = subprocess.run(
-                    [sys.executable, "-m", "patternforge", "crack", hash_value, "--json"],
+                    cmd,
                     capture_output=True,
                     text=True,
                     timeout=30,  # 30 second timeout
@@ -616,24 +661,33 @@ class EncounterScene(Scene):
                         data = json.loads(result.stdout)
                         status = data.get("status", "NOT_FOUND")
                         plaintext = data.get("plain", "")
+                        tool = data.get("tool", "unknown")
+
+                        print(f"[PatternForge] Tool: {tool} | Status: {status}")
 
                         if status == "CRACKED" and plaintext:
                             self._cracked_solution = plaintext
                             self._crack_result = "success"
+                            print(f"[PatternForge] Cracked: {plaintext}")
                         else:
                             self._crack_result = "not_found"
+                            print(f"[PatternForge] Not found in wordlist")
                     except json.JSONDecodeError:
                         self._crack_result = "error"
+                        print(f"[PatternForge] Error: Invalid JSON response")
                 else:
                     self._crack_result = "error"
+                    print(f"[PatternForge] Error: {result.stderr}")
 
             except subprocess.TimeoutExpired:
                 self._crack_result = "timeout"
+                print(f"[PatternForge] Timeout after 30s")
             except FileNotFoundError:
                 # patternforge command not found
                 self._crack_result = "not_installed"
+                print(f"[PatternForge] Error: patternforge not installed")
             except Exception as e:
-                print(f"Crack command failed: {e}")
+                print(f"[PatternForge] Error: {e}")
                 self._crack_result = "error"
 
         # Initialize crack state
