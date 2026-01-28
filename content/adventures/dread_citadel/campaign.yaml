@@ -72,11 +72,11 @@ chapters:
         tier: 0
         xp_reward: 10
         intro_text: |
-          A rusted lock bars your way. Etched into its surface is an MD5 hash:
-
-          `5f4dcc3b5aa765d61d8327deb882cf99`
+          A rusted lock bars your way. Etched into its surface is an MD5 hash.
 
           This hash protects... something. But what word created it?
+
+          The most common password in history hides behind this simple hash.
         objective: "Crack the MD5 hash to find the password"
         hash: "5f4dcc3b5aa765d61d8327deb882cf99"
         hash_type: md5
@@ -96,11 +96,11 @@ chapters:
         tier: 0
         xp_reward: 10
         intro_text: |
-          A second lock appears, this one newer but no wiser:
-
-          `e10adc3949ba59abbe56e057f20f883e`
+          A second lock appears, this one newer but no wiser.
 
           Numbers this time. What sequence do humans reach for first?
+
+          Think simple. Think sequential. Think lazy.
         objective: "Crack this MD5 hash"
         hash: "e10adc3949ba59abbe56e057f20f883e"
         hash_type: md5
@@ -119,11 +119,11 @@ chapters:
         tier: 0
         xp_reward: 15
         intro_text: |
-          A small door—the servant's entrance. Its lock bears:
-
-          `21232f297a57a5a743894a0e4a801fc3`
+          A small door—the servant's entrance.
 
           This door was meant for those with system access...
+
+          What word grants power over a system?
         objective: "Find the password that opens the servant's door"
         hash: "21232f297a57a5a743894a0e4a801fc3"
         hash_type: md5
@@ -147,7 +147,7 @@ chapters:
 
           "Prove your worth, Infiltrator. Crack my seal."
 
-          `0d107d09f5bbe40cade3de5c71e9e9b7`
+          A polite request for access might be the key...
         objective: "Defeat the Gatekeeper by cracking their hash"
         hash: "0d107d09f5bbe40cade3de5c71e9e9b7"
         hash_type: md5
@@ -187,11 +187,11 @@ chapters:
         tier: 1
         xp_reward: 15
         intro_text: |
-          A tomb sealed with a 4-digit code, hashed for protection:
-
-          `81dc9bdb52d04dc20036dbd8313ed055`
+          A tomb sealed with a 4-digit code, hashed for protection.
 
           Four digits. Sequential. Classic.
+
+          What PIN would an impatient user choose?
         objective: "Crack the 4-digit PIN"
         hash: "81dc9bdb52d04dc20036dbd8313ed055"
         hash_type: md5
@@ -210,11 +210,11 @@ chapters:
         tier: 3
         xp_reward: 25
         intro_text: |
-          A memorial stone bears a hash—someone's legacy:
-
-          `40bb26af9910da09e17e141e1ab93a97`
+          A memorial stone bears a hash—someone's legacy.
 
           People love to combine names with years...
+
+          A common male name, followed by the current year.
         objective: "Crack this name+year pattern"
         hash: "40bb26af9910da09e17e141e1ab93a97"
         hash_type: md5
@@ -233,11 +233,11 @@ chapters:
         tier: 1
         xp_reward: 20
         intro_text: |
-          An ancient scroll, its seal protected by:
-
-          `8621ffdbc5698829397d97767ac13db3`
+          An ancient scroll, its seal protected by a fantasy word.
 
           Fantasy themes are popular with certain demographics...
+
+          Think mythical creatures. Fire-breathers, perhaps.
         objective: "What creature protects this scroll?"
         hash: "8621ffdbc5698829397d97767ac13db3"
         hash_type: md5
@@ -256,11 +256,11 @@ chapters:
         tier: 1
         xp_reward: 20
         intro_text: |
-          A complex-looking lock, but the hash tells another story:
-
-          `eb0a191797624dd3a48fa681d3061212`
+          A complex-looking lock, but the hash tells another story.
 
           Some passwords suggest authority...
+
+          One who has skill or dominion over something.
         objective: "Who does this password belong to?"
         hash: "eb0a191797624dd3a48fa681d3061212"
         hash_type: md5
@@ -279,15 +279,11 @@ chapters:
         tier: 0
         xp_reward: 10
         intro_text: |
-          You notice the hash format changing. The locks ahead use SHA1:
+          The locks ahead use SHA1—longer hashes (40 chars vs MD5's 32).
 
-          SHA1 produces longer hashes (40 hex characters vs MD5's 32).
-          But don't be intimidated—the same password weaknesses apply.
+          Notice the hash panel shows more characters now.
 
-          MD5:  `5f4dcc3b5aa765d61d8327deb882cf99` (32 chars)
-          SHA1: `5baa61e4c9b93f3f0682250b6cf8331b7ee68fd8` (40 chars)
-
-          Same password ("password"), different algorithm.
+          Don't be intimidated. Same password weaknesses apply.
         objective: "Understand SHA1 hashes"
         success_text: |
           SHA1 is cryptographically stronger than MD5, but weak passwords
@@ -302,11 +298,11 @@ chapters:
         tier: 0
         xp_reward: 15
         intro_text: |
-          Your first SHA1 challenge:
-
-          `aaf4c61ddcc5e8a2dabede0f3b482cd9aea9434d`
+          Your first SHA1 challenge awaits.
 
           A simple greeting, hashed with a stronger algorithm.
+
+          How do you acknowledge someone when you first see them?
         objective: "Crack this SHA1 hash"
         hash: "aaf4c61ddcc5e8a2dabede0f3b482cd9aea9434d"
         hash_type: sha1
@@ -325,11 +321,11 @@ chapters:
         tier: 1
         xp_reward: 20
         intro_text: |
-          A treasure vault, its combination hashed:
-
-          `3bf1114a986ba87ed28fc1b5884fc2f8`
+          A treasure vault, its combination hashed.
 
           Something dark, something that follows...
+
+          It lurks behind you when the sun shines bright.
         objective: "Open the vault"
         hash: "3bf1114a986ba87ed28fc1b5884fc2f8"
         hash_type: md5
@@ -348,11 +344,11 @@ chapters:
         tier: 1
         xp_reward: 25
         intro_text: |
-          A cryptic inscription accompanies this SHA1 hash:
-
-          `e68e11be8b70e435c65aef8ba9798ff7775c361e`
+          A cryptic inscription accompanies this SHA1 hash.
 
           "The truth is out there... but whom can you believe?"
+
+          A famous password from 90s television. Paranoid advice.
         objective: "Decode the X-Files reference"
         hash: "e68e11be8b70e435c65aef8ba9798ff7775c361e"
         hash_type: sha1
@@ -372,12 +368,12 @@ chapters:
         xp_reward: 35
         is_checkpoint: true
         intro_text: |
-          The Crypt Guardian rises—a skeletal warrior bound by a SHA1 seal:
-
-          `e5e9fa1ba31ecd1ae84f75caaa474f3a663f05f4`
+          The Crypt Guardian rises—a skeletal warrior bound by a SHA1 seal.
 
           "You seek passage to the Inner Sanctum? Prove you understand
           what passwords are meant to be!"
+
+          The irony of weak security lies in its very name.
         objective: "Defeat the Crypt Guardian"
         hash: "e5e9fa1ba31ecd1ae84f75caaa474f3a663f05f4"
         hash_type: sha1
@@ -418,11 +414,11 @@ chapters:
         tier: 1
         xp_reward: 30
         intro_text: |
-          The Left Hand emerges from shadow, wielding a SHA1 blade:
-
-          `8d6e34f987851aa599257d3831a1af040886842f`
+          The Left Hand emerges from shadow, wielding a SHA1 blade.
 
           "I am warmth. I am light. Can you see through me?"
+
+          What brings warmth and light from the sky above?
         objective: "Defeat the Left Hand"
         hash: "8d6e34f987851aa599257d3831a1af040886842f"
         hash_type: sha1
@@ -441,11 +437,11 @@ chapters:
         tier: 3
         xp_reward: 35
         intro_text: |
-          The Right Hand steps forward, MD5-forged armor gleaming:
-
-          `e90664c0af74160644d29e4d6147969b`
+          The Right Hand steps forward, MD5-forged armor gleaming.
 
           "Season and year! The pattern of renewal—and predictability!"
+
+          A warm season followed by the current year. Capitalized.
         objective: "Defeat the Right Hand"
         hash: "e90664c0af74160644d29e4d6147969b"
         hash_type: md5
@@ -469,9 +465,9 @@ chapters:
 
           "You have come far, Infiltrator. But can you crack MY seal?"
 
-          `cbfdac6008f9cab4083784cbd1874f76618d2a97`
-
           "The most classic combination of all. Prove your worth!"
+
+          Remember your first lesson... and add a little more.
         objective: "Defeat the Citadel Lord and claim victory"
         hash: "cbfdac6008f9cab4083784cbd1874f76618d2a97"
         hash_type: sha1

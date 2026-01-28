@@ -27,11 +27,21 @@ LAYOUT = {
     "viewport_height": 0.65,     # Top portion for art/status
     "narrative_height": 0.35,    # Bottom portion for text/input
 
-    # Padding and margins
-    "panel_padding": 12,
-    "panel_margin": 4,
+    # Padding and margins (bumped for breathing room)
+    "panel_padding": 16,         # Was 12
+    "panel_margin": 8,           # Was 4
     "border_width": 2,
     "border_width_thick": 3,
+}
+
+# Spacing system (consistent units)
+SPACING = {
+    "xs": 4,      # Tight spacing
+    "sm": 8,      # Small gaps
+    "md": 16,     # Default spacing
+    "lg": 24,     # Section gaps
+    "xl": 32,     # Major divisions
+    "xxl": 48,    # Screen-level spacing
 }
 
 
@@ -52,11 +62,12 @@ class Colors:
     BORDER = (102, 92, 84)           # #665c54 - panel borders
     BORDER_HIGHLIGHT = (124, 111, 100)  # #7c6f64 - active/focus borders
 
-    # Text colors
-    TEXT_PRIMARY = (235, 219, 178)   # #ebdbb2 - body text, values
+    # Text colors (WCAG AA contrast optimized - bumped for better visibility)
+    TEXT_PRIMARY = (251, 241, 199)   # #fbf1c7 - brighter body text (13:1 contrast)
     TEXT_HEADER = (254, 128, 25)     # #fe8019 - titles, labels (orange)
-    TEXT_MUTED = (146, 131, 116)     # #928374 - hints, disabled
-    TEXT_DIM = (102, 92, 84)         # #665c54 - very subtle hints
+    TEXT_SECONDARY = (235, 219, 178) # #ebdbb2 - secondary text (10:1 contrast)
+    TEXT_MUTED = (189, 174, 147)     # #bdae93 - hints, disabled (6.5:1 contrast)
+    TEXT_DIM = (168, 153, 132)       # #a89984 - subtle hints (5.5:1 - bumped from 4.5)
 
     # Status colors
     SUCCESS = (184, 187, 38)         # #b8bb26 - clean solves, wins (green)
@@ -111,21 +122,28 @@ class Colors:
 # =============================================================================
 
 class Typography:
-    """Typography settings - monospace, chunky, no anti-aliasing."""
+    """Typography settings - monospace, chunky, readable.
 
-    # Font sizes
-    SIZE_TITLE = 48        # Screen titles
-    SIZE_HEADER = 28       # Panel headers
-    SIZE_SUBHEADER = 22    # Section headers
-    SIZE_BODY = 18         # Body text
-    SIZE_LABEL = 16        # Labels
-    SIZE_SMALL = 14        # Hints, prompts
+    UI Rebuild v1.0: Bumped sizes for better readability.
+    Anti-aliasing enabled for body text (retro feel preserved in headers).
+    """
+
+    # Font sizes (bumped for readability)
+    SIZE_TITLE = 52        # Screen titles
+    SIZE_HEADER = 32       # Panel headers
+    SIZE_SUBHEADER = 26    # Section headers
+    SIZE_BODY = 20         # Body text
+    SIZE_INTRO = 20        # Intro/narrative text (now has 65% height - plenty of room!)
+    SIZE_LABEL = 18        # Labels
+    SIZE_SMALL = 16        # Hints, prompts (was 14 - too small)
+    SIZE_TINY = 14         # Only for truly minor elements
 
     # Line heights (multiplier of font size)
-    LINE_HEIGHT = 1.4
+    LINE_HEIGHT = 1.5      # Slightly more breathing room
 
-    # Anti-aliasing (DISABLED for retro feel)
-    ANTIALIAS = False
+    # Anti-aliasing (enabled for readability, disable for pixel-art headers if wanted)
+    ANTIALIAS = True
+    ANTIALIAS_HEADERS = False  # Keep headers chunky/retro
 
     # Preferred fonts (in order of preference)
     MONO_FONTS = [
@@ -262,6 +280,10 @@ class FontManager:
     def get_small_font(self) -> "pygame.font.Font":
         """Get the font for hints and prompts."""
         return self.get_font(Typography.SIZE_SMALL)
+
+    def get_intro_font(self) -> "pygame.font.Font":
+        """Get the font for intro/narrative text (optimized for 65/35 layout)."""
+        return self.get_font(Typography.SIZE_INTRO)
 
 
 # Convenience function

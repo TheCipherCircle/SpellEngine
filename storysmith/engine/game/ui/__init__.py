@@ -17,6 +17,7 @@ Components:
 from storysmith.engine.game.ui.theme import (
     Colors,
     LAYOUT,
+    SPACING,
     Typography,
     BorderChars,
     FontManager,
@@ -30,11 +31,13 @@ from storysmith.engine.game.ui.panel import Panel, StatusPanel
 from storysmith.engine.game.ui.text import TextRenderer, TypewriterText, draw_double_border_title
 from storysmith.engine.game.ui.menu import Menu, MenuItem, PromptBar
 from storysmith.engine.game.ui.hash_display import HashDisplay, HashInputPanel
+from storysmith.engine.game.ui.validator import TextValidator, UIAuditLog
 
 __all__ = [
     # Theme
     "Colors",
     "LAYOUT",
+    "SPACING",
     "Typography",
     "BorderChars",
     "FontManager",
@@ -52,4 +55,7 @@ __all__ = [
     "PromptBar",
     "HashDisplay",
     "HashInputPanel",
+    # QA/Validation
+    "TextValidator",
+    "UIAuditLog",
 ]

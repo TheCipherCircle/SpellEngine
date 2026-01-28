@@ -15,6 +15,7 @@ from storysmith.engine.game.scenes.base import Scene
 from storysmith.engine.game.ui import (
     Colors,
     LAYOUT,
+    SPACING,
     Typography,
     Panel,
     StatusPanel,
@@ -22,6 +23,8 @@ from storysmith.engine.game.ui import (
     TypewriterText,
     PromptBar,
     get_fonts,
+    TextValidator,
+    UIAuditLog,
 )
 from storysmith.adventures.models import EncounterType, OutcomeType
 
@@ -167,7 +170,7 @@ class EncounterScene(Scene):
         top_height = int((screen_h - margin * 3) * LAYOUT["viewport_height"])
         bottom_height = screen_h - top_height - margin * 3
 
-        # Create viewport panel (top-left, 60%)
+        # Create viewport panel (top-left, 60% x 65%)
         self.viewport_panel = Panel(
             margin,
             margin,
@@ -177,22 +180,12 @@ class EncounterScene(Scene):
             major=True,
         )
 
-        # Create status panel (top-right, 40%)
-        chapter = state.current_chapter
-        self.status_panel = StatusPanel(
+        # Create narrative panel (top-right, 40% x 65%) - MORE ROOM FOR TEXT!
+        self.narrative_panel = Panel(
             margin * 2 + viewport_width,
             margin,
             status_width,
             top_height,
-            title=chapter.title.upper() if chapter else "STATUS",
-        )
-
-        # Create narrative panel (bottom-left)
-        self.narrative_panel = Panel(
-            margin,
-            margin * 2 + top_height,
-            viewport_width,
-            bottom_height,
             title="NARRATIVE",
             major=True,
         )
@@ -207,22 +200,37 @@ class EncounterScene(Scene):
         )
         hash_panel_title = "CONTINUE" if is_narrative_only else "TARGET HASH"
 
-        # Create hash panel (bottom-right)
+        # Create hash panel (bottom-left, 60% x 35%)
         self.hash_panel = Panel(
-            margin * 2 + viewport_width,
+            margin,
             margin * 2 + top_height,
-            status_width,
+            viewport_width,
             bottom_height,
             title=hash_panel_title,
             major=True,
         )
 
+        # Create status panel (bottom-right, 40% x 35%)
+        chapter = state.current_chapter
+        self.status_panel = StatusPanel(
+            margin * 2 + viewport_width,
+            margin * 2 + top_height,
+            status_width,
+            bottom_height,
+            title=chapter.title.upper() if chapter else "STATUS",
+        )
+
         # Set up typewriter effect for intro text
+        # Use SIZE_INTRO (14px) to fit all encounters in 65/35 layout
         self.typewriter = TypewriterText(
             encounter.intro_text,
             Colors.TEXT_PRIMARY,
             speed=0.02,
+            font_size=Typography.SIZE_INTRO,
         )
+
+        # Validate narrative text fits (QA check)
+        self._validate_narrative_text(encounter)
 
         # Load encounter-specific art assets
         campaign_id = self.client.campaign.id
@@ -277,6 +285,46 @@ class EncounterScene(Scene):
             self.is_first_encounter = True
         else:
             self.is_first_encounter = False
+
+    def _validate_narrative_text(self, encounter: "Encounter") -> None:
+        """Validate that narrative text fits without truncation (QA check)."""
+        if not self.narrative_panel:
+            return
+
+        content = self.narrative_panel.content_rect
+        fonts = get_fonts()
+        intro_font = fonts.get_intro_font()  # Use intro font (14px)
+
+        # Calculate available space for intro text
+        # Account for title, tier/XP line, objective, and hint
+        header_height = 60  # Title + tier line
+        footer_height = 50  # Objective + hint
+        available_height = content.height - header_height - footer_height
+        line_height = int(intro_font.get_height() * 1.4)
+        max_lines = max(1, available_height // line_height)
+
+        # Validate the intro text
+        result = TextValidator.validate_text_fits(
+            text=encounter.intro_text,
+            font=intro_font,
+            max_width=content.width - 10,
+            max_lines=max_lines,
+            context=f"encounter:{encounter.id}:intro",
+        )
+
+        if not result.fits:
+            UIAuditLog.log_issue(
+                component="EncounterScene.narrative",
+                issue_type="text_truncation",
+                description=f"Intro text truncated in '{encounter.title}'",
+                context={
+                    "encounter_id": encounter.id,
+                    "max_lines": max_lines,
+                    "actual_lines": result.line_count,
+                    "truncated_at": result.truncated_at,
+                    "issues": result.issues,
+                },
+            )
 
     def _load_encounter_assets(
         self, campaign_id: str, chapter_id: str, encounter: "Encounter"
@@ -573,47 +621,26 @@ class EncounterScene(Scene):
         if self.show_hint and self.client.audio:
             self.client.audio.play_sfx("hint_reveal")
 
-    def _open_crack_terminal(self, hash_value: str) -> None:
-        """Open a terminal window showing the crack command running.
+    def _log_crack_to_session(self, hash_value: str, command: str, result: str) -> None:
+        """Log a crack attempt to the test session log.
 
-        This lets testers SEE the real tool (hashcat/john) working.
-        The terminal stays open briefly after completion.
+        Opens the test terminal on first crack, then appends results.
+
+        Args:
+            hash_value: The hash being cracked
+            command: The command that was run
+            result: The result/output
         """
-        import sys
-        import shlex
+        # Open test terminal on first crack (will tail the log file)
+        self.client.open_test_terminal()
 
-        # Build the command that will run in terminal
-        # Use full path to Python executable to ensure correct environment
-        python_path = sys.executable
-        # Add clear and banner so it's obvious what's happening
-        crack_cmd = f'clear; echo "=== PATTERNFORGE CRACK ==="; echo "Hash: {hash_value}"; echo ""; {python_path} -m patternforge crack {hash_value}; echo ""; echo "=== COMPLETE ==="; sleep 5'
-
-        # Escape for AppleScript string
-        crack_cmd_escaped = crack_cmd.replace('\\', '\\\\').replace('"', '\\"')
-
-        # AppleScript to open Terminal with the crack command visible
-        applescript = f'''
-        tell application "Terminal"
-            do script "{crack_cmd_escaped}"
-            set custom title of front window to "PatternForge Crack"
-            activate
-        end tell
-        '''
-
-        try:
-            subprocess.run(
-                ["osascript", "-e", applescript],
-                capture_output=True,
-                timeout=5,
-            )
-        except Exception as e:
-            print(f"[verbose] Failed to open terminal: {e}")
+        # Log the crack attempt
+        self.client.log_crack_command(hash_value, command, result)
 
     def _run_crack_command(self) -> None:
         """Run PatternForge crack command and capture the result.
 
-        Opens a terminal window showing the real tool running (BETTER mode),
-        while also capturing JSON output for auto-fill.
+        Logs output to the test session terminal (single window for all cracks).
         The cracking animation plays while the command runs.
         """
         encounter = self.client.adventure_state.current_encounter
@@ -633,20 +660,20 @@ class EncounterScene(Scene):
 
         hash_value = encounter.hash
 
-        # Open terminal window so tester can SEE the tool working
-        self._open_crack_terminal(hash_value)
+        # Build command string for logging
+        import sys
+        cmd = [sys.executable, "-m", "patternforge", "crack", hash_value, "--json"]
+        cmd_str = " ".join(cmd)
 
         # Also print to stdout for verbose troubleshooting
         print(f"\n[PatternForge] Cracking: {hash_value}")
 
         def run_crack() -> None:
             """Background thread that runs the crack command."""
-            import sys
+            result_str = "PENDING"
             try:
                 # Run patternforge crack with JSON output
-                # Use sys.executable to ensure we use the same Python interpreter
-                cmd = [sys.executable, "-m", "patternforge", "crack", hash_value, "--json"]
-                print(f"[PatternForge] Running: {' '.join(cmd)}")
+                print(f"[PatternForge] Running: {cmd_str}")
 
                 result = subprocess.run(
                     cmd,
@@ -668,27 +695,37 @@ class EncounterScene(Scene):
                         if status == "CRACKED" and plaintext:
                             self._cracked_solution = plaintext
                             self._crack_result = "success"
+                            result_str = f"CRACKED: {plaintext} (tool: {tool})"
                             print(f"[PatternForge] Cracked: {plaintext}")
                         else:
                             self._crack_result = "not_found"
+                            result_str = f"NOT_FOUND (tool: {tool})"
                             print(f"[PatternForge] Not found in wordlist")
                     except json.JSONDecodeError:
                         self._crack_result = "error"
+                        result_str = "ERROR: Invalid JSON response"
                         print(f"[PatternForge] Error: Invalid JSON response")
                 else:
                     self._crack_result = "error"
+                    result_str = f"ERROR: {result.stderr}"
                     print(f"[PatternForge] Error: {result.stderr}")
 
             except subprocess.TimeoutExpired:
                 self._crack_result = "timeout"
+                result_str = "TIMEOUT after 30s"
                 print(f"[PatternForge] Timeout after 30s")
             except FileNotFoundError:
                 # patternforge command not found
                 self._crack_result = "not_installed"
+                result_str = "ERROR: patternforge not installed"
                 print(f"[PatternForge] Error: patternforge not installed")
             except Exception as e:
                 print(f"[PatternForge] Error: {e}")
                 self._crack_result = "error"
+                result_str = f"ERROR: {e}"
+
+            # Log to test session
+            self._log_crack_to_session(hash_value, cmd_str, result_str)
 
         # Initialize crack state
         self._cracking = True
@@ -994,13 +1031,13 @@ class EncounterScene(Scene):
 
         y = content.y
 
-        # Encounter title
+        # Encounter title (chunky for retro feel)
         title_font = fonts.get_font(Typography.SIZE_SUBHEADER, bold=True)
         title_surface = title_font.render(
-            encounter.title.upper(), Typography.ANTIALIAS, Colors.TEXT_HEADER
+            encounter.title.upper(), Typography.ANTIALIAS_HEADERS, Colors.TEXT_HEADER
         )
         surface.blit(title_surface, (content.x, y))
-        y += title_font.get_height() + 8
+        y += title_font.get_height() + SPACING["sm"]
 
         # Tier/XP indicator
         tier_str = "*" * encounter.tier + "." * (6 - encounter.tier)
@@ -1008,36 +1045,38 @@ class EncounterScene(Scene):
         info_text = f"[{tier_str}]  +{encounter.xp_reward} XP"
         info_surface = info_font.render(info_text, Typography.ANTIALIAS, Colors.YELLOW)
         surface.blit(info_surface, (content.x, y))
-        y += info_font.get_height() + 12
+        y += info_font.get_height() + SPACING["md"]
 
         # Intro text (typewriter) with proper line spacing
         if self.typewriter:
             wrapped = self.typewriter.render_wrapped(content.width - 10)  # Slight padding
             fonts = get_fonts()
-            body_font = fonts.get_body_font()
-            line_height = int(body_font.get_height() * 1.4)  # More spacing between lines
+            intro_font = fonts.get_intro_font()  # Dedicated intro font for better fit
+            line_height = int(intro_font.get_height() * 1.4)  # More spacing between lines
 
-            # Calculate available space for text (leave room for objective/hint/prompts)
-            available_height = content.height - (y - content.y) - 80
+            # Calculate available space for text (leave room for objective/hint)
+            # Reduced from 80 to 45 to allow more narrative text
+            footer_space = 45
+            available_height = content.height - (y - content.y) - footer_space
             max_lines = max(1, available_height // line_height)
 
             text_y = y
             for i, (line_surface, _) in enumerate(wrapped[:max_lines]):
-                if text_y + line_height > content.y + content.height - 80:
+                if text_y + line_height > content.y + content.height - footer_space:
                     break  # Stop if we're running into the objective area
                 surface.blit(line_surface, (content.x, text_y))
                 text_y += line_height
 
-        # Objective
-        obj_y = content.y + content.height - 50
+        # Objective - positioned at bottom of narrative panel
+        obj_y = content.y + content.height - 40
         obj_font = fonts.get_label_font()
         obj_text = f"Objective: {encounter.objective}"
         obj_surface = obj_font.render(obj_text, Typography.ANTIALIAS, Colors.BLUE)
         surface.blit(obj_surface, (content.x, obj_y))
 
-        # Hint (if showing)
+        # Hint (if showing) - positioned below objective
         if self.show_hint and encounter.hint:
-            hint_y = obj_y + 20
+            hint_y = obj_y + SPACING["md"]
             # In observer mode, reveal the answer instead of just the hint
             if getattr(self.client, 'game_mode', 'full') == 'observer':
                 hint_text = f"Answer: {encounter.solution}"
@@ -1088,7 +1127,7 @@ class EncounterScene(Scene):
             type_text = f"[{encounter.hash_type.upper()}]"
             type_surface = type_font.render(type_text, Typography.ANTIALIAS, type_color)
             surface.blit(type_surface, (content.x, y))
-            y += type_font.get_height() + 8
+            y += type_font.get_height() + SPACING["sm"]
 
             # Separator
             pygame.draw.line(
@@ -1098,7 +1137,7 @@ class EncounterScene(Scene):
                 (content.x + content.width, y),
                 1,
             )
-            y += 8
+            y += SPACING["sm"]
 
         # Hash value (wrapped) or cracked cleartext
         if encounter.hash:
@@ -1163,7 +1202,7 @@ class EncounterScene(Scene):
                 forge_text, Typography.ANTIALIAS, Colors.BLUE
             )
             forge_x = content.x + (content.width - forge_surface.get_width()) // 2
-            forge_y = y + 4
+            forge_y = y + SPACING["xs"]
             surface.blit(forge_surface, (forge_x, forge_y))
 
         # Draw text input or choice buttons
@@ -1175,7 +1214,7 @@ class EncounterScene(Scene):
                 indicator_text, Typography.ANTIALIAS, Colors.TEXT_MUTED
             )
             indicator_x = content.x
-            indicator_y = self.textbox.rect.y - indicator_font.get_height() - 28
+            indicator_y = self.textbox.rect.y - indicator_font.get_height() - SPACING["lg"]
             surface.blit(indicator_surface, (indicator_x, indicator_y))
 
             # Draw visible prompt label above textbox
@@ -1185,7 +1224,7 @@ class EncounterScene(Scene):
                 prompt_text, Typography.ANTIALIAS, Colors.CURSOR
             )
             prompt_x = content.x
-            prompt_y = self.textbox.rect.y - prompt_font.get_height() - 8
+            prompt_y = self.textbox.rect.y - prompt_font.get_height() - SPACING["sm"]
             surface.blit(prompt_surface, (prompt_x, prompt_y))
 
             # Draw the textbox itself
@@ -1199,7 +1238,7 @@ class EncounterScene(Scene):
                 Colors.TEXT_MUTED,
             )
             inst_x = content.x + (content.width - inst_surface.get_width()) // 2
-            inst_y = self.textbox.rect.y + self.textbox.rect.height + 8
+            inst_y = self.textbox.rect.y + self.textbox.rect.height + SPACING["sm"]
             surface.blit(inst_surface, (inst_x, inst_y))
 
             # First-time instruction
@@ -1210,14 +1249,14 @@ class EncounterScene(Scene):
                     Colors.TEXT_DIM,
                 )
                 hint_x = content.x + (content.width - hint_surface.get_width()) // 2
-                hint_y = indicator_y - 20
+                hint_y = indicator_y - SPACING["md"]
                 surface.blit(hint_surface, (hint_x, hint_y))
                 self.first_encounter_shown = True
 
         elif self.choice_buttons:
             # Draw fork choices
             choice_font = fonts.get_body_font()
-            choice_y = content.y + 80
+            choice_y = content.y + SPACING["xxl"] + SPACING["xl"]
 
             for key, label in self.choice_buttons:
                 choice_text = f"[{key}] {label}"
@@ -1225,7 +1264,7 @@ class EncounterScene(Scene):
                     choice_text, Typography.ANTIALIAS, Colors.TEXT_PRIMARY
                 )
                 surface.blit(choice_surface, (content.x, choice_y))
-                choice_y += int(choice_font.get_height() * Typography.LINE_HEIGHT) + 8
+                choice_y += int(choice_font.get_height() * Typography.LINE_HEIGHT) + SPACING["sm"]
 
     def _draw_tour_panel(
         self, surface: "pygame.Surface", content: "pygame.Rect", fonts: "FontManager"
@@ -1246,10 +1285,10 @@ class EncounterScene(Scene):
             1,
         )
 
-        # "NARRATIVE" label
+        # "NARRATIVE" label (chunky for retro feel)
         label_font = fonts.get_font(Typography.SIZE_LABEL, bold=True)
         label_text = "NARRATIVE"
-        label_surface = label_font.render(label_text, Typography.ANTIALIAS, Colors.TEXT_MUTED)
+        label_surface = label_font.render(label_text, Typography.ANTIALIAS_HEADERS, Colors.TEXT_MUTED)
         label_x = content.x + (content.width - label_surface.get_width()) // 2
         label_y = center_y - 20
         surface.blit(label_surface, (label_x, label_y))
