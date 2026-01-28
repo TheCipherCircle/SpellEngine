@@ -26,7 +26,9 @@ wheels/
 
 # PyInstaller
 *.manifest
-*.spec
+# Ignore generated spec files but keep our custom ones
+!DreadCitadel.spec
+!storysmith_windows.spec
 
 # Installer logs
 pip-log.txt
