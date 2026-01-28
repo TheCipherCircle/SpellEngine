@@ -33,6 +33,8 @@ class GameClient:
         save_dir: Path | None = None,
         width: int = DEFAULT_WIDTH,
         height: int = DEFAULT_HEIGHT,
+        game_mode: str = "full",
+        tools: dict | None = None,
     ) -> None:
         """Initialize the game client.
 
@@ -42,11 +44,15 @@ class GameClient:
             save_dir: Directory for save files
             width: Window width
             height: Window height
+            game_mode: Tool availability mode (full/hashcat/john/observer)
+            tools: Dict of available tool paths
         """
         self.campaign = campaign
         self.player_name = player_name
         self.save_dir = save_dir or Path.home() / ".patternforge" / "saves"
         self.screen_size = (width, height)
+        self.game_mode = game_mode
+        self.tools = tools or {}
 
         self._running = False
         self._screen: "pygame.Surface | None" = None
@@ -284,6 +290,8 @@ def launch_game(
     player_name: str = "Player",
     save_dir: Path | None = None,
     resume: bool = False,
+    game_mode: str = "full",
+    tools: dict | None = None,
 ) -> None:
     """Launch the game client for a campaign.
 
@@ -294,10 +302,14 @@ def launch_game(
         player_name: Player display name
         save_dir: Directory for save files
         resume: Whether to resume from save
+        game_mode: Tool availability mode (full/hashcat/john/observer)
+        tools: Dict of available tool paths
     """
     client = GameClient(
         campaign=campaign,
         player_name=player_name,
         save_dir=save_dir,
+        game_mode=game_mode,
+        tools=tools or {},
     )
     client.run(resume=resume)

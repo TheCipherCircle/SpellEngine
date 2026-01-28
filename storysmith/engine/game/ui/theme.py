@@ -71,6 +71,7 @@ class Colors:
     PURPLE = (211, 134, 155)         # #d3869b
     AQUA = (142, 192, 124)           # #8ec07c
     ORANGE = (254, 128, 25)          # #fe8019
+    GOLD = (215, 153, 33)            # #d79921 - observer mode answers
 
     # Hash type accents
     HASH_MD5 = (215, 153, 33)        # #d79921 - tarnished amber

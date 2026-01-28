@@ -13,14 +13,181 @@ PROPRIETARY - All Rights Reserved
 from __future__ import annotations
 
 import argparse
+import shutil
 import sys
 from pathlib import Path
 
 
 __version__ = "0.1.0"
 
+# Game modes based on available tools
+GAME_MODE_FULL = "full"           # Both hashcat and john available
+GAME_MODE_HASHCAT = "hashcat"     # Hashcat only
+GAME_MODE_JOHN = "john"           # John only
+GAME_MODE_OBSERVER = "observer"   # No tools - hints reveal answers
+
 # Default content directory (relative to package)
 CONTENT_ROOT = Path(__file__).parent.parent / "content"
+
+
+def check_cracking_tools() -> dict[str, str | None]:
+    """Check which cracking tools are available.
+
+    Returns:
+        Dict with tool names and paths (None if not found)
+    """
+    tools = {"hashcat": None, "john": None}
+
+    # Check hashcat
+    hashcat_candidates = [
+        "hashcat",
+        "/usr/local/bin/hashcat",
+        "/opt/homebrew/bin/hashcat",
+    ]
+    for candidate in hashcat_candidates:
+        if shutil.which(candidate):
+            tools["hashcat"] = candidate
+            break
+
+    # Check john
+    john_candidates = [
+        "john",
+        "/usr/local/bin/john",
+        "/opt/homebrew/bin/john",
+    ]
+    for candidate in john_candidates:
+        if shutil.which(candidate):
+            tools["john"] = candidate
+            break
+
+    return tools
+
+
+def determine_game_mode(tools: dict[str, str | None]) -> str:
+    """Determine game mode based on available tools.
+
+    Args:
+        tools: Dict of tool names to paths
+
+    Returns:
+        Game mode constant
+    """
+    has_hashcat = tools.get("hashcat") is not None
+    has_john = tools.get("john") is not None
+
+    if has_hashcat and has_john:
+        return GAME_MODE_FULL
+    elif has_hashcat:
+        return GAME_MODE_HASHCAT
+    elif has_john:
+        return GAME_MODE_JOHN
+    else:
+        return GAME_MODE_OBSERVER
+
+
+def display_tool_check() -> tuple[str, dict]:
+    """Display tool check and get user's choice.
+
+    Returns:
+        Tuple of (game_mode, tools_dict)
+    """
+    tools = check_cracking_tools()
+    mode = determine_game_mode(tools)
+
+    print()
+    print("=" * 60)
+    print("              STORYSMITH - TOOL CHECK")
+    print("=" * 60)
+    print()
+    print("Checking for cracking tools...")
+    print()
+
+    # Display status
+    if tools["hashcat"]:
+        print(f"  [✓] hashcat: {tools['hashcat']}")
+    else:
+        print("  [✗] hashcat: not found")
+
+    if tools["john"]:
+        print(f"  [✓] john: {tools['john']}")
+    else:
+        print("  [✗] john: not found")
+
+    print()
+
+    # If both tools available, just continue
+    if mode == GAME_MODE_FULL:
+        print("All tools available. Full functionality enabled.")
+        print()
+        return mode, tools
+
+    # If at least one tool, offer choice
+    if mode in (GAME_MODE_HASHCAT, GAME_MODE_JOHN):
+        tool_name = "hashcat" if mode == GAME_MODE_HASHCAT else "john"
+        print(f"Running in {tool_name}-only mode.")
+        print("Some encounters may use the available tool.")
+        print()
+        print("Options:")
+        print("  [C] Continue with available tools")
+        print("  [O] Observer mode (hints reveal answers)")
+        print("  [Q] Quit and install missing tools")
+        print()
+
+        while True:
+            choice = input("Choice [C/O/Q]: ").strip().upper()
+            if choice == "C":
+                return mode, tools
+            elif choice == "O":
+                return GAME_MODE_OBSERVER, tools
+            elif choice == "Q":
+                print()
+                print("To install missing tools:")
+                print("  hashcat: brew install hashcat (macOS)")
+                print("  john: brew install john (macOS)")
+                print()
+                print("Or check: https://hashcat.net and https://openwall.com/john")
+                sys.exit(0)
+            else:
+                print("Invalid choice. Enter C, O, or Q.")
+
+    # No tools at all
+    print("No cracking tools found.")
+    print()
+    print("The Dread Citadel requires hashcat or john the ripper")
+    print("to crack hashes. Without them, you can still explore")
+    print("the adventure in Observer mode (hints reveal answers).")
+    print()
+    print("Options:")
+    print("  [O] Observer mode (hints reveal answers)")
+    print("  [I] Show install instructions")
+    print("  [Q] Quit")
+    print()
+
+    while True:
+        choice = input("Choice [O/I/Q]: ").strip().upper()
+        if choice == "O":
+            return GAME_MODE_OBSERVER, tools
+        elif choice == "I":
+            print()
+            print("Install instructions:")
+            print()
+            print("macOS (Homebrew):")
+            print("  brew install hashcat")
+            print("  brew install john")
+            print()
+            print("Linux (apt):")
+            print("  sudo apt install hashcat john")
+            print()
+            print("Windows:")
+            print("  Download from https://hashcat.net")
+            print("  Download from https://openwall.com/john")
+            print()
+            print("After installing, restart storysmith.")
+            print()
+        elif choice == "Q":
+            sys.exit(0)
+        else:
+            print("Invalid choice. Enter O, I, or Q.")
 
 
 def get_campaigns() -> list[dict]:
@@ -121,7 +288,16 @@ def play_gui_mode(campaign: dict, args: argparse.Namespace) -> int:
         print("Install with: pip install pygame")
         return 1
 
+    # Check for cracking tools (unless --skip-tool-check)
+    if not getattr(args, 'skip_tool_check', False):
+        game_mode, tools = display_tool_check()
+    else:
+        tools = check_cracking_tools()
+        game_mode = determine_game_mode(tools)
+
     print(f"Starting {campaign['title']}...")
+    if game_mode == GAME_MODE_OBSERVER:
+        print("(Observer mode - hints will reveal answers)")
     print()
 
     # Load campaign
@@ -144,11 +320,13 @@ def play_gui_mode(campaign: dict, args: argparse.Namespace) -> int:
 
         loaded_campaign = load_campaign(campaign_file)
 
-        # Launch the game
+        # Launch the game with tool configuration
         launch_game(
             campaign=loaded_campaign,
             player_name=args.name,
             resume=args.resume,
+            game_mode=game_mode,
+            tools=tools,
         )
 
         return 0

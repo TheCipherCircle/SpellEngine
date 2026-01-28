@@ -367,7 +367,11 @@ class EncounterScene(Scene):
             # For hash-cracking encounters - show submission and hint
             prompts.append(("Enter", "Submit"))
             if encounter.hint:
-                prompts.append(("H", "Hint"))
+                # In observer mode, label shows "Answer" instead of "Hint"
+                if getattr(self.client, 'game_mode', 'full') == 'observer':
+                    prompts.append(("H", "Answer"))
+                else:
+                    prompts.append(("H", "Hint"))
 
         # Add retreat option for boss encounters (if checkpoint available)
         is_boss = encounter.id in BOSS_ENCOUNTERS
@@ -937,8 +941,15 @@ class EncounterScene(Scene):
         # Hint (if showing)
         if self.show_hint and encounter.hint:
             hint_y = obj_y + 20
+            # In observer mode, reveal the answer instead of just the hint
+            if getattr(self.client, 'game_mode', 'full') == 'observer':
+                hint_text = f"Answer: {encounter.solution}"
+                hint_color = Colors.GOLD  # Make answer stand out
+            else:
+                hint_text = f"Hint: {encounter.hint}"
+                hint_color = Colors.TEXT_MUTED
             hint_surface = obj_font.render(
-                f"Hint: {encounter.hint}", Typography.ANTIALIAS, Colors.TEXT_MUTED
+                hint_text, Typography.ANTIALIAS, hint_color
             )
             surface.blit(hint_surface, (content.x, hint_y))
 
