@@ -1,7 +1,7 @@
 """Button UI component for game client.
 
 Styled with Gruvbox colors, square corners, thick borders.
-Corrupted SNES aesthetic.
+Corrupted SNES aesthetic with anti-aliased text for readability.
 """
 
 from typing import Callable, TYPE_CHECKING
@@ -19,7 +19,7 @@ class Button:
     - Gruvbox themed with hover/press states
     - Square corners (no rounding)
     - Thick borders
-    - No anti-aliasing for retro feel
+    - Anti-aliased text for readability
     """
 
     def __init__(

@@ -325,6 +325,7 @@ def play_gui_mode(campaign: dict, args: argparse.Namespace) -> int:
             campaign=loaded_campaign,
             player_name=args.name,
             resume=args.resume,
+            display_mode=args.display,
             game_mode=game_mode,
             tools=tools,
         )
@@ -379,6 +380,12 @@ def main(argv: list[str] | None = None) -> int:
         "--gui", "-g",
         action="store_true",
         help=argparse.SUPPRESS,  # Hidden - GUI is default, no need to show
+    )
+    play_parser.add_argument(
+        "--display", "-d",
+        choices=["windowed", "fullscreen_windowed", "fullscreen"],
+        default="fullscreen_windowed",
+        help="Display mode (default: fullscreen_windowed). Use F11 to cycle modes in-game.",
     )
     play_parser.set_defaults(func=cmd_play)
 

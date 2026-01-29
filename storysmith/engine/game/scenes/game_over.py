@@ -9,6 +9,7 @@ from storysmith.engine.game.scenes.base import Scene
 from storysmith.engine.game.ui import (
     Colors,
     LAYOUT,
+    SPACING,
     Typography,
     Panel,
     Menu,
@@ -70,6 +71,16 @@ class GameOverScene(Scene):
         self.deaths = kwargs.get("deaths", 0)
 
         screen_w, screen_h = self.client.screen_size
+
+        # Finalize test session with stats
+        state = self.client.adventure_state.state
+        self.client.finalize_test_session({
+            "total_xp": state.xp_earned,
+            "deaths": self.deaths,
+            "clean_solves": state.clean_solves,
+            "hints_used": state.hints_used,
+            "result": "GAME_OVER",
+        })
 
         # Play defeat sound
         if self.client.audio:

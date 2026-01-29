@@ -13,6 +13,7 @@ from storysmith.engine.game.scenes.title import TitleScene
 from storysmith.engine.game.scenes.encounter import EncounterScene
 from storysmith.engine.game.scenes.game_over import GameOverScene
 from storysmith.engine.game.scenes.victory import VictoryScene
+from storysmith.engine.game.scenes.credits import CreditsScene
 
 __all__ = [
     "Scene",
@@ -20,4 +21,5 @@ __all__ = [
     "EncounterScene",
     "GameOverScene",
     "VictoryScene",
+    "CreditsScene",
 ]

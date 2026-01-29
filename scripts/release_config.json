@@ -1,0 +1,6 @@
+{
+  "proton_drive_sync": "~/Library/CloudStorage/ProtonDrive-pete@mckernans.org-folder/Storysmith-Releases",
+  "default_version_prefix": "0.9",
+  "notify_on_build": true,
+  "auto_open_folder": false
+}

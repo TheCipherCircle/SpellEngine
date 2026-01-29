@@ -3,6 +3,10 @@
 Pygame-based graphical interface that wraps AdventureState.
 """
 
+import subprocess
+import uuid
+from datetime import datetime
+from enum import Enum
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
@@ -15,9 +19,16 @@ if TYPE_CHECKING:
     from storysmith.engine.game.audio import AudioManager
 
 
-# Default window size
-DEFAULT_WIDTH = 1024
-DEFAULT_HEIGHT = 768
+class DisplayMode(Enum):
+    """Display mode options."""
+    WINDOWED = "windowed"
+    FULLSCREEN_WINDOWED = "fullscreen_windowed"  # Borderless fullscreen
+    FULLSCREEN = "fullscreen"
+
+
+# Default window size (used for windowed mode)
+DEFAULT_WIDTH = 1280
+DEFAULT_HEIGHT = 800
 
 
 class GameClient:
@@ -26,6 +37,11 @@ class GameClient:
     Wraps AdventureState for game logic and manages Pygame rendering.
     """
 
+    # Test session tracking (class-level for persistence)
+    _test_session_id: str | None = None
+    _test_log_path: Path | None = None
+    _test_terminal_opened: bool = False
+
     def __init__(
         self,
         campaign: "Campaign",
@@ -33,6 +49,7 @@ class GameClient:
         save_dir: Path | None = None,
         width: int = DEFAULT_WIDTH,
         height: int = DEFAULT_HEIGHT,
+        display_mode: DisplayMode = DisplayMode.FULLSCREEN_WINDOWED,
         game_mode: str = "full",
         tools: dict | None = None,
     ) -> None:
@@ -42,15 +59,18 @@ class GameClient:
             campaign: Campaign to play
             player_name: Player display name
             save_dir: Directory for save files
-            width: Window width
-            height: Window height
+            width: Window width (for windowed mode)
+            height: Window height (for windowed mode)
+            display_mode: Display mode (windowed, fullscreen_windowed, fullscreen)
             game_mode: Tool availability mode (full/hashcat/john/observer)
             tools: Dict of available tool paths
         """
         self.campaign = campaign
         self.player_name = player_name
         self.save_dir = save_dir or Path.home() / ".patternforge" / "saves"
+        self._windowed_size = (width, height)  # Store for mode switching
         self.screen_size = (width, height)
+        self.display_mode = display_mode
         self.game_mode = game_mode
         self.tools = tools or {}
 
@@ -82,30 +102,175 @@ class GameClient:
         """Check if a save file exists."""
         return self.save_path.exists()
 
+    def _init_test_session(self) -> None:
+        """Initialize a test session for tracking crack commands."""
+        from storysmith.cli import __version__
+
+        # Generate unique session ID
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        short_id = uuid.uuid4().hex[:8]
+        GameClient._test_session_id = f"{timestamp}_{short_id}"
+
+        # Create test log directory and file
+        test_log_dir = Path.home() / ".storysmith" / "test_logs"
+        test_log_dir.mkdir(parents=True, exist_ok=True)
+        GameClient._test_log_path = test_log_dir / f"playtest_{GameClient._test_session_id}.log"
+        GameClient._test_terminal_opened = False
+
+        # Write session header
+        with open(GameClient._test_log_path, "w") as f:
+            f.write("=" * 60 + "\n")
+            f.write("  STORYSMITH PLAYTEST LOG\n")
+            f.write("=" * 60 + "\n")
+            f.write(f"Session ID: {GameClient._test_session_id}\n")
+            f.write(f"Version: {__version__}\n")
+            f.write(f"Campaign: {self.campaign.title} ({self.campaign.id})\n")
+            f.write(f"Game Mode: {self.game_mode}\n")
+            f.write(f"Started: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
+            f.write("=" * 60 + "\n\n")
+
+    def log_crack_command(self, hash_value: str, command: str, result: str) -> None:
+        """Log a crack command and result to the test session.
+
+        Args:
+            hash_value: The hash being cracked
+            command: The command that was run
+            result: The result/output
+        """
+        if not GameClient._test_log_path:
+            return
+
+        timestamp = datetime.now().strftime("%H:%M:%S")
+        with open(GameClient._test_log_path, "a") as f:
+            f.write(f"[{timestamp}] CRACK ATTEMPT\n")
+            f.write(f"Hash: {hash_value}\n")
+            f.write(f"Command: {command}\n")
+            f.write(f"Result: {result}\n")
+            f.write("-" * 40 + "\n\n")
+
+    def open_test_terminal(self) -> None:
+        """Open a terminal window that tails the test log."""
+        if GameClient._test_terminal_opened or not GameClient._test_log_path:
+            return
+
+        GameClient._test_terminal_opened = True
+        log_path = GameClient._test_log_path
+
+        # AppleScript to open Terminal with tail -f on the log file
+        applescript = f'''
+        tell application "Terminal"
+            do script "clear; echo '=== STORYSMITH PLAYTEST LOG ==='; echo 'Session: {GameClient._test_session_id}'; echo ''; tail -f \\"{log_path}\\" 2>/dev/null"
+            set custom title of front window to "Playtest Log - {GameClient._test_session_id}"
+        end tell
+        '''
+
+        try:
+            subprocess.run(
+                ["osascript", "-e", applescript],
+                capture_output=True,
+                timeout=5,
+            )
+        except Exception as e:
+            print(f"[verbose] Failed to open test terminal: {e}")
+
+    def finalize_test_session(self, stats: dict) -> None:
+        """Finalize the test session and prompt for submission.
+
+        Args:
+            stats: Final game stats (xp, deaths, clean_solves, etc.)
+        """
+        if not GameClient._test_log_path:
+            return
+
+        # Write final stats to log
+        with open(GameClient._test_log_path, "a") as f:
+            f.write("\n" + "=" * 60 + "\n")
+            f.write("  PLAYTEST COMPLETE\n")
+            f.write("=" * 60 + "\n")
+            f.write(f"Ended: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
+            f.write(f"Total XP: {stats.get('total_xp', 0)}\n")
+            f.write(f"Deaths: {stats.get('deaths', 0)}\n")
+            f.write(f"Clean Solves: {stats.get('clean_solves', 0)}\n")
+            f.write(f"Hints Used: {stats.get('hints_used', 0)}\n")
+            f.write("=" * 60 + "\n\n")
+            f.write("This log will be included with your playtest report.\n")
+            f.write("Press ENTER to send and close...\n")
+
+        # If terminal is open, it will show this via tail -f
+        # The terminal script handles the "press enter to close" prompt
+
     def _init_pygame(self) -> None:
         """Initialize pygame and create window."""
-        import os
         import pygame
-
-        # Position window on left side of screen (for side-by-side with terminal)
-        # Must set before pygame.init() for SDL to pick it up
-        os.environ['SDL_VIDEO_WINDOW_POS'] = '0,25'
 
         pygame.init()
         pygame.display.set_caption(f"PatternForge - {self.campaign.title}")
 
-        self._screen = pygame.display.set_mode(self.screen_size)
-
-        # Try to reposition window after creation (backup for macOS)
-        try:
-            from ctypes import c_int, byref
-            import ctypes.util
-            sdl2 = ctypes.CDLL(ctypes.util.find_library('SDL2'))
-            window = pygame.display.get_wm_info()['window']
-            sdl2.SDL_SetWindowPosition(window, 0, 25)
-        except Exception:
-            pass  # Fallback if SDL2 direct access fails
+        # Set up display based on mode
+        self._set_display_mode(self.display_mode)
         self._clock = pygame.time.Clock()
+
+    def _set_display_mode(self, mode: DisplayMode) -> None:
+        """Set the display mode.
+
+        Args:
+            mode: Display mode to set
+        """
+        import pygame
+
+        self.display_mode = mode
+
+        if mode == DisplayMode.WINDOWED:
+            # Standard windowed mode
+            self._screen = pygame.display.set_mode(self._windowed_size, pygame.RESIZABLE)
+            self.screen_size = self._windowed_size
+
+        elif mode == DisplayMode.FULLSCREEN_WINDOWED:
+            # Borderless fullscreen (covers screen but not exclusive)
+            display_info = pygame.display.Info()
+            screen_w, screen_h = display_info.current_w, display_info.current_h
+            self._screen = pygame.display.set_mode(
+                (screen_w, screen_h),
+                pygame.NOFRAME
+            )
+            self.screen_size = (screen_w, screen_h)
+
+        elif mode == DisplayMode.FULLSCREEN:
+            # True fullscreen (exclusive mode)
+            display_info = pygame.display.Info()
+            screen_w, screen_h = display_info.current_w, display_info.current_h
+            self._screen = pygame.display.set_mode(
+                (screen_w, screen_h),
+                pygame.FULLSCREEN
+            )
+            self.screen_size = (screen_w, screen_h)
+
+        # Reinitialize scenes if they exist (they cache screen dimensions)
+        if self._scenes and self._current_scene_name:
+            self._reinit_current_scene()
+
+    def _reinit_current_scene(self) -> None:
+        """Reinitialize current scene after display mode change."""
+        if self._current_scene and self._current_scene_name:
+            # Exit and re-enter current scene to recalculate layouts
+            scene_name = self._current_scene_name
+            self._current_scene.exit()
+
+            # Re-enter with appropriate params
+            if scene_name == "title":
+                self._current_scene.enter(campaign=self.campaign, has_save=self.has_save())
+            elif scene_name == "encounter":
+                self._current_scene.enter()
+            else:
+                self._current_scene.enter()
+
+    def cycle_display_mode(self) -> None:
+        """Cycle through display modes: windowed -> fullscreen_windowed -> fullscreen."""
+        modes = [DisplayMode.WINDOWED, DisplayMode.FULLSCREEN_WINDOWED, DisplayMode.FULLSCREEN]
+        current_idx = modes.index(self.display_mode)
+        next_idx = (current_idx + 1) % len(modes)
+        self._set_display_mode(modes[next_idx])
+        print(f"Display mode: {self.display_mode.value}")
 
     def _init_scenes(self) -> None:
         """Initialize all scene objects."""
@@ -113,12 +278,14 @@ class GameClient:
         from storysmith.engine.game.scenes.encounter import EncounterScene
         from storysmith.engine.game.scenes.game_over import GameOverScene
         from storysmith.engine.game.scenes.victory import VictoryScene
+        from storysmith.engine.game.scenes.credits import CreditsScene
 
         self._scenes = {
             "title": TitleScene(self),
             "encounter": EncounterScene(self),
             "game_over": GameOverScene(self),
             "victory": VictoryScene(self),
+            "credits": CreditsScene(self),
         }
 
     def _init_adventure(self, resume: bool = False) -> None:
@@ -225,6 +392,7 @@ class GameClient:
         self._init_scenes()
         self._init_assets()
         self._init_adventure(resume)
+        self._init_test_session()
 
         # Start with title screen or encounter depending on mode
         if resume and self.adventure_state:
@@ -255,6 +423,9 @@ class GameClient:
                 # Screenshot capture (F12)
                 elif event.type == pygame.KEYDOWN and event.key == pygame.K_F12:
                     self._take_screenshot()
+                # Display mode toggle (F11)
+                elif event.type == pygame.KEYDOWN and event.key == pygame.K_F11:
+                    self.cycle_display_mode()
                 elif self._current_scene:
                     try:
                         self._current_scene.handle_event(event)
@@ -290,6 +461,7 @@ def launch_game(
     player_name: str = "Player",
     save_dir: Path | None = None,
     resume: bool = False,
+    display_mode: str = "fullscreen_windowed",
     game_mode: str = "full",
     tools: dict | None = None,
 ) -> None:
@@ -302,13 +474,23 @@ def launch_game(
         player_name: Player display name
         save_dir: Directory for save files
         resume: Whether to resume from save
+        display_mode: Display mode (windowed, fullscreen_windowed, fullscreen)
         game_mode: Tool availability mode (full/hashcat/john/observer)
         tools: Dict of available tool paths
     """
+    # Parse display mode string to enum
+    mode_map = {
+        "windowed": DisplayMode.WINDOWED,
+        "fullscreen_windowed": DisplayMode.FULLSCREEN_WINDOWED,
+        "fullscreen": DisplayMode.FULLSCREEN,
+    }
+    mode = mode_map.get(display_mode, DisplayMode.FULLSCREEN_WINDOWED)
+
     client = GameClient(
         campaign=campaign,
         player_name=player_name,
         save_dir=save_dir,
+        display_mode=mode,
         game_mode=game_mode,
         tools=tools or {},
     )

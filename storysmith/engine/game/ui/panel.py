@@ -6,7 +6,7 @@ Square corners, no rounding - corrupted SNES aesthetic.
 
 from typing import TYPE_CHECKING
 
-from storysmith.engine.game.ui.theme import Colors, LAYOUT, Typography, get_fonts
+from storysmith.engine.game.ui.theme import Colors, LAYOUT, SPACING, Typography, get_fonts
 
 if TYPE_CHECKING:
     import pygame
@@ -151,9 +151,9 @@ class Panel:
                 1,
             )
 
-            # Title text
+            # Title text (chunky for retro feel)
             title_surface = font.render(
-                self.title, Typography.ANTIALIAS, Colors.TEXT_HEADER
+                self.title, Typography.ANTIALIAS_HEADERS, Colors.TEXT_HEADER
             )
             title_x = self.rect.x + bw + LAYOUT["panel_padding"]
             title_y = self.rect.y + bw + (self._title_height - font.get_height()) // 2
@@ -233,7 +233,7 @@ class StatusPanel(Panel):
 
         content = self.content_rect
         y = content.y
-        line_height = int(Typography.SIZE_BODY * Typography.LINE_HEIGHT) + 4
+        line_height = int(Typography.SIZE_BODY * Typography.LINE_HEIGHT) + SPACING["xs"]
 
         for label, value, color in self._stats:
             if color is None:
@@ -253,9 +253,9 @@ class StatusPanel(Panel):
                 y += line_height
                 continue
 
-            # Draw label (ALL CAPS, muted)
+            # Draw label (ALL CAPS, muted, chunky)
             label_surface = label_font.render(
-                label.upper() + ":", Typography.ANTIALIAS, Colors.TEXT_MUTED
+                label.upper() + ":", Typography.ANTIALIAS_HEADERS, Colors.TEXT_MUTED
             )
             surface.blit(label_surface, (content.x, y))
 

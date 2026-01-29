@@ -5,7 +5,7 @@ Displays hashes with color-coded type indicators and state management.
 
 from typing import TYPE_CHECKING
 
-from storysmith.engine.game.ui.theme import Colors, Typography, get_fonts, LAYOUT
+from storysmith.engine.game.ui.theme import Colors, Typography, get_fonts, LAYOUT, SPACING
 
 if TYPE_CHECKING:
     import pygame
@@ -123,7 +123,7 @@ class HashDisplay:
         surface.blit(type_surface, (x, y))
 
         # Separator line
-        y += self._type_font.get_height() + 4
+        y += self._type_font.get_height() + SPACING["xs"]
         pygame.draw.line(
             surface,
             Colors.BORDER,
@@ -131,7 +131,7 @@ class HashDisplay:
             (x + self.rect.width - pad * 2, y),
             1,
         )
-        y += 6
+        y += SPACING["xs"] + 2
 
         # Calculate hash display
         chars_per_line = (self.rect.width - pad * 2) // (self._font.size("0")[0])
@@ -286,10 +286,10 @@ class HashInputPanel:
         pygame.draw.rect(surface, Colors.BG_MEDIUM, self.rect)
         pygame.draw.rect(surface, Colors.BORDER, self.rect, bw)
 
-        # Title
+        # Title (chunky for retro feel)
         title_font = get_fonts().get_font(Typography.SIZE_SUBHEADER, bold=True)
         title_surface = title_font.render(
-            "TARGET HASH", Typography.ANTIALIAS, Colors.TEXT_HEADER
+            "TARGET HASH", Typography.ANTIALIAS_HEADERS, Colors.TEXT_HEADER
         )
         surface.blit(title_surface, (self.rect.x + pad, self.rect.y + pad))
 

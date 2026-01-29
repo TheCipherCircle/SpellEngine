@@ -1,12 +1,12 @@
 """Text input box for password guessing.
 
 Styled with Gruvbox colors, blinking cursor, monospace font.
-Corrupted SNES aesthetic - no anti-aliasing, hard pixel edges.
+Anti-aliased text for readability while typing.
 """
 
 from typing import Callable, TYPE_CHECKING
 
-from storysmith.engine.game.ui.theme import Colors, Typography, get_fonts, LAYOUT
+from storysmith.engine.game.ui.theme import Colors, Typography, get_fonts, LAYOUT, SPACING
 
 if TYPE_CHECKING:
     import pygame
@@ -19,7 +19,7 @@ class TextBox:
     - Monospace font for terminal feel
     - Blinking cursor with > prefix
     - Orange cursor when active
-    - No anti-aliasing for retro aesthetic
+    - Anti-aliased text for readability
     """
 
     def __init__(
@@ -223,7 +223,7 @@ class TextBox:
         """Remove focus from this text box."""
         self.active = False
 
-    def flash_error(self, duration: float = 0.3) -> None:
+    def flash_error(self, duration: float = 0.5) -> None:
         """Flash the text box to indicate an error.
 
         Args:
@@ -232,7 +232,7 @@ class TextBox:
         self._error_flash = True
         self._error_timer = duration
 
-    def flash_success(self, duration: float = 0.3) -> None:
+    def flash_success(self, duration: float = 0.5) -> None:
         """Flash the text box to indicate success.
 
         Args:

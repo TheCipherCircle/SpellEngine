@@ -9,6 +9,7 @@ from storysmith.engine.game.scenes.base import Scene
 from storysmith.engine.game.ui import (
     Colors,
     LAYOUT,
+    SPACING,
     Typography,
     Panel,
     StatusPanel,
@@ -74,6 +75,16 @@ class VictoryScene(Scene):
         self.achievements = self.client.adventure_state.state.achievements.copy()
 
         screen_w, screen_h = self.client.screen_size
+
+        # Finalize test session with stats
+        state = self.client.adventure_state.state
+        self.client.finalize_test_session({
+            "total_xp": self.total_xp,
+            "deaths": self.deaths,
+            "clean_solves": state.clean_solves,
+            "hints_used": state.hints_used,
+            "result": "VICTORY",
+        })
 
         # Play victory fanfare
         if self.client.audio:
@@ -323,9 +334,9 @@ class VictoryScene(Scene):
             star_y = rating_content.y + 20
             surface.blit(star_surface, (star_x, star_y))
 
-            # Draw rating title
+            # Draw rating title (chunky for retro feel)
             title_surface = fonts.get_header_font().render(
-                title, Typography.ANTIALIAS, Colors.SUCCESS
+                title, Typography.ANTIALIAS_HEADERS, Colors.SUCCESS
             )
             title_x = rating_content.x + (rating_content.width - title_surface.get_width()) // 2
             surface.blit(title_surface, (title_x, star_y + star_font.get_height() + 10))

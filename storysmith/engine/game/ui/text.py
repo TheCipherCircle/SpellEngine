@@ -1,7 +1,7 @@
 """Text rendering utilities with retro styling.
 
-NO anti-aliasing, monospace fonts, ALL CAPS headers.
-Corrupted SNES aesthetic with hard pixel edges.
+Anti-aliased body text for readability, chunky headers for retro feel.
+Corrupted SNES aesthetic with monospace fonts and ALL CAPS headers.
 """
 
 from typing import TYPE_CHECKING
@@ -17,7 +17,7 @@ class TextRenderer:
 
     @staticmethod
     def render_title(text: str, color: tuple[int, int, int] | None = None) -> "pygame.Surface":
-        """Render a screen title (ALL CAPS, large, bold).
+        """Render a screen title (ALL CAPS, large, bold, chunky).
 
         Args:
             text: Text to render
@@ -28,11 +28,12 @@ class TextRenderer:
         """
         font = get_fonts().get_title_font()
         color = color or Colors.TEXT_HEADER
-        return font.render(text.upper(), Typography.ANTIALIAS, color)
+        # Headers use chunky rendering (no anti-alias) for retro feel
+        return font.render(text.upper(), Typography.ANTIALIAS_HEADERS, color)
 
     @staticmethod
     def render_header(text: str, color: tuple[int, int, int] | None = None) -> "pygame.Surface":
-        """Render a panel header (ALL CAPS, medium, bold).
+        """Render a panel header (ALL CAPS, medium, bold, chunky).
 
         Args:
             text: Text to render
@@ -43,7 +44,8 @@ class TextRenderer:
         """
         font = get_fonts().get_header_font()
         color = color or Colors.TEXT_HEADER
-        return font.render(text.upper(), Typography.ANTIALIAS, color)
+        # Headers use chunky rendering (no anti-alias) for retro feel
+        return font.render(text.upper(), Typography.ANTIALIAS_HEADERS, color)
 
     @staticmethod
     def render_body(text: str, color: tuple[int, int, int] | None = None) -> "pygame.Surface":
@@ -62,7 +64,7 @@ class TextRenderer:
 
     @staticmethod
     def render_label(text: str, color: tuple[int, int, int] | None = None) -> "pygame.Surface":
-        """Render a label (ALL CAPS, small, muted).
+        """Render a label (ALL CAPS, small, muted, chunky).
 
         Args:
             text: Text to render
@@ -73,7 +75,8 @@ class TextRenderer:
         """
         font = get_fonts().get_label_font()
         color = color or Colors.TEXT_MUTED
-        return font.render(text.upper(), Typography.ANTIALIAS, color)
+        # Labels use chunky rendering for retro feel
+        return font.render(text.upper(), Typography.ANTIALIAS_HEADERS, color)
 
     @staticmethod
     def render_prompt(text: str, color: tuple[int, int, int] | None = None) -> "pygame.Surface":
@@ -293,11 +296,11 @@ def draw_double_border_title(
     # Create the border line
     border_line = "\u2550" * num_chars  # ═
 
-    # Render border lines
-    border_surface = font.render(border_line, Typography.ANTIALIAS, Colors.TEXT_HEADER)
+    # Render border lines (chunky for retro feel)
+    border_surface = font.render(border_line, Typography.ANTIALIAS_HEADERS, Colors.TEXT_HEADER)
 
-    # Render title
-    title_surface = font.render(text.upper(), Typography.ANTIALIAS, Colors.TEXT_HEADER)
+    # Render title (chunky for retro feel)
+    title_surface = font.render(text.upper(), Typography.ANTIALIAS_HEADERS, Colors.TEXT_HEADER)
     title_x = x + (width - title_surface.get_width()) // 2
 
     line_height = font.get_height()

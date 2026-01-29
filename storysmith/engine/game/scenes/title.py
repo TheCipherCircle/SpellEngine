@@ -15,6 +15,7 @@ from storysmith.engine.game.scenes.base import Scene
 from storysmith.engine.game.ui import (
     Colors,
     LAYOUT,
+    SPACING,
     Typography,
     Panel,
     Menu,
@@ -127,7 +128,7 @@ class TitleScene(Scene):
             items.append(MenuItem("START", "N", self._on_start))
             self._start_menu_index = 0  # "START" is first item
 
-        items.append(MenuItem("Profile", "P", self._on_profile, enabled=False))
+        items.append(MenuItem("Credits", "R", self._on_credits))
         items.append(MenuItem("Quit", "ESC", self._on_quit))
 
         # Center menu horizontally, position below title area
@@ -161,10 +162,9 @@ class TitleScene(Scene):
         """Handle new game button click."""
         self.change_scene("encounter", resume=False)
 
-    def _on_profile(self) -> None:
-        """Handle profile button click."""
-        # Not implemented yet
-        pass
+    def _on_credits(self) -> None:
+        """Handle credits button click."""
+        self.change_scene("credits")
 
     def _on_quit(self) -> None:
         """Handle quit button click."""
@@ -263,12 +263,12 @@ class TitleScene(Scene):
         info_text = f"{self.campaign.difficulty.upper()} | {len(self.campaign.chapters)} Ch | {self.campaign.estimated_time}"
         info_surface = info_font.render(info_text, Typography.ANTIALIAS, Colors.TEXT_MUTED)
         # Position in upper left corner
-        info_x = content.x + 15
-        info_y = title_y + 70
+        info_x = content.x + SPACING["md"]
+        info_y = title_y + SPACING["xxl"] + SPACING["lg"]
         surface.blit(info_surface, (info_x, info_y))
 
         # === MENU: Positioned below title area ===
-        menu_y = title_y + 100
+        menu_y = title_y + SPACING["xxl"] + SPACING["xxl"]
 
         # Update menu position
         if self.menu and self.menu.rect.y != menu_y:

@@ -5,7 +5,7 @@ Styled for corrupted SNES aesthetic with red arrow indicator.
 
 from typing import Callable, TYPE_CHECKING
 
-from storysmith.engine.game.ui.theme import Colors, Typography, get_fonts, LAYOUT
+from storysmith.engine.game.ui.theme import Colors, Typography, get_fonts, LAYOUT, SPACING
 
 if TYPE_CHECKING:
     import pygame
@@ -80,7 +80,7 @@ class Menu:
 
     def _update_height(self) -> None:
         """Calculate height based on number of items."""
-        line_height = int(self._font.get_height() * Typography.LINE_HEIGHT) + 8
+        line_height = int(self._font.get_height() * Typography.LINE_HEIGHT) + SPACING["sm"]
         self.rect.height = len(self.items) * line_height
 
     def add_item(self, item: MenuItem) -> None:
@@ -170,7 +170,7 @@ class Menu:
         """
         import pygame
 
-        line_height = int(self._font.get_height() * Typography.LINE_HEIGHT) + 8
+        line_height = int(self._font.get_height() * Typography.LINE_HEIGHT) + SPACING["sm"]
         indicator = "\u25ba "  # Right-pointing triangle as arrow
 
         for i, item in enumerate(self.items):
@@ -299,7 +299,7 @@ class PromptBar:
             surface: Surface to draw on
         """
         x = self.x
-        spacing = 24
+        spacing = SPACING["lg"]
 
         for key, label in self.prompts:
             # Key in brackets
