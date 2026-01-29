@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Download - The Dread Citadel | Storysmith</title>
+    <title>The Dread Citadel | Hashtopia</title>
     <style>
         * {
             margin: 0;
@@ -179,6 +179,13 @@
             color: #6bff6b;
         }
 
+        .brand {
+            color: #8f8fff;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+            letter-spacing: 0.2em;
+        }
+
         @media (max-width: 600px) {
             .download-card {
                 flex-direction: column;
@@ -195,6 +202,7 @@
 <body>
     <div class="container">
         <header class="header">
+            <div class="brand">HASHTOPIA</div>
             <pre class="ascii-art">
     ████████╗██╗  ██╗███████╗
     ╚══██╔══╝██║  ██║██╔════╝
@@ -216,15 +224,15 @@
      ╚═════╝╚═╝   ╚═╝   ╚═╝  ╚═╝╚═════╝ ╚══════╝╚══════╝
             </pre>
             <h1 class="title">THE DREAD CITADEL</h1>
-            <p class="subtitle">A Storysmith Adventure</p>
-            <span class="version">v1.0.0</span>
+            <p class="subtitle">A Password Cracking Adventure</p>
+            <span class="version" id="version">v0.9-demo</span>
         </header>
 
         <section class="section">
-            <p>Learn <span class="highlight">BloodHound</span> and Active Directory security through an immersive dark fantasy adventure. Storm the citadel, uncover its secrets, and master the tools that reveal hidden attack paths.</p>
+            <p>Learn <span class="highlight">password cracking</span> through an immersive dark fantasy adventure. Storm the citadel, crack the hashes that guard its gates, and master the tools that break weak passwords.</p>
 
             <div class="quick-start">
-                <strong>New to security tools?</strong> No problem! <span class="highlight">Observer Mode</span> lets you experience the full story without any tools installed.
+                <strong>New to cracking tools?</strong> No problem! <span class="highlight">Observer Mode</span> lets you experience the full story while learning the concepts - no tools required.
             </div>
         </section>
 
@@ -234,10 +242,10 @@
                     <span class="platform-icon">🍎</span>
                     <div>
                         <div class="platform-name">macOS</div>
-                        <div class="platform-note">Apple Silicon • macOS 11+</div>
+                        <div class="platform-note">Apple Silicon & Intel • macOS 11+</div>
                     </div>
                 </div>
-                <a href="https://github.com/pitl0rd/Storysmith/releases/latest/download/DreadCitadel-macOS.zip" class="download-btn">Download</a>
+                <a href="https://github.com/TheCipherCircle/SpellEngine/releases/latest/download/DreadCitadel-macOS.zip" class="download-btn">Download</a>
             </div>
 
             <div class="download-card">
@@ -248,7 +256,7 @@
                         <div class="platform-note">Windows 10/11 • 64-bit</div>
                     </div>
                 </div>
-                <a href="https://github.com/pitl0rd/Storysmith/releases/latest/download/DreadCitadel-Windows.zip" class="download-btn">Download</a>
+                <a href="https://github.com/TheCipherCircle/SpellEngine/releases/latest/download/DreadCitadel-Windows.zip" class="download-btn">Download</a>
             </div>
 
             <div class="download-card">
@@ -256,21 +264,21 @@
                     <span class="platform-icon">🐧</span>
                     <div>
                         <div class="platform-name">Linux</div>
-                        <div class="platform-note">Ubuntu 20.04+ • x86_64</div>
+                        <div class="platform-note">Ubuntu 20.04+ / Kali / Debian</div>
                     </div>
                 </div>
-                <a href="https://github.com/pitl0rd/Storysmith/releases/latest/download/DreadCitadel-Linux.tar.gz" class="download-btn">Download</a>
+                <a href="https://github.com/TheCipherCircle/SpellEngine/releases/latest/download/DreadCitadel-Linux.tar.gz" class="download-btn">Download</a>
             </div>
         </div>
 
         <section class="section">
             <h2 class="section-title">Quick Start</h2>
             <ol style="padding-left: 1.5rem; line-height: 2;">
-                <li>Download the ZIP for your platform</li>
+                <li>Download the archive for your platform</li>
                 <li>Extract to a folder</li>
                 <li><strong>macOS:</strong> Right-click the app → Open (first time only)</li>
                 <li><strong>Windows:</strong> Run <code>DreadCitadel.exe</code></li>
-                <li><strong>Linux:</strong> Run <code>./DreadCitadel</code></li>
+                <li><strong>Linux:</strong> <code>chmod +x DreadCitadel && ./DreadCitadel</code></li>
             </ol>
         </section>
 
@@ -280,7 +288,7 @@
                 <div class="req-item">OS: macOS 11+ / Windows 10 / Ubuntu 20.04</div>
                 <div class="req-item">RAM: 2 GB minimum</div>
                 <div class="req-item">Storage: 100 MB</div>
-                <div class="req-item">Display: 1280x720</div>
+                <div class="req-item">Display: 1024x768</div>
             </div>
         </section>
 
@@ -288,17 +296,28 @@
             <h2 class="section-title">Optional Tools</h2>
             <p style="margin-bottom: 1rem;">For the full hands-on experience:</p>
             <ul style="padding-left: 1.5rem; line-height: 2;">
-                <li><a href="https://bloodhound.readthedocs.io/" style="color: #6b6bff;">BloodHound</a> - AD attack path analysis</li>
-                <li><a href="https://neo4j.com/" style="color: #6b6bff;">Neo4j</a> - Graph database</li>
+                <li><a href="https://hashcat.net/hashcat/" style="color: #6b6bff;">hashcat</a> - Advanced password recovery</li>
+                <li><a href="https://www.openwall.com/john/" style="color: #6b6bff;">John the Ripper</a> - Classic password cracker</li>
             </ul>
             <p style="margin-top: 1rem; color: #6b6b8f;"><em>Don't have these? Observer Mode has you covered!</em></p>
+        </section>
+
+        <section class="section">
+            <h2 class="section-title">What You'll Learn</h2>
+            <ul style="padding-left: 1.5rem; line-height: 2;">
+                <li>Why common passwords fall instantly</li>
+                <li>How MD5 and SHA1 hashes work</li>
+                <li>Dictionary attacks vs. brute force</li>
+                <li>Pattern-based password weaknesses</li>
+                <li>Building effective wordlists</li>
+            </ul>
         </section>
 
         <footer class="footer">
             <p>Built by the <a href="https://github.com/TheCipherCircle">Cipher Circle</a></p>
             <p style="margin-top: 0.5rem;">
-                <a href="https://github.com/pitl0rd/Storysmith">GitHub</a> •
-                <a href="https://github.com/pitl0rd/Storysmith/issues">Report Issues</a>
+                <a href="https://github.com/TheCipherCircle/SpellEngine/releases">All Releases</a> •
+                <a href="https://github.com/TheCipherCircle/SpellEngine/issues">Report Issues</a>
             </p>
             <p style="margin-top: 1rem; color: #3a3a5a;">The Citadel awaits, adventurer.</p>
         </footer>
