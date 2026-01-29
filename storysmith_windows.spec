@@ -49,6 +49,10 @@ hiddenimports = [
     'yaml',
     'pyyaml',
     'psutil',  # Used by agents/math_validator.py
+    'pydantic',  # Used by adventures/models.py
+    'pydantic.fields',
+    'pydantic.main',
+    'pydantic_core',
     # All storysmith modules
     'storysmith',
     'storysmith.cli',

@@ -27,7 +27,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install pyinstaller pygame pyyaml psutil
+          pip install pyinstaller pygame pyyaml psutil pydantic
 
       - name: Build executable
         run: python scripts/build_windows_exe.py
