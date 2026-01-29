@@ -4,7 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>The Dread Citadel | Hashtopia</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --orange: #e67e22;
+            --orange-dark: #d35400;
+            --orange-light: #f39c12;
+            --cream: #f5e6d3;
+            --cream-dark: #d4c4b0;
+            --dark: #1a1a1a;
+            --darker: #0d0d0d;
+            --gray: #888;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -12,69 +26,136 @@
         }
 
         body {
-            background-color: #0a0a0f;
-            color: #c0c0c0;
-            font-family: 'Courier New', monospace;
+            background-color: var(--darker);
+            color: var(--cream);
+            font-family: 'Space Grotesk', 'Courier New', monospace;
             min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        /* Hero section with castle banner */
+        .hero {
+            position: relative;
+            background:
+                linear-gradient(180deg, rgba(13,13,13,0.3) 0%, rgba(13,13,13,0.7) 60%, var(--darker) 100%),
+                url('assets/hashtopia-hero.jpg') center top / cover no-repeat;
+            padding: 3rem 2rem 4rem;
+            text-align: center;
+            min-height: 320px;
             display: flex;
             flex-direction: column;
+            justify-content: center;
             align-items: center;
-            padding: 2rem;
-        }
-
-        .container {
-            max-width: 800px;
-            width: 100%;
-        }
-
-        .header {
-            text-align: center;
-            margin-bottom: 3rem;
-            border: 2px solid #4a4a6a;
-            padding: 2rem;
-            background: linear-gradient(180deg, #1a1a2e 0%, #0a0a0f 100%);
         }
 
         .title {
-            color: #ff6b6b;
-            font-size: 2.5rem;
-            text-shadow: 0 0 10px #ff6b6b40;
+            color: var(--orange);
+            font-size: 2.8rem;
+            font-weight: 700;
+            text-shadow: 0 0 30px rgba(0, 0, 0, 0.8), 0 0 60px rgba(230, 126, 34, 0.4);
             margin-bottom: 0.5rem;
+            letter-spacing: 0.05em;
         }
 
         .subtitle {
-            color: #6b6b8f;
-            font-size: 1rem;
+            color: var(--cream);
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
         }
 
-        .ascii-art {
-            color: #4a6b4a;
-            font-size: 0.7rem;
-            line-height: 1.2;
-            margin: 1rem 0;
-            white-space: pre;
+        .version {
+            display: inline-block;
+            background: var(--dark);
+            border: 1px solid var(--orange);
+            color: var(--orange);
+            padding: 0.25rem 0.75rem;
+            font-size: 0.85rem;
+            font-weight: 500;
         }
 
+        /* Main content */
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .intro {
+            text-align: center;
+            padding: 2rem;
+            border-bottom: 1px solid #333;
+            margin-bottom: 2rem;
+        }
+
+        .intro p {
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto 1.5rem;
+        }
+
+        .intro .highlight {
+            color: var(--orange);
+            font-weight: 600;
+        }
+
+        .observer-note {
+            background: var(--dark);
+            border-left: 3px solid var(--orange);
+            padding: 1rem 1.25rem;
+            display: inline-block;
+            text-align: left;
+        }
+
+        .observer-note strong {
+            color: var(--orange);
+        }
+
+        /* Download section with cover art */
+        .download-section {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 2rem;
+            margin: 2rem 0;
+            align-items: start;
+        }
+
+        .cover-art {
+            border: 2px solid #333;
+            overflow: hidden;
+        }
+
+        .cover-art img {
+            width: 100%;
+            height: auto;
+            display: block;
+            transition: transform 0.3s ease;
+        }
+
+        .cover-art:hover img {
+            transform: scale(1.02);
+        }
+
+        /* Download cards */
         .downloads {
             display: flex;
             flex-direction: column;
             gap: 1rem;
-            margin: 2rem 0;
         }
 
         .download-card {
-            border: 1px solid #3a3a5a;
-            padding: 1.5rem;
-            background: #12121a;
+            background: var(--dark);
+            border: 1px solid #333;
+            padding: 1.25rem 1.5rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            transition: all 0.3s ease;
+            transition: all 0.2s ease;
         }
 
         .download-card:hover {
-            border-color: #6b6bff;
-            background: #1a1a2a;
+            border-color: var(--orange);
+            transform: translateX(4px);
         }
 
         .platform {
@@ -84,113 +165,206 @@
         }
 
         .platform-icon {
-            font-size: 2rem;
+            font-size: 1.8rem;
+            width: 50px;
+            text-align: center;
         }
 
         .platform-name {
-            color: #e0e0e0;
-            font-size: 1.2rem;
+            font-size: 1.15rem;
+            font-weight: 600;
+            color: var(--cream);
         }
 
         .platform-note {
-            color: #6b6b8f;
-            font-size: 0.8rem;
+            font-size: 0.85rem;
+            color: var(--gray);
         }
 
         .download-btn {
-            background: #4a4a8f;
-            color: #fff;
+            background: var(--orange);
+            color: var(--darker);
             border: none;
-            padding: 0.75rem 1.5rem;
+            padding: 0.6rem 1.5rem;
             font-family: inherit;
-            font-size: 1rem;
+            font-size: 0.95rem;
+            font-weight: 600;
             cursor: pointer;
             text-decoration: none;
-            transition: all 0.3s ease;
+            transition: all 0.2s ease;
         }
 
         .download-btn:hover {
-            background: #6b6bff;
+            background: var(--orange-light);
         }
 
+        /* Sections */
         .section {
-            margin: 2rem 0;
-            border: 1px solid #3a3a5a;
-            padding: 1.5rem;
-            background: #0f0f18;
+            margin: 2.5rem 0;
         }
 
         .section-title {
-            color: #8f8fff;
-            font-size: 1.2rem;
+            color: var(--orange);
+            font-size: 1rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
             margin-bottom: 1rem;
-            border-bottom: 1px solid #3a3a5a;
             padding-bottom: 0.5rem;
+            border-bottom: 1px solid #333;
         }
 
-        .requirements {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 0.5rem;
+        .section ul, .section ol {
+            padding-left: 1.5rem;
         }
 
-        .req-item {
-            color: #a0a0a0;
+        .section li {
+            margin-bottom: 0.5rem;
+            color: var(--cream-dark);
         }
 
-        .highlight {
-            color: #6bff6b;
-        }
-
-        .warning {
-            color: #ffaa6b;
-        }
-
-        .footer {
-            text-align: center;
-            margin-top: 3rem;
-            color: #4a4a6a;
-            font-size: 0.9rem;
-        }
-
-        .footer a {
-            color: #6b6bff;
+        .section a {
+            color: var(--orange);
             text-decoration: none;
         }
 
-        .version {
-            background: #2a2a4a;
-            padding: 0.25rem 0.75rem;
-            border-radius: 3px;
-            font-size: 0.9rem;
-            color: #8f8fff;
-            display: inline-block;
-            margin-top: 1rem;
+        .section a:hover {
+            text-decoration: underline;
         }
 
-        .quick-start {
-            background: #1a1a1a;
-            padding: 1rem;
-            border-left: 3px solid #6bff6b;
+        .section code {
+            background: var(--dark);
+            padding: 0.15rem 0.4rem;
+            font-family: 'Courier New', monospace;
+            color: var(--orange-light);
+        }
+
+        /* Two column grid */
+        .two-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        /* Requirements grid */
+        .requirements {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem 2rem;
+        }
+
+        .req-item {
+            color: var(--cream-dark);
+            font-size: 0.95rem;
+        }
+
+        /* Tool list */
+        .tool-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .tool-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--dark);
+            padding: 0.75rem 1rem;
+            border: 1px solid #333;
+        }
+
+        .tool-info strong {
+            color: var(--cream);
+        }
+
+        .tool-links {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .tool-link {
+            padding: 0.35rem 0.75rem;
+            font-size: 0.85rem;
+            text-decoration: none;
+            border: 1px solid var(--orange);
+            color: var(--orange);
+            transition: all 0.2s ease;
+        }
+
+        .tool-link:hover {
+            background: var(--orange);
+            color: var(--darker);
+        }
+
+        .tool-download {
+            background: var(--orange);
+            color: var(--darker);
+        }
+
+        .tool-download:hover {
+            background: var(--orange-light);
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 3rem 2rem;
+            border-top: 1px solid #333;
+            margin-top: 2rem;
+        }
+
+        .footer a {
+            color: var(--orange);
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+        .footer-links {
             margin: 1rem 0;
         }
 
-        .quick-start code {
-            color: #6bff6b;
+        .footer-links a {
+            margin: 0 1rem;
         }
 
-        .brand {
-            color: #8f8fff;
+        .footer-tagline {
+            color: #555;
             font-size: 0.9rem;
-            margin-bottom: 1rem;
-            letter-spacing: 0.2em;
+            margin-top: 1.5rem;
         }
 
-        @media (max-width: 600px) {
+        /* Responsive */
+        @media (max-width: 700px) {
+            .title {
+                font-size: 2rem;
+            }
+
+            .download-section {
+                grid-template-columns: 1fr;
+            }
+
+            .cover-art {
+                max-width: 300px;
+                margin: 0 auto;
+            }
+
             .download-card {
                 flex-direction: column;
                 text-align: center;
                 gap: 1rem;
+            }
+
+            .platform {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .two-col {
+                grid-template-columns: 1fr;
             }
 
             .requirements {
@@ -200,126 +374,126 @@
     </style>
 </head>
 <body>
+    <header class="hero">
+        <h1 class="title">THE DREAD CITADEL</h1>
+        <p class="subtitle">A Password Cracking Adventure</p>
+        <span class="version">v0.9-demo</span>
+    </header>
+
     <div class="container">
-        <header class="header">
-            <div class="brand">HASHTOPIA</div>
-            <pre class="ascii-art">
-    ████████╗██╗  ██╗███████╗
-    ╚══██╔══╝██║  ██║██╔════╝
-       ██║   ███████║█████╗
-       ██║   ██╔══██║██╔══╝
-       ██║   ██║  ██║███████╗
-       ╚═╝   ╚═╝  ╚═╝╚══════╝
-    ██████╗ ██████╗ ███████╗ █████╗ ██████╗
-    ██╔══██╗██╔══██╗██╔════╝██╔══██╗██╔══██╗
-    ██║  ██║██████╔╝█████╗  ███████║██║  ██║
-    ██║  ██║██╔══██╗██╔══╝  ██╔══██║██║  ██║
-    ██████╔╝██║  ██║███████╗██║  ██║██████╔╝
-    ╚═════╝ ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝╚═════╝
-     ██████╗██╗████████╗ █████╗ ██████╗ ███████╗██╗
-    ██╔════╝██║╚══██╔══╝██╔══██╗██╔══██╗██╔════╝██║
-    ██║     ██║   ██║   ███████║██║  ██║█████╗  ██║
-    ██║     ██║   ██║   ██╔══██║██║  ██║██╔══╝  ██║
-    ╚██████╗██║   ██║   ██║  ██║██████╔╝███████╗███████╗
-     ╚═════╝╚═╝   ╚═╝   ╚═╝  ╚═╝╚═════╝ ╚══════╝╚══════╝
-            </pre>
-            <h1 class="title">THE DREAD CITADEL</h1>
-            <p class="subtitle">A Password Cracking Adventure</p>
-            <span class="version" id="version">v0.9-demo</span>
-        </header>
-
-        <section class="section">
+        <div class="intro">
             <p>Learn <span class="highlight">password cracking</span> through an immersive dark fantasy adventure. Storm the citadel, crack the hashes that guard its gates, and master the tools that break weak passwords.</p>
-
-            <div class="quick-start">
-                <strong>New to cracking tools?</strong> No problem! <span class="highlight">Observer Mode</span> lets you experience the full story while learning the concepts - no tools required.
-            </div>
-        </section>
-
-        <div class="downloads">
-            <div class="download-card">
-                <div class="platform">
-                    <span class="platform-icon">🍎</span>
-                    <div>
-                        <div class="platform-name">macOS</div>
-                        <div class="platform-note">Apple Silicon & Intel • macOS 11+</div>
-                    </div>
-                </div>
-                <a href="https://github.com/TheCipherCircle/SpellEngine/releases/latest/download/DreadCitadel-macOS.zip" class="download-btn">Download</a>
-            </div>
-
-            <div class="download-card">
-                <div class="platform">
-                    <span class="platform-icon">🪟</span>
-                    <div>
-                        <div class="platform-name">Windows</div>
-                        <div class="platform-note">Windows 10/11 • 64-bit</div>
-                    </div>
-                </div>
-                <a href="https://github.com/TheCipherCircle/SpellEngine/releases/latest/download/DreadCitadel-Windows.zip" class="download-btn">Download</a>
-            </div>
-
-            <div class="download-card">
-                <div class="platform">
-                    <span class="platform-icon">🐧</span>
-                    <div>
-                        <div class="platform-name">Linux</div>
-                        <div class="platform-note">Ubuntu 20.04+ / Kali / Debian</div>
-                    </div>
-                </div>
-                <a href="https://github.com/TheCipherCircle/SpellEngine/releases/latest/download/DreadCitadel-Linux.tar.gz" class="download-btn">Download</a>
+            <div class="observer-note">
+                <strong>New to cracking tools?</strong> Observer Mode lets you experience the full story while learning the concepts — no tools required.
             </div>
         </div>
 
-        <section class="section">
-            <h2 class="section-title">Quick Start</h2>
-            <ol style="padding-left: 1.5rem; line-height: 2;">
-                <li>Download the archive for your platform</li>
-                <li>Extract to a folder</li>
-                <li><strong>macOS:</strong> Right-click the app → Open (first time only)</li>
-                <li><strong>Windows:</strong> Run <code>DreadCitadel.exe</code></li>
-                <li><strong>Linux:</strong> <code>chmod +x DreadCitadel && ./DreadCitadel</code></li>
-            </ol>
-        </section>
+        <div class="download-section">
+            <div class="cover-art">
+                <img src="assets/cover-art.png" alt="The Dread Citadel">
+            </div>
+            <div class="downloads">
+                <div class="download-card">
+                    <div class="platform">
+                        <span class="platform-icon">🍎</span>
+                        <div>
+                            <div class="platform-name">macOS</div>
+                            <div class="platform-note">Apple Silicon & Intel • macOS 11+</div>
+                        </div>
+                    </div>
+                    <a href="https://github.com/TheCipherCircle/SpellEngine/releases/latest/download/DreadCitadel-macOS.zip" class="download-btn">Download</a>
+                </div>
 
-        <section class="section">
+                <div class="download-card">
+                    <div class="platform">
+                        <span class="platform-icon">🪟</span>
+                        <div>
+                            <div class="platform-name">Windows</div>
+                            <div class="platform-note">Windows 10/11 • 64-bit</div>
+                        </div>
+                    </div>
+                    <a href="https://github.com/TheCipherCircle/SpellEngine/releases/latest/download/DreadCitadel-Windows.zip" class="download-btn">Download</a>
+                </div>
+
+                <div class="download-card">
+                    <div class="platform">
+                        <span class="platform-icon">🐧</span>
+                        <div>
+                            <div class="platform-name">Linux</div>
+                            <div class="platform-note">Ubuntu 20.04+ / Kali / Debian</div>
+                        </div>
+                    </div>
+                    <a href="https://github.com/TheCipherCircle/SpellEngine/releases/latest/download/DreadCitadel-Linux.tar.gz" class="download-btn">Download</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="two-col">
+            <div class="section">
+                <h2 class="section-title">Quick Start</h2>
+                <ol>
+                    <li>Download the archive for your platform</li>
+                    <li>Extract to a folder</li>
+                    <li><strong>macOS:</strong> Right-click → Open (first time)</li>
+                    <li><strong>Windows:</strong> Run <code>DreadCitadel.exe</code></li>
+                    <li><strong>Linux:</strong> <code>chmod +x DreadCitadel && ./DreadCitadel</code></li>
+                </ol>
+            </div>
+
+            <div class="section">
+                <h2 class="section-title">What You'll Learn</h2>
+                <ul>
+                    <li>Why common passwords fall instantly</li>
+                    <li>How MD5 and SHA1 hashes work</li>
+                    <li>Dictionary attacks vs. brute force</li>
+                    <li>Pattern-based password weaknesses</li>
+                    <li>Building effective wordlists</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section">
             <h2 class="section-title">System Requirements</h2>
             <div class="requirements">
                 <div class="req-item">OS: macOS 11+ / Windows 10 / Ubuntu 20.04</div>
                 <div class="req-item">RAM: 2 GB minimum</div>
                 <div class="req-item">Storage: 100 MB</div>
-                <div class="req-item">Display: 1024x768</div>
+                <div class="req-item">Display: 1024×768</div>
             </div>
-        </section>
+        </div>
 
-        <section class="section">
-            <h2 class="section-title">Optional Tools</h2>
-            <p style="margin-bottom: 1rem;">For the full hands-on experience:</p>
-            <ul style="padding-left: 1.5rem; line-height: 2;">
-                <li><a href="https://hashcat.net/hashcat/" style="color: #6b6bff;">hashcat</a> - Advanced password recovery</li>
-                <li><a href="https://www.openwall.com/john/" style="color: #6b6bff;">John the Ripper</a> - Classic password cracker</li>
-            </ul>
-            <p style="margin-top: 1rem; color: #6b6b8f;"><em>Don't have these? Observer Mode has you covered!</em></p>
-        </section>
-
-        <section class="section">
-            <h2 class="section-title">What You'll Learn</h2>
-            <ul style="padding-left: 1.5rem; line-height: 2;">
-                <li>Why common passwords fall instantly</li>
-                <li>How MD5 and SHA1 hashes work</li>
-                <li>Dictionary attacks vs. brute force</li>
-                <li>Pattern-based password weaknesses</li>
-                <li>Building effective wordlists</li>
-            </ul>
-        </section>
+        <div class="section">
+            <h2 class="section-title">Tools You'll Learn</h2>
+            <div class="tool-list">
+                <div class="tool-item">
+                    <div class="tool-info">
+                        <strong>hashcat</strong> — Advanced password recovery
+                    </div>
+                    <div class="tool-links">
+                        <a href="https://hashcat.net/hashcat/" class="tool-link">Info</a>
+                        <a href="https://hashcat.net/hashcat/" class="tool-link tool-download">Download</a>
+                    </div>
+                </div>
+                <div class="tool-item">
+                    <div class="tool-info">
+                        <strong>John the Ripper</strong> — Classic password cracker
+                    </div>
+                    <div class="tool-links">
+                        <a href="https://www.openwall.com/john/" class="tool-link">Info</a>
+                        <a href="https://www.openwall.com/john/j/john-1.9.0-jumbo-1.tar.gz" class="tool-link tool-download">Download</a>
+                    </div>
+                </div>
+            </div>
+            <p style="margin-top: 1rem; color: var(--gray);">New to these tools? Observer Mode teaches the concepts first.</p>
+        </div>
 
         <footer class="footer">
             <p>Built by the <a href="https://github.com/TheCipherCircle">Cipher Circle</a></p>
-            <p style="margin-top: 0.5rem;">
-                <a href="https://github.com/TheCipherCircle/SpellEngine/releases">All Releases</a> •
+            <div class="footer-links">
+                <a href="https://github.com/TheCipherCircle/SpellEngine/releases">All Releases</a>
                 <a href="https://github.com/TheCipherCircle/SpellEngine/issues">Report Issues</a>
-            </p>
-            <p style="margin-top: 1rem; color: #3a3a5a;">The Citadel awaits, adventurer.</p>
+            </div>
+            <p class="footer-tagline">The Citadel awaits, adventurer.</p>
         </footer>
     </div>
 </body>
