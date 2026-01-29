@@ -242,6 +242,60 @@ def cmd_list(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_selftest(args: argparse.Namespace) -> int:
+    """Run self-tests on campaigns for CI validation."""
+    from spellengine.adventures.selftest import run_selftest, print_report
+
+    campaigns = get_campaigns()
+
+    if not campaigns:
+        print("No campaigns found.")
+        print(f"Looking in: {CONTENT_ROOT / 'adventures'}")
+        return 1
+
+    # Determine which campaigns to test
+    if args.all:
+        test_campaigns = campaigns
+    elif args.campaign:
+        campaign = next((c for c in campaigns if c["id"] == args.campaign), None)
+        if not campaign:
+            print(f"Campaign not found: {args.campaign}")
+            print()
+            print("Available campaigns:")
+            for c in campaigns:
+                print(f"  {c['id']}")
+            return 1
+        test_campaigns = [campaign]
+    else:
+        # Default to first campaign if none specified
+        print("No campaign specified. Use --all or provide a campaign ID.")
+        print()
+        print("Available campaigns:")
+        for c in campaigns:
+            print(f"  {c['id']}")
+        print()
+        print("Usage: spellengine selftest <campaign_id>")
+        print("       spellengine selftest --all")
+        return 1
+
+    # Run tests
+    all_passed = True
+    for campaign in test_campaigns:
+        campaign_file = campaign["path"] / "campaign.yaml"
+
+        if not campaign_file.exists():
+            print(f"[SKIP] {campaign['id']} - no campaign.yaml found")
+            continue
+
+        report = run_selftest(campaign["id"])
+        print_report(report)
+
+        if not report.success:
+            all_passed = False
+
+    return 0 if all_passed else 1
+
+
 def cmd_play(args: argparse.Namespace) -> int:
     """Play a campaign."""
     campaign_id = args.campaign
@@ -392,6 +446,29 @@ def main(argv: list[str] | None = None) -> int:
     # list command
     list_parser = subparsers.add_parser("list", help="List available campaigns")
     list_parser.set_defaults(func=cmd_list)
+
+    # selftest command
+    selftest_parser = subparsers.add_parser(
+        "selftest",
+        help="Validate campaign integrity (for CI)",
+    )
+    selftest_parser.add_argument(
+        "campaign",
+        nargs="?",
+        default=None,
+        help="Campaign ID to test (e.g., dread_citadel)",
+    )
+    selftest_parser.add_argument(
+        "--all", "-a",
+        action="store_true",
+        help="Test all available campaigns",
+    )
+    selftest_parser.add_argument(
+        "--verbose", "-v",
+        action="store_true",
+        help="Show detailed output",
+    )
+    selftest_parser.set_defaults(func=cmd_selftest)
 
     # Parse args
     args = parser.parse_args(argv)
