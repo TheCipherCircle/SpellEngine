@@ -22,7 +22,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install pyyaml pydantic
+          pip install pyyaml pydantic rich
           pip install -e .
 
       - name: Run campaign self-tests
