@@ -53,6 +53,13 @@ hiddenimports = [
     'pydantic.fields',
     'pydantic.main',
     'pydantic_core',
+    'rich',  # Used by dice.py and CLI
+    'rich.console',
+    'rich.table',
+    'rich.panel',
+    'rich.text',
+    'rich.style',
+    'rich.markup',
     # All storysmith modules
     'storysmith',
     'storysmith.cli',
