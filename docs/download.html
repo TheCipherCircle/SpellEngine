@@ -48,6 +48,23 @@
             align-items: center;
         }
 
+        .presents {
+            font-size: 0.85rem;
+            color: var(--cream-dark);
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+            margin-bottom: 0.25rem;
+        }
+
+        .series {
+            font-size: 1.1rem;
+            color: var(--orange);
+            font-weight: 600;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+            margin-bottom: 1rem;
+        }
+
         .title {
             color: var(--orange);
             font-size: 2.8rem;
@@ -124,19 +141,13 @@
             text-align: center;
         }
 
-        .cover-presents {
-            font-size: 0.75rem;
-            color: var(--gray);
-            letter-spacing: 0.1em;
-            text-transform: uppercase;
-            margin-bottom: 0.25rem;
-        }
-
-        .cover-series {
-            font-size: 0.9rem;
+        .cover-chapter {
+            font-size: 0.85rem;
             color: var(--orange);
             font-weight: 600;
-            margin-bottom: 0.75rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            margin-bottom: 0.5rem;
         }
 
         .cover-art img {
@@ -363,6 +374,12 @@
             margin-top: 1.5rem;
         }
 
+        .copyright {
+            color: #444;
+            font-size: 0.8rem;
+            margin-top: 1.5rem;
+        }
+
         /* Responsive */
         @media (max-width: 700px) {
             .title {
@@ -401,6 +418,8 @@
 </head>
 <body>
     <header class="hero">
+        <div class="presents">The Cipher Circle Presents</div>
+        <div class="series">A Hashtopia Adventure</div>
         <h1 class="title">THE DREAD CITADEL</h1>
         <p class="subtitle">A Password Cracking Adventure</p>
         <span class="version">v0.9-demo</span>
@@ -416,8 +435,7 @@
 
         <div class="download-section">
             <div class="cover-art">
-                <div class="cover-presents">The Cipher Circle Presents</div>
-                <div class="cover-series">A Hashtopia Adventure</div>
+                <div class="cover-chapter">Chapter One</div>
                 <img src="assets/cover-art.png" alt="The Dread Citadel">
                 <div class="cover-teaser">The Citadel has stood for centuries, its gates sealed by ancient hashes. Many have tried to breach its walls. None have returned. Will you be the one to crack its secrets?</div>
             </div>
@@ -523,6 +541,7 @@
                 <a href="https://github.com/TheCipherCircle/SpellEngine/issues">Report Issues</a>
             </div>
             <p class="footer-tagline">The Citadel awaits, adventurer.</p>
+            <p class="copyright">&copy; 2026 The Cipher Circle. All rights reserved.</p>
         </footer>
     </div>
 </body>
