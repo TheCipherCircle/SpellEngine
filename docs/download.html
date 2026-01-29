@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Download - The Dread Citadel | Storysmith</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #0a0a0f;
+            color: #c0c0c0;
+            font-family: 'Courier New', monospace;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+            border: 2px solid #4a4a6a;
+            padding: 2rem;
+            background: linear-gradient(180deg, #1a1a2e 0%, #0a0a0f 100%);
+        }
+
+        .title {
+            color: #ff6b6b;
+            font-size: 2.5rem;
+            text-shadow: 0 0 10px #ff6b6b40;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            color: #6b6b8f;
+            font-size: 1rem;
+        }
+
+        .ascii-art {
+            color: #4a6b4a;
+            font-size: 0.7rem;
+            line-height: 1.2;
+            margin: 1rem 0;
+            white-space: pre;
+        }
+
+        .downloads {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        .download-card {
+            border: 1px solid #3a3a5a;
+            padding: 1.5rem;
+            background: #12121a;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .download-card:hover {
+            border-color: #6b6bff;
+            background: #1a1a2a;
+        }
+
+        .platform {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .platform-icon {
+            font-size: 2rem;
+        }
+
+        .platform-name {
+            color: #e0e0e0;
+            font-size: 1.2rem;
+        }
+
+        .platform-note {
+            color: #6b6b8f;
+            font-size: 0.8rem;
+        }
+
+        .download-btn {
+            background: #4a4a8f;
+            color: #fff;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            font-family: inherit;
+            font-size: 1rem;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .download-btn:hover {
+            background: #6b6bff;
+        }
+
+        .section {
+            margin: 2rem 0;
+            border: 1px solid #3a3a5a;
+            padding: 1.5rem;
+            background: #0f0f18;
+        }
+
+        .section-title {
+            color: #8f8fff;
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid #3a3a5a;
+            padding-bottom: 0.5rem;
+        }
+
+        .requirements {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+        }
+
+        .req-item {
+            color: #a0a0a0;
+        }
+
+        .highlight {
+            color: #6bff6b;
+        }
+
+        .warning {
+            color: #ffaa6b;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 3rem;
+            color: #4a4a6a;
+            font-size: 0.9rem;
+        }
+
+        .footer a {
+            color: #6b6bff;
+            text-decoration: none;
+        }
+
+        .version {
+            background: #2a2a4a;
+            padding: 0.25rem 0.75rem;
+            border-radius: 3px;
+            font-size: 0.9rem;
+            color: #8f8fff;
+            display: inline-block;
+            margin-top: 1rem;
+        }
+
+        .quick-start {
+            background: #1a1a1a;
+            padding: 1rem;
+            border-left: 3px solid #6bff6b;
+            margin: 1rem 0;
+        }
+
+        .quick-start code {
+            color: #6bff6b;
+        }
+
+        @media (max-width: 600px) {
+            .download-card {
+                flex-direction: column;
+                text-align: center;
+                gap: 1rem;
+            }
+
+            .requirements {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <pre class="ascii-art">
+    ████████╗██╗  ██╗███████╗
+    ╚══██╔══╝██║  ██║██╔════╝
+       ██║   ███████║█████╗
+       ██║   ██╔══██║██╔══╝
+       ██║   ██║  ██║███████╗
+       ╚═╝   ╚═╝  ╚═╝╚══════╝
+    ██████╗ ██████╗ ███████╗ █████╗ ██████╗
+    ██╔══██╗██╔══██╗██╔════╝██╔══██╗██╔══██╗
+    ██║  ██║██████╔╝█████╗  ███████║██║  ██║
+    ██║  ██║██╔══██╗██╔══╝  ██╔══██║██║  ██║
+    ██████╔╝██║  ██║███████╗██║  ██║██████╔╝
+    ╚═════╝ ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝╚═════╝
+     ██████╗██╗████████╗ █████╗ ██████╗ ███████╗██╗
+    ██╔════╝██║╚══██╔══╝██╔══██╗██╔══██╗██╔════╝██║
+    ██║     ██║   ██║   ███████║██║  ██║█████╗  ██║
+    ██║     ██║   ██║   ██╔══██║██║  ██║██╔══╝  ██║
+    ╚██████╗██║   ██║   ██║  ██║██████╔╝███████╗███████╗
+     ╚═════╝╚═╝   ╚═╝   ╚═╝  ╚═╝╚═════╝ ╚══════╝╚══════╝
+            </pre>
+            <h1 class="title">THE DREAD CITADEL</h1>
+            <p class="subtitle">A Storysmith Adventure</p>
+            <span class="version">v1.0.0</span>
+        </header>
+
+        <section class="section">
+            <p>Learn <span class="highlight">BloodHound</span> and Active Directory security through an immersive dark fantasy adventure. Storm the citadel, uncover its secrets, and master the tools that reveal hidden attack paths.</p>
+
+            <div class="quick-start">
+                <strong>New to security tools?</strong> No problem! <span class="highlight">Observer Mode</span> lets you experience the full story without any tools installed.
+            </div>
+        </section>
+
+        <div class="downloads">
+            <div class="download-card">
+                <div class="platform">
+                    <span class="platform-icon">🍎</span>
+                    <div>
+                        <div class="platform-name">macOS</div>
+                        <div class="platform-note">Apple Silicon • macOS 11+</div>
+                    </div>
+                </div>
+                <a href="https://github.com/pitl0rd/Storysmith/releases/latest/download/DreadCitadel-macOS.zip" class="download-btn">Download</a>
+            </div>
+
+            <div class="download-card">
+                <div class="platform">
+                    <span class="platform-icon">🪟</span>
+                    <div>
+                        <div class="platform-name">Windows</div>
+                        <div class="platform-note">Windows 10/11 • 64-bit</div>
+                    </div>
+                </div>
+                <a href="https://github.com/pitl0rd/Storysmith/releases/latest/download/DreadCitadel-Windows.zip" class="download-btn">Download</a>
+            </div>
+
+            <div class="download-card">
+                <div class="platform">
+                    <span class="platform-icon">🐧</span>
+                    <div>
+                        <div class="platform-name">Linux</div>
+                        <div class="platform-note">Ubuntu 20.04+ • x86_64</div>
+                    </div>
+                </div>
+                <a href="https://github.com/pitl0rd/Storysmith/releases/latest/download/DreadCitadel-Linux.tar.gz" class="download-btn">Download</a>
+            </div>
+        </div>
+
+        <section class="section">
+            <h2 class="section-title">Quick Start</h2>
+            <ol style="padding-left: 1.5rem; line-height: 2;">
+                <li>Download the ZIP for your platform</li>
+                <li>Extract to a folder</li>
+                <li><strong>macOS:</strong> Right-click the app → Open (first time only)</li>
+                <li><strong>Windows:</strong> Run <code>DreadCitadel.exe</code></li>
+                <li><strong>Linux:</strong> Run <code>./DreadCitadel</code></li>
+            </ol>
+        </section>
+
+        <section class="section">
+            <h2 class="section-title">System Requirements</h2>
+            <div class="requirements">
+                <div class="req-item">OS: macOS 11+ / Windows 10 / Ubuntu 20.04</div>
+                <div class="req-item">RAM: 2 GB minimum</div>
+                <div class="req-item">Storage: 100 MB</div>
+                <div class="req-item">Display: 1280x720</div>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2 class="section-title">Optional Tools</h2>
+            <p style="margin-bottom: 1rem;">For the full hands-on experience:</p>
+            <ul style="padding-left: 1.5rem; line-height: 2;">
+                <li><a href="https://bloodhound.readthedocs.io/" style="color: #6b6bff;">BloodHound</a> - AD attack path analysis</li>
+                <li><a href="https://neo4j.com/" style="color: #6b6bff;">Neo4j</a> - Graph database</li>
+            </ul>
+            <p style="margin-top: 1rem; color: #6b6b8f;"><em>Don't have these? Observer Mode has you covered!</em></p>
+        </section>
+
+        <footer class="footer">
+            <p>Built by the <a href="https://github.com/TheCipherCircle">Cipher Circle</a></p>
+            <p style="margin-top: 0.5rem;">
+                <a href="https://github.com/pitl0rd/Storysmith">GitHub</a> •
+                <a href="https://github.com/pitl0rd/Storysmith/issues">Report Issues</a>
+            </p>
+            <p style="margin-top: 1rem; color: #3a3a5a;">The Citadel awaits, adventurer.</p>
+        </footer>
+    </div>
+</body>
+</html>
