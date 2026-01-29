@@ -32,6 +32,23 @@ jobs:
       - name: Build executable
         run: python scripts/build_windows_exe.py
 
+      - name: Smoke test - verify exe launches
+        shell: pwsh
+        run: |
+          Write-Host "Starting launch test..."
+          $process = Start-Process -FilePath "dist/DreadCitadel.exe" -PassThru
+          Start-Sleep -Seconds 10
+
+          if ($process.HasExited) {
+            Write-Host "FAIL: Process exited with code $($process.ExitCode)"
+            Write-Host "This usually means a missing module or crash on startup"
+            exit 1
+          }
+
+          Write-Host "PASS: Process still running after 10s (no immediate crash)"
+          Stop-Process -Id $process.Id -Force
+          Write-Host "Smoke test passed"
+
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
