@@ -144,6 +144,52 @@ lore/               # Narrative documentation
 
 ---
 
+## Quick Start
+
+### Option 1: Download & Play (Recommended)
+
+Download the latest release for your platform:
+
+**[Download v0.10.0](https://github.com/pitl0rd/Storysmith/releases/tag/v0.10.0)**
+
+| Platform | Download | Instructions |
+|----------|----------|--------------|
+| **macOS** | `DreadCitadel-macOS.zip` | Unzip, right-click app → Open (first time) |
+| **Windows** | `DreadCitadel-Windows.zip` | Unzip, run `DreadCitadel.exe` |
+| **Linux** | `DreadCitadel-Linux.tar.gz` | Extract, run `./DreadCitadel` |
+
+### Option 2: Run from Source
+
+```bash
+# Clone the repository
+git clone https://github.com/pitl0rd/Storysmith.git
+cd Storysmith
+
+# Install dependencies
+pip install -e .
+
+# Run the game
+python -m storysmith
+```
+
+### First Launch
+
+1. The game will check for required tools (BloodHound, etc.)
+2. Missing tools? Follow the in-game prompts or use Observer Mode
+3. Observer Mode lets you experience the story without the tools installed
+
+### Controls
+
+| Key | Action |
+|-----|--------|
+| `Enter` | Select / Continue |
+| `Arrow Keys` | Navigate menus |
+| `Escape` | Pause / Back |
+| `F12` | Screenshot |
+| `O` | Toggle Observer Mode |
+
+---
+
 ## Requirements
 
 | Component | Minimum | Recommended |
@@ -152,6 +198,15 @@ lore/               # Narrative documentation
 | PatternForge | Latest | Latest |
 | Pygame | 2.0+ | 2.5+ |
 | RAM | 2 GB | 4+ GB |
+
+### Optional Tools (for full experience)
+
+The Dread Citadel teaches real security tools. For the full experience, install:
+
+- **BloodHound** - Active Directory analysis ([Install Guide](https://bloodhound.readthedocs.io/))
+- **Neo4j** - Graph database for BloodHound
+
+*Don't have the tools? Use Observer Mode to enjoy the story without them.*
 
 ---
 
