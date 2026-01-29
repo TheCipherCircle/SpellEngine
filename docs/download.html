@@ -121,19 +121,44 @@
         }
 
         .cover-art {
-            border: 2px solid #333;
-            overflow: hidden;
+            text-align: center;
+        }
+
+        .cover-presents {
+            font-size: 0.75rem;
+            color: var(--gray);
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            margin-bottom: 0.25rem;
+        }
+
+        .cover-series {
+            font-size: 0.9rem;
+            color: var(--orange);
+            font-weight: 600;
+            margin-bottom: 0.75rem;
         }
 
         .cover-art img {
             width: 100%;
             height: auto;
             display: block;
+            border: 2px solid #333;
             transition: transform 0.3s ease;
         }
 
         .cover-art:hover img {
             transform: scale(1.02);
+            border-color: var(--orange);
+        }
+
+        .cover-teaser {
+            font-size: 0.8rem;
+            color: var(--cream-dark);
+            font-style: italic;
+            line-height: 1.5;
+            margin-top: 0.75rem;
+            padding: 0 0.25rem;
         }
 
         /* Download cards */
@@ -297,13 +322,14 @@
             color: var(--darker);
         }
 
-        .tool-download {
+        .tool-link.tool-download {
             background: var(--orange);
             color: var(--darker);
         }
 
-        .tool-download:hover {
+        .tool-link.tool-download:hover {
             background: var(--orange-light);
+            color: var(--darker);
         }
 
         /* Footer */
@@ -390,7 +416,10 @@
 
         <div class="download-section">
             <div class="cover-art">
+                <div class="cover-presents">The Cipher Circle Presents</div>
+                <div class="cover-series">A Hashtopia Adventure</div>
                 <img src="assets/cover-art.png" alt="The Dread Citadel">
+                <div class="cover-teaser">The Citadel has stood for centuries, its gates sealed by ancient hashes. Many have tried to breach its walls. None have returned. Will you be the one to crack its secrets?</div>
             </div>
             <div class="downloads">
                 <div class="download-card">
