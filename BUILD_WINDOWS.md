@@ -21,8 +21,8 @@ During installation:
 ### 2. Clone or Download the Repository
 
 ```powershell
-git clone https://github.com/TheCipherCircle/Storysmith.git
-cd Storysmith
+git clone https://github.com/TheCipherCircle/SpellEngine.git
+cd SpellEngine
 ```
 
 Or download and extract the ZIP from GitHub.
@@ -50,7 +50,7 @@ The build creates:
 If the build script doesn't work, you can run PyInstaller directly:
 
 ```powershell
-pyinstaller --clean --noconfirm storysmith_windows.spec
+pyinstaller --clean --noconfirm spellengine_windows.spec
 ```
 
 ## What Gets Bundled
@@ -89,7 +89,7 @@ all PyInstaller-built applications. You may need to whitelist the executable.
 Ensure you're in the project root directory and the virtual environment (if any)
 is activated:
 ```powershell
-cd C:\path\to\Storysmith
+cd C:\path\to\SpellEngine
 python -m pip install pygame pyyaml psutil pyinstaller
 python scripts\build_windows_exe.py
 ```
@@ -116,7 +116,7 @@ Share this ZIP file. Recipients just extract and double-click the exe.
 
 ### Spec File
 
-The build configuration is in `storysmith_windows.spec`. Key settings:
+The build configuration is in `spellengine_windows.spec`. Key settings:
 
 - `console=False` - No command prompt window
 - `icon=...patternforge_icon.ico` - Custom Windows icon
@@ -125,7 +125,7 @@ The build configuration is in `storysmith_windows.spec`. Key settings:
 
 ### Resource Paths
 
-The `storysmith/launcher.py` module handles finding bundled resources at runtime
+The `spellengine/launcher.py` module handles finding bundled resources at runtime
 using PyInstaller's `sys._MEIPASS` for the temp extraction directory.
 
 ### Excluded Modules
@@ -150,7 +150,7 @@ To reduce size, these are excluded:
 pyinstaller --onefile --windowed \
     --icon=assets/images/patternforge_icon.icns \
     --name "Dread Citadel" \
-    storysmith/launcher.py
+    spellengine/launcher.py
 ```
 
 ### Linux
@@ -159,7 +159,7 @@ pyinstaller --onefile --windowed \
 # On Linux
 pyinstaller --onefile \
     --name dread-citadel \
-    storysmith/launcher.py
+    spellengine/launcher.py
 ```
 
 ## CI/CD Considerations

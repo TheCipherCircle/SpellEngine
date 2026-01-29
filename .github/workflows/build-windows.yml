@@ -4,11 +4,11 @@ on:
   push:
     branches: [main]
     paths:
-      - 'storysmith/**'
+      - 'spellengine/**'
       - 'assets/**'
       - 'content/**'
       - 'scripts/build_windows_exe.py'
-      - 'storysmith_windows.spec'
+      - 'spellengine_windows.spec'
   workflow_dispatch:  # Manual trigger
 
 jobs:

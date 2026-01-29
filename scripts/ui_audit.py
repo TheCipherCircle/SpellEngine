@@ -20,9 +20,9 @@ import pygame
 pygame.init()
 pygame.font.init()
 
-from storysmith.adventures.loader import load_campaign
-from storysmith.engine.game.ui.theme import Typography, LAYOUT, get_fonts
-from storysmith.engine.game.ui.validator import TextValidator, UIAuditLog
+from spellengine.adventures.loader import load_campaign
+from spellengine.engine.game.ui.theme import Typography, LAYOUT, get_fonts
+from spellengine.engine.game.ui.validator import TextValidator, UIAuditLog
 
 
 # Font sizes to test

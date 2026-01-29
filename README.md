@@ -1,7 +1,7 @@
-# Storysmith
+# SpellEngine
 
 <!-- Hero banner placeholder -->
-<!-- ![Storysmith Banner](docs/images/banner.png) -->
+<!-- ![SpellEngine Banner](docs/images/banner.png) -->
 
 ![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue)
 ![License: Proprietary](https://img.shields.io/badge/License-Proprietary-red)
@@ -9,13 +9,13 @@
 
 **The narrative engine that transforms security tools into immersive adventures.**
 
-Storysmith is the premium experience layer for PatternForge, turning pattern analysis and password security concepts into engaging interactive campaigns with branching narratives, achievement systems, and a corrupted SNES visual aesthetic.
+SpellEngine is the premium experience layer for PatternForge, turning pattern analysis and password security concepts into engaging interactive campaigns with branching narratives, achievement systems, and a corrupted SNES visual aesthetic.
 
 ---
 
-## What is Storysmith?
+## What is SpellEngine?
 
-Storysmith is a **closed-source narrative engine** that sits atop [PatternForge](https://github.com/hashtopia/patternforge), transforming technical security concepts into playable adventures. Where PatternForge provides the analytical tools, Storysmith provides the journey.
+SpellEngine is a **closed-source narrative engine** that sits atop [PatternForge](https://github.com/hashtopia/patternforge), transforming technical security concepts into playable adventures. Where PatternForge provides the analytical tools, SpellEngine provides the journey.
 
 > *"If they're not having fun, they're not learning."*
 > *— The Cipher Circle*
@@ -50,7 +50,7 @@ The engine bridges the gap between abstract security knowledge and practical und
 <!-- Campaign art placeholder -->
 <!-- ![The Dread Citadel](assets/images/dread_citadel_banner.png) -->
 
-**The Dread Citadel** is Storysmith's first complete campaign - a dark fantasy adventure where players learn password analysis by conquering an ancient fortress of broken secrets.
+**The Dread Citadel** is SpellEngine's first complete campaign - a dark fantasy adventure where players learn password analysis by conquering an ancient fortress of broken secrets.
 
 ### Campaign Structure
 
@@ -84,7 +84,7 @@ THE DREAD CITADEL
 
 ### Visual Aesthetic
 
-Storysmith employs a **corrupted SNES** visual style inspired by Crawl (Powerhoof):
+SpellEngine employs a **corrupted SNES** visual style inspired by Crawl (Powerhoof):
 
 - Ultra-low resolution with high-fidelity feel
 - Muted earth tones with accent glows
@@ -95,7 +95,7 @@ Storysmith employs a **corrupted SNES** visual style inspired by Crawl (Powerhoo
 
 ## Architecture
 
-Storysmith depends on PatternForge as its analytical foundation.
+SpellEngine depends on PatternForge as its analytical foundation.
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
@@ -122,7 +122,7 @@ Storysmith depends on PatternForge as its analytical foundation.
 ### Directory Structure
 
 ```
-storysmith/
+spellengine/
 ├── adventures/     # Adventure system (achievements, state, grading)
 ├── agents/         # AI agents (Mirth, Scribe, Cosmic, Math Validator)
 ├── campaigns/      # Campaign content and scripts
@@ -150,7 +150,7 @@ lore/               # Narrative documentation
 
 Download the latest release for your platform:
 
-**[Download v0.10.0](https://github.com/pitl0rd/Storysmith/releases/tag/v0.10.0)**
+**[Download v0.10.0](https://github.com/pitl0rd/SpellEngine/releases/tag/v0.10.0)**
 
 | Platform | Download | Instructions |
 |----------|----------|--------------|
@@ -162,14 +162,14 @@ Download the latest release for your platform:
 
 ```bash
 # Clone the repository
-git clone https://github.com/pitl0rd/Storysmith.git
-cd Storysmith
+git clone https://github.com/pitl0rd/SpellEngine.git
+cd SpellEngine
 
 # Install dependencies
 pip install -e .
 
 # Run the game
-python -m storysmith
+python -m spellengine
 ```
 
 ### First Launch
@@ -215,7 +215,7 @@ The Dread Citadel teaches real security tools. For the full experience, install:
 <!-- Team portrait placeholder -->
 <!-- ![Cipher Circle](docs/images/cipher-circle.png) -->
 
-Storysmith is built by the **Cipher Circle** - a 9-member human-AI development fellowship.
+SpellEngine is built by the **Cipher Circle** - a 9-member human-AI development fellowship.
 
 | Member | Title | Domain |
 |--------|-------|--------|
@@ -246,7 +246,7 @@ Storysmith is built by the **Cipher Circle** - a 9-member human-AI development f
 
 **Proprietary - All Rights Reserved**
 
-Storysmith is closed-source software. This repository contains premium adventure content, the narrative engine, and game systems that are not open source.
+SpellEngine is closed-source software. This repository contains premium adventure content, the narrative engine, and game systems that are not open source.
 
 For licensing inquiries, contact the Cipher Circle.
 

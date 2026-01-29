@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Build macOS .app bundle for Storysmith/Dread Citadel.
+Build macOS .app bundle for SpellEngine/Dread Citadel.
 
 Creates a double-click installer that requires NO terminal, NO pip, NO git.
 VIP business lead (Regent) - zero friction is critical.
@@ -90,15 +90,15 @@ def main():
     app_root = setup_environment()
 
     # Import and run the game
-    from storysmith.cli import (
+    from spellengine.cli import (
         play_gui_mode,
         get_campaigns,
         check_cracking_tools,
         determine_game_mode,
         GAME_MODE_OBSERVER,
     )
-    from storysmith.adventures.loader import load_campaign
-    from storysmith.engine.game.client import launch_game
+    from spellengine.adventures.loader import load_campaign
+    from spellengine.engine.game.client import launch_game
 
     # Find Dread Citadel campaign
     campaigns = get_campaigns()
@@ -196,8 +196,8 @@ datas = [
     (str(project_root / "assets"), "assets"),
     # Lore files (if any)
     (str(project_root / "lore"), "lore"),
-    # The storysmith package itself (for campaigns folder)
-    (str(project_root / "storysmith" / "campaigns"), "storysmith/campaigns") if (project_root / "storysmith" / "campaigns").exists() else (str(project_root / "content"), "storysmith/campaigns"),
+    # The spellengine package itself (for campaigns folder)
+    (str(project_root / "spellengine" / "campaigns"), "spellengine/campaigns") if (project_root / "spellengine" / "campaigns").exists() else (str(project_root / "content"), "spellengine/campaigns"),
 ]
 
 # Filter out non-existent paths
@@ -218,36 +218,36 @@ hiddenimports = [
     'pygame.color',
     'yaml',
     'pyyaml',
-    'storysmith',
-    'storysmith.cli',
-    'storysmith.adventures',
-    'storysmith.adventures.loader',
-    'storysmith.adventures.models',
-    'storysmith.adventures.state',
-    'storysmith.adventures.assets',
-    'storysmith.adventures.achievements',
-    'storysmith.adventures.ascii_art',
-    'storysmith.adventures.dice',
-    'storysmith.adventures.validation',
-    'storysmith.engine',
-    'storysmith.engine.game',
-    'storysmith.engine.game.client',
-    'storysmith.engine.game.audio',
-    'storysmith.engine.game.renderer',
-    'storysmith.engine.game.ui',
-    'storysmith.engine.game.ui.button',
-    'storysmith.engine.game.ui.menu',
-    'storysmith.engine.game.ui.panel',
-    'storysmith.engine.game.ui.text',
-    'storysmith.engine.game.ui.textbox',
-    'storysmith.engine.game.ui.theme',
-    'storysmith.engine.game.ui.hash_display',
-    'storysmith.engine.game.scenes',
-    'storysmith.engine.game.scenes.base',
-    'storysmith.engine.game.scenes.title',
-    'storysmith.engine.game.scenes.encounter',
-    'storysmith.engine.game.scenes.game_over',
-    'storysmith.engine.game.scenes.victory',
+    'spellengine',
+    'spellengine.cli',
+    'spellengine.adventures',
+    'spellengine.adventures.loader',
+    'spellengine.adventures.models',
+    'spellengine.adventures.state',
+    'spellengine.adventures.assets',
+    'spellengine.adventures.achievements',
+    'spellengine.adventures.ascii_art',
+    'spellengine.adventures.dice',
+    'spellengine.adventures.validation',
+    'spellengine.engine',
+    'spellengine.engine.game',
+    'spellengine.engine.game.client',
+    'spellengine.engine.game.audio',
+    'spellengine.engine.game.renderer',
+    'spellengine.engine.game.ui',
+    'spellengine.engine.game.ui.button',
+    'spellengine.engine.game.ui.menu',
+    'spellengine.engine.game.ui.panel',
+    'spellengine.engine.game.ui.text',
+    'spellengine.engine.game.ui.textbox',
+    'spellengine.engine.game.ui.theme',
+    'spellengine.engine.game.ui.hash_display',
+    'spellengine.engine.game.scenes',
+    'spellengine.engine.game.scenes.base',
+    'spellengine.engine.game.scenes.title',
+    'spellengine.engine.game.scenes.encounter',
+    'spellengine.engine.game.scenes.game_over',
+    'spellengine.engine.game.scenes.victory',
 ]
 
 a = Analysis(

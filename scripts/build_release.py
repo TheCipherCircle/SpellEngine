@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Build and package Storysmith/Dread Citadel for distribution.
+Build and package SpellEngine/Dread Citadel for distribution.
 
 Creates a clean release package with:
 - Version manifest with SHA256 checksums
@@ -10,7 +10,7 @@ Creates a clean release package with:
 Usage:
     python scripts/build_release.py
     python scripts/build_release.py --version 0.9.1
-    python scripts/build_release.py --proton-sync ~/ProtonDrive/Storysmith-Releases
+    python scripts/build_release.py --proton-sync ~/ProtonDrive/SpellEngine-Releases
 """
 
 import argparse
@@ -63,7 +63,7 @@ REQUIRED_FILES = [
     'README.md',
     'TESTER_QUICKSTART.md',
     'install.sh',
-    'storysmith',
+    'spellengine',
     'assets',
     'content',
     'lore',
@@ -179,7 +179,7 @@ def build_release(version: str = None, proton_sync_path: Path = None) -> Path:
 
     # Create build directory
     build_time = datetime.now(timezone.utc)
-    build_name = f"storysmith-{version}"
+    build_name = f"spellengine-{version}"
     build_dir = PROJECT_ROOT / 'dist' / build_name
 
     # Clean previous build
@@ -214,7 +214,7 @@ def build_release(version: str = None, proton_sync_path: Path = None) -> Path:
 
     # Create manifest
     manifest = {
-        'name': 'Storysmith - The Dread Citadel',
+        'name': 'SpellEngine - The Dread Citadel',
         'version': version,
         'build_time': build_time.isoformat() + 'Z',
         'git': git_info,
@@ -334,7 +334,7 @@ if __name__ == '__main__':
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Build Storysmith release package')
+    parser = argparse.ArgumentParser(description='Build SpellEngine release package')
     parser.add_argument('--version', '-v', help='Version string (default: auto from git)')
     parser.add_argument('--proton-sync', '-p', help='Proton Drive sync folder path')
 

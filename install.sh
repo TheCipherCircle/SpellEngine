@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 # Cipher Circle Installer
-# Installs PatternForge + Storysmith for testing
+# Installs PatternForge + SpellEngine for testing
 #
 
 set -e
@@ -19,7 +19,7 @@ print_banner() {
     echo "    ║                                                   ║"
     echo "    ║          THE CIPHER CIRCLE INSTALLER              ║"
     echo "    ║                                                   ║"
-    echo "    ║     PatternForge + Storysmith + Dread Citadel     ║"
+    echo "    ║     PatternForge + SpellEngine + Dread Citadel     ║"
     echo "    ║                                                   ║"
     echo "    ╚═══════════════════════════════════════════════════╝"
     echo -e "${NC}"
@@ -109,18 +109,18 @@ else
 fi
 print_success "PatternForge ready"
 
-# Clone or update Storysmith
-print_step "Setting up Storysmith..."
-if [ -d "Storysmith" ]; then
-    print_info "Storysmith exists, updating..."
-    cd Storysmith
+# Clone or update SpellEngine
+print_step "Setting up SpellEngine..."
+if [ -d "SpellEngine" ]; then
+    print_info "SpellEngine exists, updating..."
+    cd SpellEngine
     git pull
     cd ..
 else
-    print_info "Cloning Storysmith..."
-    git clone git@github.com:pitl0rd/Storysmith.git
+    print_info "Cloning SpellEngine..."
+    git clone git@github.com:pitl0rd/SpellEngine.git
 fi
-print_success "Storysmith ready"
+print_success "SpellEngine ready"
 
 # Create virtual environment
 print_step "Creating virtual environment..."
@@ -140,11 +140,11 @@ print_step "Installing PatternForge..."
 pip install -e . --quiet
 print_success "PatternForge installed"
 
-# Install Storysmith
-print_step "Installing Storysmith..."
-cd ../Storysmith
+# Install SpellEngine
+print_step "Installing SpellEngine..."
+cd ../SpellEngine
 pip install -e . --quiet
-print_success "Storysmith installed"
+print_success "SpellEngine installed"
 
 # Install pygame
 print_step "Installing pygame..."
@@ -163,10 +163,10 @@ else
     exit 1
 fi
 
-if python3 -c "import storysmith" 2>/dev/null; then
-    print_success "Storysmith imports OK"
+if python3 -c "import spellengine" 2>/dev/null; then
+    print_success "SpellEngine imports OK"
 else
-    print_error "Storysmith import failed"
+    print_error "SpellEngine import failed"
     exit 1
 fi
 
@@ -186,11 +186,11 @@ echo "To play the game:"
 echo ""
 echo -e "  ${CYAN}cd $INSTALL_DIR/PatternForge${NC}"
 echo -e "  ${CYAN}source .venv/bin/activate${NC}"
-echo -e "  ${CYAN}python3 -m storysmith play dread_citadel${NC}"
+echo -e "  ${CYAN}python3 -m spellengine play dread_citadel${NC}"
 echo ""
 echo "Or run:"
 echo ""
-echo -e "  ${CYAN}$INSTALL_DIR/PatternForge/.venv/bin/python3 -m storysmith play dread_citadel${NC}"
+echo -e "  ${CYAN}$INSTALL_DIR/PatternForge/.venv/bin/python3 -m spellengine play dread_citadel${NC}"
 echo ""
 echo -e "${CYAN}May your hashes crack swiftly.${NC}"
 echo ""

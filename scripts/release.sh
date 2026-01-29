@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Quick release builder for Storysmith
+# Quick release builder for SpellEngine
 # Reads config from release_config.json if present
 #
 
@@ -28,7 +28,7 @@ PROTON_PATHS=(
 PROTON_SYNC=""
 for path in "${PROTON_PATHS[@]}"; do
     if [ -d "$path" ]; then
-        PROTON_SYNC="$path/Storysmith-Releases"
+        PROTON_SYNC="$path/SpellEngine-Releases"
         break
     fi
 done
@@ -94,7 +94,7 @@ if [ $BUILD_STATUS -eq 0 ]; then
         echo ""
         echo "  Share link steps:"
         echo "    1. Open Proton Drive (web or app)"
-        echo "    2. Navigate to Storysmith-Releases"
+        echo "    2. Navigate to SpellEngine-Releases"
         echo "    3. Right-click the .zip file → Get link"
         echo "    4. Share the link with testers"
     fi

@@ -1,8 +1,8 @@
-# Storysmith Content Manifest Schema
+# SpellEngine Content Manifest Schema
 # All content items (adventures, trainings) must include a manifest.yaml
 #
 # PROPRIETARY - All Rights Reserved
-# This schema is part of the Storysmith closed-source content system.
+# This schema is part of the SpellEngine closed-source content system.
 
 # Required fields
 id: string                    # Unique identifier (kebab-case, e.g., "dread-citadel")

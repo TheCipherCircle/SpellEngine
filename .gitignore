@@ -28,7 +28,7 @@ wheels/
 *.manifest
 # Ignore generated spec files but keep our custom ones
 !DreadCitadel.spec
-!storysmith_windows.spec
+!spellengine_windows.spec
 
 # Installer logs
 pip-log.txt

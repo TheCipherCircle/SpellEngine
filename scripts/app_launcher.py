@@ -36,15 +36,15 @@ def main():
     app_root = setup_environment()
 
     # Import and run the game
-    from storysmith.cli import (
+    from spellengine.cli import (
         play_gui_mode,
         get_campaigns,
         check_cracking_tools,
         determine_game_mode,
         GAME_MODE_OBSERVER,
     )
-    from storysmith.adventures.loader import load_campaign
-    from storysmith.engine.game.client import launch_game
+    from spellengine.adventures.loader import load_campaign
+    from spellengine.engine.game.client import launch_game
 
     # Find Dread Citadel campaign
     campaigns = get_campaigns()

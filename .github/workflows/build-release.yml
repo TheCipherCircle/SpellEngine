@@ -21,7 +21,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install pyinstaller pygame pyyaml psutil pydantic
+          pip install pyinstaller pygame pyyaml psutil pydantic rich
           pip install -e .
 
       - name: Build macOS app
@@ -51,7 +51,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install pyinstaller pygame pyyaml psutil pydantic
+          pip install pyinstaller pygame pyyaml psutil pydantic rich
           pip install -e .
 
       - name: Build Windows exe
@@ -82,12 +82,12 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install pyinstaller pygame pyyaml psutil pydantic
+          pip install pyinstaller pygame pyyaml psutil pydantic rich
           pip install -e .
 
       - name: Build Linux binary
         run: |
-          pyinstaller --clean --noconfirm --name "DreadCitadel" --onefile --add-data "content:content" --add-data "storysmith/engine/game/assets:storysmith/engine/game/assets" storysmith/__main__.py
+          python scripts/build_linux_exe.py
 
       - name: Create tarball
         run: |

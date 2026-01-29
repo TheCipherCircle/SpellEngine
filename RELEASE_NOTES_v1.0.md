@@ -1,4 +1,4 @@
-# Storysmith v1.0 - The Dread Citadel
+# SpellEngine v1.0 - The Dread Citadel
 
 ```
 ╔═══════════════════════════════════════════════════════════════════╗
@@ -19,7 +19,7 @@
 
 ## Overview
 
-**Storysmith v1.0** is the first official release of the narrative engine that transforms security tools into immersive adventures. This release includes the complete **Dread Citadel** campaign - a dark fantasy journey where players learn BloodHound and Active Directory security concepts through gameplay.
+**SpellEngine v1.0** is the first official release of the narrative engine that transforms security tools into immersive adventures. This release includes the complete **Dread Citadel** campaign - a dark fantasy journey where players learn BloodHound and Active Directory security concepts through gameplay.
 
 ---
 
@@ -115,10 +115,10 @@ A complete 16-encounter adventure teaching BloodHound fundamentals:
 ### From Source
 
 ```bash
-git clone https://github.com/pitl0rd/Storysmith.git
-cd Storysmith
+git clone https://github.com/pitl0rd/SpellEngine.git
+cd SpellEngine
 pip install -e .
-python -m storysmith
+python -m spellengine
 ```
 
 ---
@@ -175,7 +175,7 @@ Built by the **Cipher Circle** - a 9-member human-AI development fellowship.
 Found a bug? Have feedback? Let us know:
 
 - **Discord**: [Join the Cipher Circle](link)
-- **GitHub Issues**: [Report bugs](https://github.com/pitl0rd/Storysmith/issues)
+- **GitHub Issues**: [Report bugs](https://github.com/pitl0rd/SpellEngine/issues)
 
 ---
 

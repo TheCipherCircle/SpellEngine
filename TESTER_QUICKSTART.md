@@ -1,4 +1,4 @@
-# Storysmith Tester Quick Start
+# SpellEngine Tester Quick Start
 
 ```
     ╔══════════════════════════════════════════════════════════════╗
@@ -32,8 +32,8 @@ Welcome to the Circle! Let's get you into the game.
 # Clone PatternForge (the analysis engine)
 git clone git@github.com:TheCipherCircle/PatternForge.git
 
-# Clone Storysmith (the game - you're probably already here)
-git clone git@github.com:TheCipherCircle/Storysmith.git
+# Clone SpellEngine (the game - you're probably already here)
+git clone git@github.com:TheCipherCircle/SpellEngine.git
 ```
 
 ### Step 2: Install PatternForge
@@ -45,10 +45,10 @@ source .venv/bin/activate    # Windows: .venv\Scripts\activate
 pip install -e .
 ```
 
-### Step 3: Install Storysmith
+### Step 3: Install SpellEngine
 
 ```bash
-cd ../Storysmith
+cd ../SpellEngine
 pip install -e .
 pip install pygame           # For graphical mode
 ```
@@ -59,8 +59,8 @@ pip install pygame           # For graphical mode
 # Check PatternForge
 patternforge --version
 
-# Check Storysmith
-python3 -m storysmith --help
+# Check SpellEngine
+python3 -m spellengine --help
 ```
 
 ---
@@ -70,19 +70,19 @@ python3 -m storysmith --help
 ### Option A: Full GUI Mode (Recommended)
 
 ```bash
-python3 -m storysmith play dread_citadel
+python3 -m spellengine play dread_citadel
 ```
 
 ### Option B: Terminal Mode (Two Covers)
 
 ```bash
-python3 -m storysmith play dread_citadel
+python3 -m spellengine play dread_citadel
 ```
 
 ### Option C: Text-Only Mode (Minimal)
 
 ```bash
-python3 -m storysmith play dread_citadel --text
+python3 -m spellengine play dread_citadel --text
 ```
 
 ---
@@ -121,7 +121,7 @@ System: [macOS/Windows/Linux] Python [version]
 
 ```bash
 echo "=== System ===" && uname -a && python3 --version && \
-cd /path/to/Storysmith && git rev-parse --short HEAD && \
+cd /path/to/SpellEngine && git rev-parse --short HEAD && \
 cd /path/to/PatternForge && git rev-parse --short HEAD
 ```
 
@@ -184,7 +184,7 @@ pip install pygame
 Check both repos are on latest:
 ```bash
 cd /path/to/PatternForge && git pull
-cd /path/to/Storysmith && git pull
+cd /path/to/SpellEngine && git pull
 pip install -e .  # In both dirs
 ```
 

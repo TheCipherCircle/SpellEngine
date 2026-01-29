@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Build Windows executable for Storysmith / Dread Citadel
+Build Windows executable for SpellEngine / Dread Citadel
 
 This script prepares and builds a double-click Windows installer using PyInstaller.
 
@@ -25,7 +25,7 @@ from pathlib import Path
 # Project paths
 SCRIPT_DIR = Path(__file__).parent.resolve()
 PROJECT_ROOT = SCRIPT_DIR.parent
-SPEC_FILE = PROJECT_ROOT / "storysmith_windows.spec"
+SPEC_FILE = PROJECT_ROOT / "spellengine_windows.spec"
 DIST_DIR = PROJECT_ROOT / "dist"
 
 
@@ -231,7 +231,7 @@ def main():
     """Main build process."""
     print()
     print("=" * 60)
-    print("  Storysmith / Dread Citadel - Windows Build")
+    print("  SpellEngine / Dread Citadel - Windows Build")
     print("=" * 60)
     print()
 

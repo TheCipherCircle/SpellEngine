@@ -3,7 +3,7 @@ requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "storysmith"
+name = "spellengine"
 version = "0.1.0"
 description = "The Narrative Engine for PatternForge - Educational adventures for password security"
 readme = "README.md"
@@ -41,19 +41,19 @@ dev = [
 ]
 
 [project.scripts]
-storysmith = "storysmith.cli:main"
-storysmith-content = "storysmith.content.cli:main"
+spellengine = "spellengine.cli:main"
+spellengine-content = "spellengine.content.cli:main"
 
 [project.urls]
-"Homepage" = "https://github.com/TheCipherCircle/Storysmith"
-"Bug Tracker" = "https://github.com/TheCipherCircle/Storysmith/issues"
+"Homepage" = "https://github.com/TheCipherCircle/SpellEngine"
+"Bug Tracker" = "https://github.com/TheCipherCircle/SpellEngine/issues"
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["storysmith*"]
+include = ["spellengine*"]
 
 [tool.setuptools.package-data]
-"storysmith" = [
+"spellengine" = [
     "campaigns/**/*.yaml",
     "campaigns/**/*.yml",
 ]
