@@ -77,6 +77,29 @@ From Literary Release Materials (TODO.md):
 
 ---
 
+## New Member Onboarding
+
+When someone new joins the Cipher Circle:
+
+**First Two Weeks - Anvil Review Required**
+
+All PRs from new members must be reviewed by Anvil (QA) before merge:
+- Code review for quality and patterns
+- Test coverage verification
+- Platform compatibility check
+- Catch issues early, teach best practices
+
+This isn't about distrust - it's about setting everyone up for success. After two weeks of clean submissions, full autonomy is granted.
+
+**Review Checklist for New Members:**
+- [ ] Follows existing code patterns
+- [ ] Tests included and passing
+- [ ] No breaking changes to existing functionality
+- [ ] Commit messages follow conventions
+- [ ] No secrets or credentials committed
+
+---
+
 ## Code Quality Standards
 
 - Explore codebase before proposing changes
