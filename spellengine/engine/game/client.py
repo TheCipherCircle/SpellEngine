@@ -300,6 +300,7 @@ class GameClient:
         from spellengine.engine.game.scenes.victory import VictoryScene
         from spellengine.engine.game.scenes.credits import CreditsScene
         from spellengine.engine.game.scenes.settings import SettingsScene
+        from spellengine.engine.game.scenes.prologue_gate import PrologueGateScene
 
         self._scenes = {
             "title": TitleScene(self),
@@ -308,6 +309,7 @@ class GameClient:
             "victory": VictoryScene(self),
             "credits": CreditsScene(self),
             "settings": SettingsScene(self),
+            "prologue_gate": PrologueGateScene(self),
         }
 
     def _init_adventure(self, resume: bool = False, difficulty: "DifficultyLevel | None" = None) -> None:
@@ -328,13 +330,18 @@ class GameClient:
             if difficulty:
                 self.adventure_state.difficulty = difficulty
                 self.adventure_state.state.difficulty = difficulty
+            # Update game mode from current session
+            self.adventure_state.game_mode = self.game_mode
+            self.adventure_state.state.game_mode = self.game_mode
         else:
             self.adventure_state = AdventureState(
                 self.campaign,
                 player_name=self.player_name,
                 save_path=self.save_path,
                 difficulty=difficulty or DifficultyLevel.NORMAL,
+                game_mode=self.game_mode,
             )
+            self.adventure_state.state.game_mode = self.game_mode
 
     def _init_assets(self) -> None:
         """Initialize the asset loader."""

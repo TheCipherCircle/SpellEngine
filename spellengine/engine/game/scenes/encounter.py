@@ -33,6 +33,7 @@ if TYPE_CHECKING:
     from spellengine.adventures.models import Encounter, Choice
     from spellengine.engine.game.client import GameClient
     from spellengine.engine.game.ui.theme import FontManager
+    from spellengine.tools.cracker import CrackResult
 
 
 # Boss encounter IDs mapped to boss sprite names
@@ -152,6 +153,12 @@ class EncounterScene(Scene):
         self._pending_result: dict | None = None
         self._xp_awarded: int = 0
 
+        # PatternForge verification state (for non-Observer mode)
+        self._verifying: bool = False
+        self._verify_answer: str = ""
+        self._verify_result: "CrackResult | None" = None
+        self._crack_command: str = ""  # Command used for crack (for learning)
+
     def enter(self, **kwargs: Any) -> None:
         """Enter the encounter scene."""
         screen_w, screen_h = self.client.screen_size
@@ -179,6 +186,12 @@ class EncounterScene(Scene):
         self._celebration_phase = 0
         self._pending_result = None
         self._xp_awarded = 0
+
+        # Reset PatternForge verification state
+        self._verifying = False
+        self._verify_answer = ""
+        self._verify_result = None
+        self._crack_command = ""
 
         # Calculate layout dimensions (M&M sacred ratios)
         margin = LAYOUT["panel_margin"]
@@ -531,8 +544,11 @@ class EncounterScene(Scene):
 
     def _on_answer_submit(self, answer: str) -> None:
         """Handle answer submission."""
+        import threading
+
         state = self.client.adventure_state
         encounter = state.current_encounter
+        game_mode = getattr(self.client, 'game_mode', 'observer')
 
         # Track attempt
         self._attempts_this_encounter += 1
@@ -541,107 +557,159 @@ class EncounterScene(Scene):
         current_hash = state.get_current_hash()
         current_solution = state.get_current_solution()
 
-        # Check answer
+        # For TOUR/WALKTHROUGH - always accept
+        if encounter.encounter_type in (EncounterType.TOUR, EncounterType.WALKTHROUGH):
+            self._process_correct_answer(encounter)
+            return
+
+        # Check if we should use real tools (non-Observer mode with hash)
+        use_real_tools = (
+            game_mode != 'observer'
+            and current_hash
+            and encounter.hash_type
+        )
+
+        if use_real_tools:
+            # Use PatternForge for verification (async)
+            self._start_patternforge_verify(answer, current_hash, encounter.hash_type)
+            return
+
+        # Observer mode or no hash - use fast internal validation
         correct = False
         if current_hash and encounter.hash_type:
             from spellengine.adventures.validation import validate_crack
             correct = validate_crack(answer, current_hash, encounter.hash_type)
         elif current_solution:
             correct = answer.lower().strip() == current_solution.lower().strip()
-        else:
-            if encounter.encounter_type in (
-                EncounterType.TOUR,
-                EncounterType.WALKTHROUGH,
-            ):
-                correct = True
 
         if correct:
-            # Use subtle click for narrative encounters, full success sound for hash cracking
-            is_narrative = encounter.encounter_type in (
-                EncounterType.TOUR,
-                EncounterType.WALKTHROUGH,
+            self._process_correct_answer(encounter)
+        else:
+            self._process_incorrect_answer(encounter)
+
+    def _start_patternforge_verify(
+        self, answer: str, hash_value: str, hash_type: str
+    ) -> None:
+        """Start async PatternForge verification of a password guess.
+
+        Uses real cracking tools via PatternForge for educational value.
+        """
+        import threading
+        from spellengine.tools.cracker import verify_password
+
+        # Don't start if already verifying
+        if self._verifying:
+            return
+
+        self._verifying = True
+        self._verify_answer = answer
+        self._verify_result = None
+
+        # Show verifying state
+        self.feedback_message = "Verifying with PatternForge..."
+        self.feedback_color = Colors.BLUE
+        self.feedback_timer = 30.0  # Long timeout, will be cleared when done
+
+        if self.terminal:
+            self.terminal.add_system_message("Verifying password...")
+
+        def run_verify() -> None:
+            """Background thread that runs PatternForge verification."""
+            result = verify_password(
+                hash_value=hash_value,
+                password=answer,
+                hash_type=hash_type,
             )
+            self._verify_result = result
 
-            # Track clean solve (first try, no hints, non-narrative encounter)
-            if (
-                not is_narrative
-                and self._attempts_this_encounter == 1
-                and not self._hint_used_this_encounter
-            ):
-                self.client.adventure_state.state.clean_solves += 1
+        threading.Thread(target=run_verify, daemon=True).start()
 
-            # Record the outcome but don't process yet
-            result = self.client.adventure_state.record_outcome(OutcomeType.SUCCESS)
+    def _process_correct_answer(self, encounter: "Encounter") -> None:
+        """Process a correct answer - celebration and advancement."""
+        # Use subtle click for narrative encounters, full success sound for hash cracking
+        is_narrative = encounter.encounter_type in (
+            EncounterType.TOUR,
+            EncounterType.WALKTHROUGH,
+        )
 
-            # Skip celebration for narrative encounters - advance immediately
-            if is_narrative:
+        # Track clean solve (first try, no hints, non-narrative encounter)
+        if (
+            not is_narrative
+            and self._attempts_this_encounter == 1
+            and not self._hint_used_this_encounter
+        ):
+            self.client.adventure_state.state.clean_solves += 1
+
+        # Record the outcome but don't process yet
+        result = self.client.adventure_state.record_outcome(OutcomeType.SUCCESS)
+
+        # Skip celebration for narrative encounters - advance immediately
+        if is_narrative:
+            self._handle_result(result)
+            return
+
+        # Start the success celebration sequence
+        from spellengine.engine.settings import get_settings
+        settings = get_settings()
+
+        # Store result for later processing
+        self._pending_result = result
+        self._xp_awarded = result.get("xp_awarded", 0)
+
+        # Phase 0: Flash and initial sound
+        self._celebrating_success = True
+        self._celebration_timer = 0.0
+        self._celebration_phase = 0
+
+        # Green flash (respects settings)
+        if settings.flash_enabled:
+            self.client.flash_success()
+
+        # Success crack sound (respects reduce_motion setting)
+        if self.client.audio and not settings.reduce_motion:
+            self.client.audio.play_sfx("crack_success")
+
+    def _process_incorrect_answer(self, encounter: "Encounter", error_msg: str = "") -> None:
+        """Process an incorrect answer - feedback and retry."""
+        self._result_panel = self.client.assets.get_ui_element(
+            self.client.campaign.id, "panel_failure"
+        )
+        self._result_panel_timer = 1.0
+
+        if self.textbox:
+            self.textbox.flash_error()
+            self.textbox.clear()
+
+        # Screen shake and flash for clear failure feedback
+        self.client.shake(intensity=4, duration=0.2)
+        self.client.flash_failure()
+
+        # Check if this is a BOSS encounter with limited attempts
+        is_boss = encounter.encounter_type in (
+            EncounterType.BOSS,
+            EncounterType.BOSS_HEROIC,
+        ) if hasattr(EncounterType, 'BOSS') else encounter.id in BOSS_ENCOUNTERS
+
+        if is_boss:
+            self._boss_attempts += 1
+            remaining = self._boss_max_attempts - self._boss_attempts
+
+            if remaining <= 0:
+                # Game over - boss defeated the player
+                result = self.client.adventure_state.record_outcome(OutcomeType.FAILURE)
                 self._handle_result(result)
                 return
-
-            # Start the success celebration sequence
-            from spellengine.engine.settings import get_settings
-            settings = get_settings()
-
-            # Store result for later processing
-            self._pending_result = result
-            self._xp_awarded = result.get("xp_awarded", 0)
-
-            # Phase 0: Flash and initial sound
-            self._celebrating_success = True
-            self._celebration_timer = 0.0
-            self._celebration_phase = 0
-
-            # Green flash (respects settings)
-            if settings.flash_enabled:
-                self.client.flash_success()
-
-            # Success crack sound (respects reduce_motion setting)
-            if self.client.audio and not settings.reduce_motion:
-                self.client.audio.play_sfx("crack_success")
-        else:
-            # DISABLED - sounds too intrusive
-            # if self.client.audio:
-            #     self.client.audio.play_sfx("crack_failure")
-
-            self._result_panel = self.client.assets.get_ui_element(
-                self.client.campaign.id, "panel_failure"
-            )
-            self._result_panel_timer = 1.0
-
-            if self.textbox:
-                self.textbox.flash_error()
-                self.textbox.clear()
-
-            # Screen shake and flash for clear failure feedback
-            self.client.shake(intensity=4, duration=0.2)
-            self.client.flash_failure()
-
-            # Check if this is a BOSS encounter with limited attempts
-            is_boss = encounter.encounter_type in (
-                EncounterType.BOSS,
-                EncounterType.BOSS_HEROIC,
-            ) if hasattr(EncounterType, 'BOSS') else encounter.id in BOSS_ENCOUNTERS
-
-            if is_boss:
-                self._boss_attempts += 1
-                remaining = self._boss_max_attempts - self._boss_attempts
-
-                if remaining <= 0:
-                    # Game over - boss defeated the player
-                    result = self.client.adventure_state.record_outcome(OutcomeType.FAILURE)
-                    self._handle_result(result)
-                    return
-                else:
-                    self.feedback_message = f"Incorrect! {remaining} attempt{'s' if remaining != 1 else ''} remaining."
             else:
-                self.feedback_message = "Incorrect. Try again."
+                self.feedback_message = f"Incorrect! {remaining} attempt{'s' if remaining != 1 else ''} remaining."
+        else:
+            self.feedback_message = error_msg or "Incorrect. Try again."
 
-            self.feedback_color = Colors.ERROR
-            self.feedback_timer = 2.0
+        self.feedback_color = Colors.ERROR
+        self.feedback_timer = 2.0
 
-            # Show error in terminal too
-            if self.terminal:
-                self.terminal.add_error("Incorrect password")
+        # Show error in terminal too
+        if self.terminal:
+            self.terminal.add_error("Incorrect password")
 
     def _on_terminal_command(self, command: str) -> None:
         """Handle command from embedded terminal.
@@ -683,39 +751,90 @@ class EncounterScene(Scene):
             self._on_answer_submit(command)
 
     def _start_theatrical_crack(self) -> None:
-        """Start theatrical cracking using the hash index."""
-        if not self.terminal or not self.hash_index or not self.theatrical_cracker:
+        """Start cracking - uses real tools for non-Observer mode."""
+        if not self.terminal:
             return
 
         # Don't start if already cracking
-        if self.theatrical_cracker.is_active:
+        if self._cracking:
             self.terminal.add_output("Crack already in progress...")
             return
 
         state = self.client.adventure_state
         encounter = state.current_encounter
         current_hash = state.get_current_hash()
+        game_mode = getattr(self.client, 'game_mode', 'observer')
 
         if not current_hash:
             self.terminal.add_error("No hash to crack in this encounter.")
             return
 
-        # Look up the hash in our index
-        result = self.hash_index.lookup(current_hash)
-
-        if result.found:
-            # Start theatrical reveal with hash info for syntax display
-            self.theatrical_cracker.start(
-                solution=result.solution,
-                hash_value=current_hash,
-                hash_type=encounter.hash_type or "md5",
-                show_syntax=True,  # Show equivalent hashcat/john commands
-            )
-            self._cracking = True
+        # Check if we should use real tools
+        if game_mode != 'observer':
+            # Use real PatternForge crack
+            self._start_patternforge_crack(current_hash, encounter.hash_type or "md5")
         else:
-            # Hash not in index - shouldn't happen for campaign hashes
-            self.terminal.add_error("Hash not found in campaign index.")
-            self.terminal.add_output("Try entering the password manually.")
+            # Observer mode - use theatrical reveal with pre-indexed lookup
+            if not self.hash_index or not self.theatrical_cracker:
+                self.terminal.add_error("Theatrical cracker not available.")
+                return
+
+            result = self.hash_index.lookup(current_hash)
+
+            if result.found:
+                # Start theatrical reveal with hash info for syntax display
+                self.theatrical_cracker.start(
+                    solution=result.solution,
+                    hash_value=current_hash,
+                    hash_type=encounter.hash_type or "md5",
+                    show_syntax=True,
+                )
+                self._cracking = True
+            else:
+                self.terminal.add_error("Hash not found in campaign index.")
+                self.terminal.add_output("Try entering the password manually.")
+
+    def _start_patternforge_crack(self, hash_value: str, hash_type: str) -> None:
+        """Start real PatternForge crack with actual tools."""
+        import threading
+        from spellengine.tools.cracker import crack_hash
+
+        self._cracking = True
+        self._crack_timer = 0.0
+        self._crack_result = None
+        self._cracked_solution = ""
+
+        self.terminal.add_system_message("Starting PatternForge crack...")
+        self.terminal.add_info(f"Target: {hash_value[:32]}...")
+        self.terminal.add_output("")
+
+        def run_crack() -> None:
+            """Background thread that runs PatternForge crack."""
+            def on_progress(msg: str) -> None:
+                # Note: Can't update terminal from background thread safely
+                # Progress will be shown when result comes back
+                pass
+
+            result = crack_hash(
+                hash_value=hash_value,
+                hash_type=hash_type,
+                wordlist="common",  # Start with common wordlist
+                on_progress=on_progress,
+                timeout=60,
+            )
+
+            if result.success:
+                self._cracked_solution = result.plaintext
+                self._crack_result = "success"
+            elif result.error:
+                self._crack_result = f"error:{result.error}"
+            else:
+                self._crack_result = "not_found"
+
+            # Store the command for display
+            self._crack_command = result.command
+
+        threading.Thread(target=run_crack, daemon=True).start()
 
     def _on_choice_select(self, choice_index: int) -> None:
         """Handle fork choice selection."""
@@ -762,6 +881,15 @@ class EncounterScene(Scene):
                 message=result.get("message", "You have failed."),
                 options=result.get("options", []),
                 deaths=result.get("deaths", 0),
+            )
+
+        elif action == "prologue_gate":
+            # Observer mode completed the prologue - show gate screen
+            self.client.adventure_state.save()
+            self.change_scene(
+                "prologue_gate",
+                message=result.get("message", ""),
+                xp_earned=result.get("xp_earned", 0),
             )
 
     def _on_keystroke(self) -> None:
@@ -1027,6 +1155,43 @@ class EncounterScene(Scene):
                 self._celebration_phase = 2
                 # Now waiting indefinitely for user input
 
+        # Check PatternForge verification result
+        if self._verifying and self._verify_result is not None:
+            result = self._verify_result
+            self._verifying = False
+            self._verify_result = None
+            self.feedback_timer = 0.0  # Clear the "verifying" message
+
+            encounter = self.client.adventure_state.current_encounter
+
+            if result.success:
+                # Show the command used (educational)
+                if self.terminal and result.command:
+                    self.terminal.add_system_message(f"Verified: {result.command}")
+                    if result.tool:
+                        self.terminal.add_info(f"Tool: {result.tool}")
+                self._process_correct_answer(encounter)
+            elif result.error:
+                # Tool error - fall back to internal validation
+                self.feedback_message = f"Tool error: {result.error}"
+                self.feedback_color = Colors.WARNING
+                self.feedback_timer = 2.0
+                # Try internal validation as fallback
+                current_hash = self.client.adventure_state.get_current_hash()
+                if current_hash and encounter.hash_type:
+                    from spellengine.adventures.validation import validate_crack
+                    if validate_crack(self._verify_answer, current_hash, encounter.hash_type):
+                        self._process_correct_answer(encounter)
+                    else:
+                        self._process_incorrect_answer(encounter)
+            else:
+                # Password didn't match
+                if self.terminal and result.command:
+                    self.terminal.add_output(f"Tried: {result.command}")
+                self._process_incorrect_answer(encounter)
+
+            self._verify_answer = ""
+
         # Update typewriter effect
         if self.typewriter:
             self.typewriter.update(dt)
@@ -1077,28 +1242,54 @@ class EncounterScene(Scene):
                 self._crack_timer = 0.0
                 self._crack_complete = True
 
+                # Show the command used (educational)
+                crack_cmd = getattr(self, '_crack_command', '')
+                if self.terminal and crack_cmd:
+                    self.terminal.add_output("")
+                    self.terminal.add_system_message(f"Command: {crack_cmd}")
+
                 if crack_result == "success" and self._cracked_solution:
-                    # Fill in the cracked password
+                    # Show cracked result in terminal
+                    if self.terminal:
+                        self.terminal.add_output("")
+                        self.terminal.add_info(f"CRACKED: {self._cracked_solution}")
+                    # Fill in the cracked password (if textbox exists)
                     if self.textbox:
                         self.textbox.set_text(self._cracked_solution)
                 elif crack_result == "not_found":
+                    if self.terminal:
+                        self.terminal.add_error("Password not in wordlist")
+                        self.terminal.add_output("Try a different wordlist or [H] for hint.")
                     self.feedback_message = "Hash not in wordlist. Try [H] for hint."
                     self.feedback_color = Colors.WARNING
                     self.feedback_timer = 3.0
                     self._crack_complete = False
                     self._cracked_solution = ""
                 elif crack_result == "not_installed":
+                    if self.terminal:
+                        self.terminal.add_error("PatternForge not installed")
                     self.feedback_message = "PatternForge not installed."
                     self.feedback_color = Colors.ERROR
                     self.feedback_timer = 3.0
                     self._crack_complete = False
+                elif crack_result.startswith("error:"):
+                    error_msg = crack_result[6:]  # Strip "error:" prefix
+                    if self.terminal:
+                        self.terminal.add_error(f"Crack failed: {error_msg}")
+                    self.feedback_message = "Crack failed. Try manual entry."
+                    self.feedback_color = Colors.ERROR
+                    self.feedback_timer = 3.0
+                    self._crack_complete = False
                 elif crack_result in ("error", "timeout"):
+                    if self.terminal:
+                        self.terminal.add_error("Crack timed out or failed")
                     self.feedback_message = "Crack failed. Try manual entry."
                     self.feedback_color = Colors.ERROR
                     self.feedback_timer = 3.0
                     self._crack_complete = False
 
                 self._crack_result = None  # Reset for next crack
+                self._crack_command = ""
 
         # Auto-submit after showing cracked result for 1.5 seconds
         if self._crack_complete:

@@ -13,7 +13,9 @@ PROPRIETARY - All Rights Reserved
 from __future__ import annotations
 
 import argparse
+import json
 import shutil
+import subprocess
 import sys
 from pathlib import Path
 
@@ -30,15 +32,45 @@ GAME_MODE_OBSERVER = "observer"   # No tools - hints reveal answers
 CONTENT_ROOT = Path(__file__).parent.parent / "content"
 
 
+def check_patternforge() -> dict | None:
+    """Check if PatternForge is installed and get tool status.
+
+    Returns:
+        Dict from 'patternforge tools --json' or None if not available
+    """
+    try:
+        result = subprocess.run(
+            [sys.executable, "-m", "patternforge", "tools", "--json"],
+            capture_output=True,
+            text=True,
+            timeout=10,
+        )
+        if result.returncode == 0 and result.stdout:
+            return json.loads(result.stdout)
+    except (subprocess.TimeoutExpired, json.JSONDecodeError, FileNotFoundError):
+        pass
+    return None
+
+
 def check_cracking_tools() -> dict[str, str | None]:
-    """Check which cracking tools are available.
+    """Check which cracking tools are available via PatternForge.
 
     Returns:
         Dict with tool names and paths (None if not found)
     """
-    tools = {"hashcat": None, "john": None}
+    tools = {"hashcat": None, "john": None, "patternforge": None}
 
-    # Check hashcat
+    # Try PatternForge first (single source of truth)
+    pf_status = check_patternforge()
+    if pf_status:
+        tools["patternforge"] = pf_status.get("patternforge", {}).get("version")
+        if pf_status.get("hashcat"):
+            tools["hashcat"] = pf_status["hashcat"].get("path")
+        if pf_status.get("john"):
+            tools["john"] = pf_status["john"].get("path")
+        return tools
+
+    # Fallback: direct detection (if PatternForge not installed)
     hashcat_candidates = [
         "hashcat",
         "/usr/local/bin/hashcat",
@@ -49,7 +81,6 @@ def check_cracking_tools() -> dict[str, str | None]:
             tools["hashcat"] = candidate
             break
 
-    # Check john
     john_candidates = [
         "john",
         "/usr/local/bin/john",
@@ -93,16 +124,23 @@ def display_tool_check() -> tuple[str, dict]:
     """
     tools = check_cracking_tools()
     mode = determine_game_mode(tools)
+    has_patternforge = tools.get("patternforge") is not None
 
     print()
     print("=" * 60)
-    print("              STORYSMITH - TOOL CHECK")
+    print("              THE DREAD CITADEL")
     print("=" * 60)
     print()
-    print("Checking for cracking tools...")
+    print("Checking requirements...")
     print()
 
-    # Display status
+    # Display PatternForge status
+    if has_patternforge:
+        print(f"  [✓] PatternForge {tools['patternforge']}")
+    else:
+        print("  [✗] PatternForge: not found")
+
+    # Display tool status
     if tools["hashcat"]:
         print(f"  [✓] hashcat: {tools['hashcat']}")
     else:
@@ -115,37 +153,41 @@ def display_tool_check() -> tuple[str, dict]:
 
     print()
 
-    # If both tools available, just continue
+    # Fast path: all tools available (Kali users, etc.)
+    if mode == GAME_MODE_FULL and has_patternforge:
+        print("All tools detected. Full mode enabled!")
+        print()
+        return mode, tools
+
+    # If both crackers but no PatternForge, still good
     if mode == GAME_MODE_FULL:
-        print("All tools available. Full functionality enabled.")
+        print("Cracking tools available. Full functionality enabled.")
         print()
         return mode, tools
 
     # If at least one tool, offer choice
     if mode in (GAME_MODE_HASHCAT, GAME_MODE_JOHN):
         tool_name = "hashcat" if mode == GAME_MODE_HASHCAT else "john"
-        print(f"Running in {tool_name}-only mode.")
-        print("Some encounters may use the available tool.")
+        print(f"You have {tool_name}. All encounters are playable!")
         print()
         print("Options:")
-        print("  [C] Continue with available tools")
-        print("  [O] Observer mode (hints reveal answers)")
-        print("  [Q] Quit and install missing tools")
+        print(f"  [C] Continue with {tool_name}")
+        print("  [O] Observer mode (tutorial, hints reveal answers)")
+        print("  [Q] Quit")
         print()
 
         while True:
-            choice = input("Choice [C/O/Q]: ").strip().upper()
-            if choice == "C":
+            try:
+                choice = input("Choice [C/O/Q]: ").strip().upper()
+            except (EOFError, KeyboardInterrupt):
+                print()
+                sys.exit(0)
+
+            if choice == "C" or choice == "":
                 return mode, tools
             elif choice == "O":
                 return GAME_MODE_OBSERVER, tools
             elif choice == "Q":
-                print()
-                print("To install missing tools:")
-                print("  hashcat: brew install hashcat (macOS)")
-                print("  john: brew install john (macOS)")
-                print()
-                print("Or check: https://hashcat.net and https://openwall.com/john")
                 sys.exit(0)
             else:
                 print("Invalid choice. Enter C, O, or Q.")
@@ -153,41 +195,71 @@ def display_tool_check() -> tuple[str, dict]:
     # No tools at all
     print("No cracking tools found.")
     print()
-    print("The Dread Citadel requires hashcat or john the ripper")
-    print("to crack hashes. Without them, you can still explore")
-    print("the adventure in Observer mode (hints reveal answers).")
+    print("The Dread Citadel teaches real hash cracking using real tools.")
+    print("To play, you need PatternForge and a cracker (hashcat or john).")
     print()
     print("Options:")
-    print("  [O] Observer mode (hints reveal answers)")
-    print("  [I] Show install instructions")
+    if has_patternforge:
+        print("  [I] Install tools (runs: patternforge install)")
+    else:
+        print("  [I] Show install instructions")
+    print("  [O] Observer mode (tutorial chapter only)")
     print("  [Q] Quit")
     print()
 
     while True:
-        choice = input("Choice [O/I/Q]: ").strip().upper()
+        try:
+            choice = input("Choice [I/O/Q]: ").strip().upper()
+        except (EOFError, KeyboardInterrupt):
+            print()
+            sys.exit(0)
+
         if choice == "O":
             return GAME_MODE_OBSERVER, tools
         elif choice == "I":
-            print()
-            print("Install instructions:")
-            print()
-            print("macOS (Homebrew):")
-            print("  brew install hashcat")
-            print("  brew install john")
-            print()
-            print("Linux (apt):")
-            print("  sudo apt install hashcat john")
-            print()
-            print("Windows:")
-            print("  Download from https://hashcat.net")
-            print("  Download from https://openwall.com/john")
-            print()
-            print("After installing, restart spellengine.")
-            print()
+            if has_patternforge:
+                # Run PatternForge installer
+                print()
+                print("Running PatternForge installer...")
+                print()
+                try:
+                    subprocess.run(
+                        [sys.executable, "-m", "patternforge", "install"],
+                        check=False,
+                    )
+                    # Re-check tools after install
+                    print()
+                    print("Re-checking tools...")
+                    tools = check_cracking_tools()
+                    mode = determine_game_mode(tools)
+                    if mode != GAME_MODE_OBSERVER:
+                        print()
+                        print(f"Tools installed! Starting in {mode} mode.")
+                        return mode, tools
+                    print("Still no tools detected. Try Observer mode or manual install.")
+                except Exception as e:
+                    print(f"Installer error: {e}")
+            else:
+                print()
+                print("Install PatternForge first:")
+                print("  pip install patternforge")
+                print()
+                print("Then install cracking tools:")
+                print()
+                print("  Kali Linux: Tools are pre-installed!")
+                print()
+                print("  Ubuntu/Debian:")
+                print("    sudo apt install hashcat john")
+                print()
+                print("  macOS:")
+                print("    brew install hashcat john")
+                print()
+                print("After installing, restart spellengine.")
+                print()
         elif choice == "Q":
             sys.exit(0)
         else:
-            print("Invalid choice. Enter O, I, or Q.")
+            print("Invalid choice. Enter I, O, or Q.")
 
 
 def get_campaigns() -> list[dict]:

@@ -13,10 +13,20 @@ from spellengine.tools.installer import (
     get_hashcat_path,
     get_john_path,
 )
+from spellengine.tools.cracker import (
+    CrackResult,
+    verify_password,
+    crack_hash,
+    check_patternforge,
+)
 
 __all__ = [
     "show_install_menu",
     "get_tools_dir",
     "get_hashcat_path",
     "get_john_path",
+    "CrackResult",
+    "verify_password",
+    "crack_hash",
+    "check_patternforge",
 ]

@@ -51,6 +51,7 @@ class AdventureState:
         achievement_manager: AchievementManager | None = None,
         event_callbacks: dict[str, Callable[[dict], None]] | None = None,
         difficulty: DifficultyLevel = DifficultyLevel.NORMAL,
+        game_mode: str = "full",
     ) -> None:
         """Initialize adventure state.
 
@@ -62,12 +63,14 @@ class AdventureState:
             event_callbacks: Optional dict of event_type -> callback function
                 for profile hooks. Callbacks receive event data dict.
             difficulty: Selected difficulty level (Normal/Heroic/Mythic)
+            game_mode: Game mode (full/hashcat/john/observer)
         """
         self.campaign = campaign
         self.save_path = save_path
         self.achievement_manager = achievement_manager or create_achievement_manager()
         self.event_callbacks = event_callbacks or {}
         self.difficulty = difficulty
+        self.game_mode = game_mode
 
         # Track deaths within current chapter for no-death achievements
         self._chapter_deaths: int = 0
@@ -172,17 +175,39 @@ class AdventureState:
         else:  # SKIP
             return self._handle_skip(encounter)
 
+    # XP multipliers by game mode
+    XP_MULTIPLIERS = {
+        "full": 1.0,
+        "hashcat": 1.0,
+        "john": 1.0,
+        "observer": 0.2,  # 20% XP - saw it, didn't crack it
+    }
+
     def _handle_success(self, encounter: Encounter) -> dict:
         """Handle successful encounter completion."""
-        # Award XP (difficulty-adjusted)
-        xp_reward = encounter.get_xp_for_difficulty(self.difficulty)
+        # Award XP (difficulty-adjusted, then mode-adjusted)
+        base_xp = encounter.get_xp_for_difficulty(self.difficulty)
+        multiplier = self.XP_MULTIPLIERS.get(self.game_mode, 1.0)
+        xp_reward = int(base_xp * multiplier)
+
         self.state.xp_earned += xp_reward
         self.state.total_xp += xp_reward
 
-        # Mark complete
+        # Mark complete and track which mode it was completed in
         is_first_crack = len(self.state.completed_encounters) == 0
+        previous_mode = self.state.encounter_modes.get(encounter.id)
+
         if encounter.id not in self.state.completed_encounters:
             self.state.completed_encounters.append(encounter.id)
+
+        # Track the mode - only update if upgrading (observer -> real mode)
+        # This allows replaying for better rewards
+        mode_priority = {"observer": 0, "john": 1, "hashcat": 2, "full": 3}
+        current_priority = mode_priority.get(self.game_mode, 0)
+        previous_priority = mode_priority.get(previous_mode, -1)
+
+        if current_priority > previous_priority:
+            self.state.encounter_modes[encounter.id] = self.game_mode
 
         # Emit success event for profile hooks
         self._emit_event(EVENT_ENCOUNTER_SUCCESS, {
@@ -295,6 +320,29 @@ class AdventureState:
         chapter_achievements = self._check_chapter_achievements()
 
         if chapter_idx + 1 < len(self.campaign.chapters):
+            # Observer mode gate: Cap at first chapter (Prologue)
+            # In Observer mode, completing chapter 0 shows the gate screen
+            # instead of advancing to chapter 1
+            if self.game_mode == "observer" and chapter_idx == 0:
+                # Emit chapter completion event
+                self._emit_event(EVENT_CHAPTER_COMPLETED, {
+                    "chapter_id": chapter.id,
+                    "deaths_in_chapter": self._chapter_deaths,
+                    "xp_earned": self.state.xp_earned,
+                    "prologue_complete": True,
+                })
+
+                # Mark prologue as complete in state
+                self.state.prologue_complete = True
+
+                return {
+                    "action": "prologue_gate",
+                    "chapter_completed": chapter.id,
+                    "message": chapter.outro_text,
+                    "xp_earned": self.state.xp_earned,
+                    "achievements_unlocked": [u.achievement_id for u in chapter_achievements],
+                }
+
             # Emit chapter completion event
             self._emit_event(EVENT_CHAPTER_COMPLETED, {
                 "chapter_id": chapter.id,
@@ -476,7 +524,44 @@ class AdventureState:
             "deaths": self.state.deaths,
             "achievements": len(self.state.achievements),
             "achievement_points": self.achievement_manager.get_total_points(),
+            "game_mode": self.game_mode,
         }
+
+    def get_upgradeable_encounters(self) -> list[str]:
+        """Get encounters that were completed in Observer mode.
+
+        These can be replayed with real tools for better XP rewards.
+
+        Returns:
+            List of encounter IDs completed in Observer mode
+        """
+        return [
+            enc_id for enc_id, mode in self.state.encounter_modes.items()
+            if mode == "observer"
+        ]
+
+    def can_upgrade_encounter(self, encounter_id: str) -> bool:
+        """Check if an encounter can be upgraded (replayed for better rewards).
+
+        Args:
+            encounter_id: The encounter to check
+
+        Returns:
+            True if the encounter was completed in Observer mode and
+            the current game mode is a "real" mode
+        """
+        if self.game_mode == "observer":
+            return False  # Can't upgrade while in Observer mode
+
+        previous_mode = self.state.encounter_modes.get(encounter_id)
+        if not previous_mode:
+            return False  # Not completed yet
+
+        mode_priority = {"observer": 0, "john": 1, "hashcat": 2, "full": 3}
+        current_priority = mode_priority.get(self.game_mode, 0)
+        previous_priority = mode_priority.get(previous_mode, 0)
+
+        return current_priority > previous_priority
 
     # =========================================================================
     # Achievement Integration

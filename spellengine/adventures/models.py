@@ -254,6 +254,10 @@ class PlayerState(BaseModel):
 
     # History
     completed_encounters: list[str] = Field(default_factory=list)
+    encounter_modes: dict[str, str] = Field(
+        default_factory=dict,
+        description="Encounter ID -> mode it was completed in (for replay tracking)"
+    )
     last_checkpoint: str | None = Field(None, description="Last checkpoint encounter ID")
     last_fork: str | None = Field(None, description="Last fork encounter ID")
     choice_history: dict[str, str] = Field(
@@ -274,6 +278,8 @@ class PlayerState(BaseModel):
 
     # Mode
     rogue_mode: bool = Field(False, description="True if playing in text-only rogue mode")
+    game_mode: str = Field("full", description="Game mode (full/hashcat/john/observer)")
+    prologue_complete: bool = Field(False, description="True if prologue/tutorial completed")
 
 
 class GameOverOptions(str, Enum):
