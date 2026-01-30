@@ -217,7 +217,12 @@ class AudioManager:
         Args:
             name: Logical name of the sound effect
         """
+        from spellengine.engine.settings import get_settings
         import time
+
+        # Check if audio is enabled
+        if not get_settings().audio_enabled:
+            return
 
         sound = self._load_sound(name)
         if sound is None:
@@ -262,7 +267,13 @@ class AudioManager:
             name: Logical name of the music track
             loop: Whether to loop the music (default True)
         """
+        from spellengine.engine.settings import get_settings
+
         if not self._initialized:
+            return
+
+        # Check if audio is enabled
+        if not get_settings().audio_enabled:
             return
 
         # Don't restart same track if already playing
@@ -319,7 +330,13 @@ class AudioManager:
             name: Logical name of the ambiance track
             loop: Whether to loop the ambiance (default True)
         """
+        from spellengine.engine.settings import get_settings
+
         if not self._initialized or self._ambiance_channel is None:
+            return
+
+        # Check if audio is enabled
+        if not get_settings().audio_enabled:
             return
 
         # Don't restart same ambiance if already playing

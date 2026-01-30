@@ -66,7 +66,7 @@ class SettingsScene(Scene):
 
         # Create main panel (centered, takes most of screen)
         panel_width = min(500, screen_w - 100)
-        panel_height = min(450, screen_h - 100)
+        panel_height = min(485, screen_h - 100)
         panel_x = (screen_w - panel_width) // 2
         panel_y = (screen_h - panel_height) // 2
 
@@ -87,6 +87,15 @@ class SettingsScene(Scene):
         # Audio section header
         # (we'll draw this in the render method)
         y += 25
+
+        # Audio Enabled toggle (master switch)
+        audio_toggle = Toggle(
+            x, y, widget_width, "Audio Enabled",
+            value=settings.audio_enabled,
+            on_change=lambda v: self._on_audio_toggle(v),
+        )
+        self.toggles.append(audio_toggle)
+        y += 35
 
         # SFX Volume
         sfx_slider = Slider(
@@ -169,6 +178,15 @@ class SettingsScene(Scene):
                     music=settings.music_volume,
                 )
 
+    def _on_audio_toggle(self, enabled: bool) -> None:
+        """Handle audio enable/disable toggle."""
+        update_settings(audio_enabled=enabled)
+
+        # Stop all audio immediately when disabled
+        if not enabled and self.client.audio:
+            self.client.audio.stop_music()
+            self.client.audio.stop_ambiance()
+
     def exit(self) -> None:
         """Exit settings scene."""
         self.panel = None
@@ -231,15 +249,15 @@ class SettingsScene(Scene):
             line_y = audio_y + section_font.get_height() + 2
             pygame.draw.line(surface, Colors.BORDER, (x, line_y), (content.x + content.width - 20, line_y))
 
-            # Visual header (after sliders)
-            visual_y = content.y + 170
+            # Visual header (after audio toggle + sliders)
+            visual_y = content.y + 205
             visual_surface = section_font.render("VISUAL", Typography.ANTIALIAS, Colors.TEXT_MUTED)
             surface.blit(visual_surface, (x, visual_y))
             line_y = visual_y + section_font.get_height() + 2
             pygame.draw.line(surface, Colors.BORDER, (x, line_y), (content.x + content.width - 20, line_y))
 
             # Accessibility header
-            access_y = content.y + 305
+            access_y = content.y + 340
             access_surface = section_font.render("ACCESSIBILITY", Typography.ANTIALIAS, Colors.TEXT_MUTED)
             surface.blit(access_surface, (x, access_y))
             line_y = access_y + section_font.get_height() + 2

@@ -24,6 +24,7 @@ class GameSettings:
     """
 
     # Audio
+    audio_enabled: bool = True  # Master audio toggle
     sfx_volume: float = 0.7
     music_volume: float = 0.5
     ambiance_volume: float = 0.4
