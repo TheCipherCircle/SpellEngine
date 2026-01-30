@@ -37,9 +37,11 @@ jobs:
           - runner: macos-latest
             arch: arm64
             name: Apple Silicon
-          - runner: macos-13
-            arch: x86_64
-            name: Intel
+          # Intel build disabled - macos-13 retired, macos-15-intel requires paid runners
+          # ARM64 covers most modern Mac users
+          # - runner: macos-13
+          #   arch: x86_64
+          #   name: Intel
     runs-on: ${{ matrix.runner }}
     name: build-macos (${{ matrix.name }})
     steps:
@@ -63,14 +65,15 @@ jobs:
         run: |
           echo "Starting launch test on ${{ matrix.name }}..."
           # Run app with Observer mode auto-selected (echo 3 = Observer Mode)
-          echo "3" | timeout 15s "dist/Dread Citadel.app/Contents/MacOS/Dread Citadel" > smoke_output.txt 2>&1 &
+          # Use background process + sleep instead of timeout (not available on macOS)
+          echo "3" | "dist/Dread Citadel.app/Contents/MacOS/Dread Citadel" > smoke_output.txt 2>&1 &
           APP_PID=$!
           sleep 5
+          kill $APP_PID 2>/dev/null || true
 
           # Check if process started and pygame loaded
           if grep -q "pygame" smoke_output.txt; then
             echo "PASS: App initialized pygame successfully"
-            kill $APP_PID 2>/dev/null || true
           else
             echo "Output:"
             cat smoke_output.txt
