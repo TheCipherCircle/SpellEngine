@@ -31,7 +31,17 @@ jobs:
 
   build-macos:
     needs: validate
-    runs-on: macos-latest
+    strategy:
+      matrix:
+        include:
+          - runner: macos-latest
+            arch: arm64
+            name: Apple Silicon
+          - runner: macos-13
+            arch: x86_64
+            name: Intel
+    runs-on: ${{ matrix.runner }}
+    name: build-macos (${{ matrix.name }})
     steps:
       - uses: actions/checkout@v4
 
@@ -49,16 +59,29 @@ jobs:
         run: |
           python scripts/build_macos_app.py || pyinstaller --clean --noconfirm DreadCitadel.spec
 
+      - name: Smoke test - verify app launches
+        run: |
+          echo "Starting launch test on ${{ matrix.name }}..."
+          open -a "dist/Dread Citadel.app" &
+          sleep 10
+          if pgrep -f "Dread Citadel" > /dev/null 2>&1; then
+            echo "PASS: Process still running after 10s"
+            pkill -f "Dread Citadel" 2>/dev/null || true
+          else
+            echo "FAIL: Process exited unexpectedly"
+            exit 1
+          fi
+
       - name: Create ZIP archive
         run: |
           cd dist
-          zip -r "DreadCitadel-macOS.zip" "Dread Citadel.app"
+          zip -r "DreadCitadel-macOS-${{ matrix.arch }}.zip" "Dread Citadel.app"
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: DreadCitadel-macOS
-          path: dist/DreadCitadel-macOS.zip
+          name: DreadCitadel-macOS-${{ matrix.arch }}
+          path: dist/DreadCitadel-macOS-${{ matrix.arch }}.zip
 
   build-windows:
     needs: validate
@@ -80,6 +103,19 @@ jobs:
         run: |
           python scripts/build_windows_exe.py
         shell: cmd
+
+      - name: Smoke test - verify exe launches
+        shell: pwsh
+        run: |
+          Write-Host "Starting launch test..."
+          $process = Start-Process -FilePath "dist/DreadCitadel.exe" -PassThru
+          Start-Sleep -Seconds 10
+          if ($process.HasExited) {
+            Write-Host "FAIL: Process exited with code $($process.ExitCode)"
+            exit 1
+          }
+          Write-Host "PASS: Process still running after 10s"
+          Stop-Process -Id $process.Id -Force
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -111,6 +147,20 @@ jobs:
       - name: Build Linux binary
         run: |
           python scripts/build_linux_exe.py
+
+      - name: Smoke test - verify binary launches
+        run: |
+          echo "Starting launch test..."
+          timeout 10s ./dist/DreadCitadel &
+          GAME_PID=$!
+          sleep 5
+          if ps -p $GAME_PID > /dev/null 2>&1; then
+            echo "PASS: Process still running after 5s"
+            kill $GAME_PID 2>/dev/null || true
+          else
+            echo "FAIL: Process exited unexpectedly"
+            exit 1
+          fi
 
       - name: Create tarball
         run: |
