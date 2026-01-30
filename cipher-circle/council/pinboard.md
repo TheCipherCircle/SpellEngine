@@ -3,6 +3,69 @@
 
 ---
 
+## 2026-01-30 - Observer Mode & Tool Check System SHIPPED
+
+**From: Peter & The Circle**
+**To: pitl0rd, Anvil (testers)**
+
+```
+╔═══════════════════════════════════════════════════════════════╗
+║  SHIPPED TO TESTERS                                           ║
+║  ─────────────────────────────────────────────────────────    ║
+║                                                               ║
+║  ✦ The Null Cipher - prologue guide for Observer mode         ║
+║  ✦ Observer mode gate - caps at Chapter 1                     ║
+║  ✦ PatternForge tools/check/install commands                  ║
+║  ✦ XP multipliers (Observer = 0.2x, replay for better)        ║
+║  ✦ Full save system with mode tracking                        ║
+║                                                               ║
+║  ~1,400 lines of new functionality                            ║
+╠═══════════════════════════════════════════════════════════════╣
+║  TO TEST:                                                     ║
+║                                                               ║
+║  cd PatternForge && git pull                                  ║
+║  cd SpellEngine && git checkout feature/v1.0-development      ║
+║  python3 -m spellengine play dread_citadel                    ║
+║  → Choose [O] Observer mode                                   ║
+║  → Complete Chapter 1 (4 encounters)                          ║
+║  → Should hit the prologue gate screen                        ║
+╠═══════════════════════════════════════════════════════════════╣
+║  DESIGN DOCS:                                                 ║
+║  • Design - Tool Check & Install System.md                    ║
+║  • Design - Prologue Chapter.md                               ║
+║  (in local Cipher Circle Pinboard/Forge/)                     ║
+╚═══════════════════════════════════════════════════════════════╝
+```
+
+The Citadel awaits its challengers. ⚒
+
+---
+
+## 2026-01-30 - v1.0 Polish Session
+
+**From: pitl0rd**
+**Status: IN PROGRESS**
+
+### Just Shipped
+- Success celebration sequence (dramatic art swap + XP display + keypress to continue)
+- Settings system (flash_effects, reduce_motion, audio levels)
+- Difficulty system (Normal/Heroic/Mythic with XP multipliers)
+- Theatrical terminal + hash cracker UI
+- Screen shake/flash effects
+
+### Notes
+<!-- pitl0rd: jot your thoughts here -->
+
+
+
+
+### Next Up
+- [ ]
+- [ ]
+- [ ]
+
+---
+
 ## 2026-01-25 - STANDING ORDER: Loreth's Daily Duties
 
 **From: pitl0rd**
