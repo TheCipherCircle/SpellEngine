@@ -659,5 +659,24 @@ Jinx builds NeuralSmith - neural network password generation.
 
 ---
 
-*Last Updated: 2026-01-25*
-*Session: Jinx summoned for NeuralSmith*
+## Onboarding Status
+
+New members under Anvil review for their first two weeks:
+
+| Member | GitHub Handle | Access Granted | Anvil Review Until | Status |
+|--------|---------------|----------------|-------------------|--------|
+| Jeff | bluscreenofjeff | 2026-01-30 | 2026-02-13 | Active |
+
+Once the review period ends with clean submissions, move to Alumni below.
+
+### Onboarding Alumni
+*Members who completed their review period:*
+
+| Member | Completed | Notes |
+|--------|-----------|-------|
+| - | - | - |
+
+---
+
+*Last Updated: 2026-01-30*
+*Session: Jeff onboarded to Cipher Circle*
