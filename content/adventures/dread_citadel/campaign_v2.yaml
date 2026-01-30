@@ -1,0 +1,2042 @@
+# The Dread Citadel Campaign - Version 2.0
+# PROPRIETARY - All Rights Reserved
+#
+# Complete educational journey from password patterns to full PatternForge mastery
+# 6 Chapters + Prologue teaching: Patterns → Wordlists → Masks → Rules → SCARAB → EntropySmith
+
+id: dread_citadel
+title: "The Dread Citadel"
+description: "Storm the Dread Citadel and stop the Skeleton Key. Master password analysis through dark fantasy adventure."
+version: "2.0.0"
+author: "The Cipher Circle"
+difficulty: beginner_to_advanced
+estimated_time: "4-5 hours"
+
+intro_text: |
+  The Dread Citadel looms before you, its obsidian towers piercing the blood-red sky.
+
+  For centuries, the Citadel Lord has hoarded the secrets of authentication—
+  hash algorithms, password patterns, the very keys to digital kingdoms.
+
+  But now he builds something worse: THE SKELETON KEY.
+  A weapon that will crack every hash in existence.
+  Banks. Hospitals. Governments. Infrastructure. All will fall.
+
+  You have been chosen to join the Cipher Circle—an ancient order of
+  pattern breakers who see through the illusions of "secure" passwords.
+
+  Your mission: Storm the Citadel. Stop the Skeleton Key. Save the world.
+
+  The Null Cipher awaits to guide you...
+
+outro_text: |
+  The Skeleton Key shatters. The Citadel Lord screams as his life's work
+  crumbles to dust around him.
+
+  Light pours through the cracks in the obsidian walls.
+  The darkness that held this fortress together... fades.
+
+  You have done more than conquer a castle, Infiltrator.
+  You have become a true practitioner of the Cipher Circle.
+
+  The tools you now possess—PatternForge, SCARAB, EntropySmith—
+  these are yours to wield in the world beyond.
+
+  Go forth. Defend. Educate. Illuminate.
+
+  The Circle remembers those who walk the righteous path.
+
+  Until we meet again, Initiate.
+
+first_chapter: ch_awakening
+
+chapters:
+  # =========================================================================
+  # PROLOGUE: THE AWAKENING (Tier 0)
+  # "You see patterns others cannot."
+  # =========================================================================
+  - id: ch_awakening
+    title: "The Awakening"
+    description: "Learn the ways of the Cipher Circle"
+    is_prologue: true
+    intro_text: |
+      A spectral figure materializes before you—the Null Cipher, ancient
+      guide to all who seek to join the Cipher Circle.
+
+      "Welcome, Initiate. Before you storm the Citadel, you must
+      understand the truth that makes us powerful:"
+
+      "Humans are predictable. Their passwords reveal their nature."
+
+      "Let me show you..."
+    outro_text: |
+      The Null Cipher nods approvingly.
+
+      "You have awakened, Initiate. You see what others cannot—
+      the patterns that humans weave into their passwords."
+
+      "Now you are ready to face the Dread Citadel itself.
+      But be warned: the Citadel Lord builds a terrible weapon.
+      The Skeleton Key. You must stop him before it's complete."
+    first_encounter: enc_awakening_intro
+
+    encounters:
+      # Encounter 0.1: Layout Introduction (TOUR)
+      - id: enc_awakening_intro
+        title: "The Initiation"
+        type: tour
+        tier: 0
+        xp_reward: 5
+        intro_text: |
+          The Null Cipher gestures to the space around you.
+
+          "Observe the battlefield, Initiate:"
+
+          ◈ LEFT: The hash—a scrambled representation of a password
+          ◈ RIGHT: The narrative—context clues hide within
+          ◈ BOTTOM: Your input—where you submit your answer
+
+          "Press ENTER to continue your training..."
+        objective: "Learn the interface"
+        success_text: |
+          "Good. You understand the arena."
+
+          "Now let me teach you the first truth of human passwords..."
+        next_encounter: enc_obvious_choice
+
+      # Encounter 0.2: "password" - The Obvious Choice
+      - id: enc_obvious_choice
+        title: "The Obvious Choice"
+        type: walkthrough
+        tier: 0
+        xp_reward: 5
+        intro_text: |
+          The Null Cipher conjures a glowing hash before you.
+
+          "When humans must choose a password, many reach for the
+          most obvious word imaginable. They think: 'What IS a password?'"
+
+          "And then they type exactly that."
+
+          The answer is literally in the question. Type: password
+        objective: "Understand why humans choose obvious passwords"
+        hash: "5f4dcc3b5aa765d61d8327deb882cf99"
+        hash_type: md5
+        solution: "password"
+        hint: "The answer is in the question itself."
+        success_text: |
+          "Yes! 'password'—the most common password in history."
+
+          "Millions of accounts protected by the very word that
+          describes what they're trying to protect."
+
+          "Lesson one: Never underestimate human laziness."
+        failure_text: "Read the narrative again. The answer is literally stated."
+        next_encounter: enc_sequential_pattern
+
+      # Encounter 0.3: "123456" - Sequential Patterns
+      - id: enc_sequential_pattern
+        title: "The Sequential Pattern"
+        type: walkthrough
+        tier: 0
+        xp_reward: 5
+        intro_text: |
+          "Now observe another human tendency," the Null Cipher continues.
+
+          "When forced to use numbers, humans start counting:
+          1, 2, 3, 4, 5, 6..."
+
+          "Sequential. Predictable. Exploitable."
+
+          Press [H] for a hint if you need guidance, then type the answer.
+        objective: "Learn the hint system and sequential patterns"
+        hash: "e10adc3949ba59abbe56e057f20f883e"
+        hash_type: md5
+        solution: "123456"
+        hint: "Six digits, starting from one, counting up."
+        success_text: |
+          "'123456'—the second most common password worldwide."
+
+          "Humans crave simplicity. They follow patterns without thinking."
+
+          "Lesson two: Sequential patterns are everywhere."
+        failure_text: "Press [H] for a hint. Count from 1 to 6."
+        next_encounter: enc_role_thinking
+
+      # Encounter 0.4: "admin" - Context/Role Thinking
+      - id: enc_role_thinking
+        title: "The Role"
+        type: walkthrough
+        tier: 0
+        xp_reward: 5
+        intro_text: |
+          The Null Cipher's form shifts to resemble a cloaked administrator.
+
+          "Humans think in roles. A system administrator needs a password.
+          What do they call themselves? What is their title?"
+
+          "Read the narrative carefully. Context reveals everything."
+
+          The administrator's password reflects their role in the system.
+        objective: "Learn to read context clues in the narrative"
+        hash: "21232f297a57a5a743894a0e4a801fc3"
+        hash_type: md5
+        solution: "admin"
+        hint: "What role does an administrator have? What title?"
+        success_text: |
+          "'admin'—the default password on countless systems."
+
+          "People choose passwords that reflect who they are,
+          what they do, what matters to them."
+
+          "Lesson three: Context tells you what to guess."
+        failure_text: "What is the short word for 'administrator'?"
+        next_encounter: enc_keyboard_walk
+
+      # Encounter 0.5: "qwerty" - Keyboard Walks
+      - id: enc_keyboard_walk
+        title: "The Keyboard Path"
+        type: flash
+        tier: 0
+        xp_reward: 10
+        intro_text: |
+          "Final lesson before your awakening," the Null Cipher intones.
+
+          "Some humans don't even THINK—they simply let their fingers
+          walk across the keyboard. Top row, left to right..."
+
+          "This one is yours to solve. Prove you have learned."
+
+          Look at your keyboard. What letters are on the top row?
+        objective: "Apply your training - solve without explicit guidance"
+        hash: "d8578edf8458ce06fbc5bb76a58c5ca4"
+        hash_type: md5
+        solution: "qwerty"
+        hint: "Look at your keyboard. Top row, first six letters."
+        success_text: |
+          "'qwerty'—the keyboard walk. Physical laziness made digital."
+
+          The Null Cipher's eyes glow with approval.
+
+          "You have awakened, Initiate. The patterns are clear to you now."
+
+          "The Outer Gates of the Citadel await..."
+        failure_text: "Look at your physical keyboard. Top row of letters."
+
+  # =========================================================================
+  # CHAPTER 1: THE OUTER GATES (Tier 0-1)
+  # "Wordlists are your first weapon."
+  # =========================================================================
+  - id: ch_outer_gates
+    title: "The Outer Gates"
+    description: "Breach the first defenses with common wordlists"
+    intro_text: |
+      The massive gates of the Citadel stand before you, sealed with
+      ancient hash locks.
+
+      Armed with your training, you recognize the truth:
+      these defenses rely on human predictability.
+
+      The Null Cipher whispers: "Your first weapon is the WORDLIST—
+      collections of common passwords gathered from breaches past.
+      rockyou.txt alone contains 14 million passwords."
+
+      Time to put your lessons into practice.
+    outro_text: |
+      The Gatekeeper crumbles. The Outer Gates groan open.
+
+      +150 BONUS XP
+
+      The Null Cipher appears: "You've proven you can wield common weapons.
+      But the Crypts hold secrets that require... precision.
+      Wordlists alone won't save you there."
+
+      "You must learn to see the STRUCTURE of passwords.
+      You must learn... MASKS."
+    first_encounter: enc_welcome_mat
+
+    encounters:
+      # 1.1: "welcome" - Obvious choice
+      - id: enc_welcome_mat
+        title: "The Welcome Mat"
+        type: flash
+        tier: 0
+        xp_reward: 15
+        intro_text: |
+          A worn mat lies before the first gate, inscribed with a hash.
+
+          The gate seems... inviting. Hospitable, even.
+
+          What word might a friendly doorway use to greet visitors?
+        objective: "Apply Lesson 1: Obvious choices"
+        hash: "40be4e59b9a2a2b5dffb918c0e86b3d7"
+        hash_type: md5
+        solution: "welcome"
+        hint: "What do friendly signs say at entrances?"
+        success_text: |
+          "welcome"—the digital equivalent of leaving a key under the mat.
+
+          Your training serves you well. The obvious answer was correct.
+        failure_text: "Think hospitable. Think friendly. What do you say to guests?"
+        next_encounter: enc_all_ones
+
+      # 1.2: "111111" - Repetition
+      - id: enc_all_ones
+        title: "The Repeating Lock"
+        type: flash
+        tier: 0
+        xp_reward: 15
+        intro_text: |
+          A combination lock with six dials, all showing the same symbol.
+
+          Humans love repetition almost as much as sequences...
+
+          The simplest digit, repeated six times.
+        objective: "Apply Lesson 2: Sequential/repetitive patterns"
+        hash: "96e79218965eb72c92a549dd5a330112"
+        hash_type: md5
+        solution: "111111"
+        hint: "Six digits, all the same. Start with the simplest number."
+        success_text: |
+          "111111"—when in doubt, humans repeat.
+
+          Repetition is just another form of laziness.
+        failure_text: "The same digit, six times. What's the first number you learn?"
+        next_encounter: enc_root_access
+
+      # 1.3: "root" - Role thinking
+      - id: enc_root_access
+        title: "The Root Access"
+        type: flash
+        tier: 0
+        xp_reward: 20
+        intro_text: |
+          A terminal embedded in the stone wall flickers to life.
+
+          "ROOT ACCESS REQUIRED" blinks on the screen.
+
+          In ancient computing, the highest authority had a simple name...
+        objective: "Apply Lesson 3: Role-based thinking"
+        hash: "63a9f0ea7bb98050796b649e85481845"
+        hash_type: md5
+        solution: "root"
+        hint: "The Unix superuser. The base of the tree."
+        success_text: |
+          "root"—the god account of Unix systems.
+
+          Context clues pointed directly to the answer.
+        failure_text: "What's the most powerful account on a Unix system?"
+        next_encounter: enc_wordlist_intro
+
+      # 1.4: Introduction to Wordlists (TOUR)
+      - id: enc_wordlist_intro
+        title: "The Armory"
+        type: tour
+        tier: 0
+        xp_reward: 10
+        intro_text: |
+          You enter a chamber lined with scrolls—each containing
+          thousands of known passwords.
+
+          The Null Cipher materializes: "These are WORDLISTS, Initiate.
+          Collections of passwords from real breaches:
+
+          ◈ rockyou.txt — 14 million passwords from 2009
+          ◈ common.txt — Top 10,000 most used passwords
+          ◈ darkweb.txt — Harvested from underground forums
+
+          Every password you've cracked so far? In these lists.
+          Most passwords ARE in these lists."
+
+          Press ENTER to continue...
+        objective: "Understand wordlists"
+        success_text: |
+          "Wordlists are your first weapon. Simple. Effective.
+          But they have limits."
+
+          "What happens when the password ISN'T in the list?
+          That's when you need to understand STRUCTURE."
+        next_encounter: enc_love_lock
+
+      # 1.5: "iloveyou" - Emotional patterns
+      - id: enc_love_lock
+        title: "The Love Lock"
+        type: flash
+        tier: 1
+        xp_reward: 20
+        intro_text: |
+          A heart-shaped lock guards this passage.
+
+          Humans often express emotions in their passwords...
+          especially the strongest emotion of all.
+
+          Three words, no spaces: subject + verb + object.
+        objective: "Recognize emotional password patterns"
+        hash: "f25a2fc72690b780b2a14e140ef6a9e0"
+        hash_type: md5
+        solution: "iloveyou"
+        hint: "A declaration of affection. No spaces."
+        success_text: |
+          "iloveyou"—the third most common password worldwide.
+
+          Emotions make terrible security. Love, especially.
+        failure_text: "Express love. Three words, no spaces."
+        next_encounter: enc_monkey_see
+
+        variants:
+          heroic:
+            hash: "ee8d8728f435fd550f83852aabab5234ce1da528"
+            hash_type: sha1
+            solution: "ihateyou"
+            hint: "The opposite emotion. Same structure."
+            xp_reward: 30
+
+          mythic:
+            hash: "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3"
+            hash_type: sha256
+            solution: "1L0v3Y0u!"
+            hint: "Love in leet-speak with a symbol."
+            xp_reward: 40
+
+      # 1.6: "monkey" - Animal passwords
+      - id: enc_monkey_see
+        title: "The Primate Gate"
+        type: flash
+        tier: 1
+        xp_reward: 20
+        intro_text: |
+          Strange chittering echoes from beyond this gate.
+
+          Animals are popular password choices.
+          Especially playful, mischievous ones...
+
+          This creature mimics humans. See no evil, hear no evil...
+        objective: "Identify animal-based passwords"
+        hash: "d0763edaa9d9bd2a9516280e9044d885"
+        hash_type: md5
+        solution: "monkey"
+        hint: "A primate known for mimicry."
+        success_text: |
+          "monkey"—ranked in the top 20 passwords globally.
+
+          Animals, pets, favorites—all predictable choices.
+        failure_text: "Think primates. Think playful. Think banana."
+        next_encounter: enc_gatekeeper
+
+        variants:
+          heroic:
+            hash: "a4e9c8c7f9d3e1a2b5c6d7e8f9a0b1c2d3e4f5a6"
+            hash_type: sha1
+            solution: "dragon"
+            hint: "A mythical creature that breathes fire."
+            xp_reward: 30
+
+          mythic:
+            hash: "b0baee9d279d34fa1dfd71aadb908c3f"
+            hash_type: md5
+            solution: "M0nk3y!"
+            hint: "The primate in leet-speak with a symbol."
+            xp_reward: 40
+
+      # 1.7: BOSS - The Gatekeeper
+      - id: enc_gatekeeper
+        title: "The Gatekeeper"
+        type: flash
+        tier: 1
+        xp_reward: 50
+        is_checkpoint: true
+        intro_text: |
+          A spectral Gatekeeper materializes, blocking your path.
+
+          "You've come far, Initiate. But can you pass MY test?"
+
+          The Gatekeeper's seal is protected by a phrase.
+          A polite request for access... three words, no spaces.
+        objective: "Defeat the Gatekeeper"
+        hash: "0d107d09f5bbe40cade3de5c71e9e9b7"
+        hash_type: md5
+        solution: "letmein"
+        hint: "A polite request for entry. Three words, no spaces."
+        success_text: |
+          The Gatekeeper shatters!
+
+          "You have earned passage to the Crypts, Initiate.
+          But beyond lies a different kind of challenge.
+          Wordlists alone will not save you..."
+        failure_text: "What might someone say when they want to enter?"
+
+        variants:
+          heroic:
+            hash: "5cec175b165e3d5e62c9e13ce848ef6feac81bff"
+            hash_type: sha1
+            solution: "openup"
+            hint: "A more forceful request for entry."
+            xp_reward: 75
+
+          mythic:
+            hash: "ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f"
+            hash_type: sha256
+            solution: "L3tm31n!"
+            hint: "Leet-speak transformation with a symbol."
+            xp_reward: 100
+
+  # =========================================================================
+  # CHAPTER 2: THE CRYPTS (Tier 2-3)
+  # "Masks reveal structure. Structure reveals weakness."
+  # =========================================================================
+  - id: ch_the_crypts
+    title: "The Crypts"
+    description: "Master the art of masks and pattern structure"
+    intro_text: |
+      The Crypts stretch before you, filled with the bones of forgotten
+      passwords and the ghosts of breached accounts.
+
+      The Null Cipher's voice echoes: "These locks are different, Initiate.
+      Their passwords aren't in your wordlists. But they follow PATTERNS."
+
+      "A password like 'pass1234' has STRUCTURE:
+      ◈ 4 lowercase letters: ?l?l?l?l
+      ◈ 4 digits: ?d?d?d?d
+      ◈ Together: ?l?l?l?l?d?d?d?d"
+
+      "This is a MASK. Learn to see masks, and you see the skeleton
+      beneath every password's flesh."
+    outro_text: |
+      The Crypt Guardian crumbles into bone dust.
+
+      +300 BONUS XP
+      NEW ABILITY UNLOCKED: Mask Recognition
+
+      The Null Cipher appears: "You see structure now, Initiate.
+      Masks reveal what wordlists cannot."
+
+      "But the Inner Sanctum guards transform their passwords.
+      'password' becomes 'P@ssw0rd!'
+      You must learn the RULES of transformation..."
+    first_encounter: enc_mask_merchant
+
+    encounters:
+      # 2.1: Introduction to Masks (TOUR)
+      - id: enc_mask_merchant
+        title: "The Mask Merchant"
+        type: tour
+        tier: 0
+        xp_reward: 10
+        intro_text: |
+          A hooded figure beckons from the shadows.
+
+          "I am the Mask Merchant. I see the STRUCTURE of things."
+
+          "Observe these charsets, Initiate:
+
+          ?l = lowercase letter (a-z)
+          ?u = uppercase letter (A-Z)
+          ?d = digit (0-9)
+          ?s = symbol (!@#$%^&*)
+
+          A password like 'abc123' has the mask: ?l?l?l?d?d?d
+          A password like 'Pass1!' has the mask: ?u?l?l?l?d?s"
+
+          Press ENTER to learn more...
+        objective: "Understand mask notation"
+        success_text: |
+          "Now you understand the language of structure."
+
+          "When you see a password's SHAPE, you don't need the wordlist.
+          You can GENERATE every possible password that fits."
+        next_encounter: enc_four_letters
+
+      # 2.2: "abcd" - Pure lowercase
+      - id: enc_four_letters
+        title: "The Simple Lock"
+        type: flash
+        tier: 1
+        xp_reward: 20
+        intro_text: |
+          A lock with four letter wheels, each showing lowercase only.
+
+          The mask is: ?l?l?l?l
+
+          Four lowercase letters. Sequential. Like the alphabet...
+        objective: "Crack a simple lowercase pattern"
+        hash: "e2fc714c4727ee9395f324cd2e7f331f"
+        hash_type: md5
+        solution: "abcd"
+        hint: "First four letters of the alphabet."
+        success_text: |
+          "abcd"—the alphabetic equivalent of 1234.
+
+          You recognized the pattern. The mask was ?l?l?l?l.
+        failure_text: "Four lowercase letters. Start at the beginning."
+        next_encounter: enc_four_digits
+
+        variants:
+          heroic:
+            hash: "7fc56270e7a70fa81a5935b72eacbe29"
+            hash_type: sha1
+            solution: "wxyz"
+            hint: "Last four letters of the alphabet."
+            xp_reward: 30
+
+          mythic:
+            hash: "900150983cd24fb0d6963f7d28e17f72"
+            hash_type: md5
+            solution: "zyxw"
+            hint: "Alphabet backwards. Four letters."
+            xp_reward: 40
+
+      # 2.3: "0000" - Pure digits
+      - id: enc_four_digits
+        title: "The Number Lock"
+        type: flash
+        tier: 1
+        xp_reward: 20
+        intro_text: |
+          A digital keypad lock. Four digits required.
+
+          The mask is: ?d?d?d?d
+
+          What's the laziest four-digit PIN imaginable?
+        objective: "Crack a pure digit pattern"
+        hash: "4a7d1ed414474e4033ac29ccb8653d9b"
+        hash_type: md5
+        solution: "0000"
+        hint: "The same digit, four times. The easiest one."
+        success_text: |
+          "0000"—the ultimate lazy PIN.
+
+          Mask: ?d?d?d?d. When digits are required, humans minimize.
+        failure_text: "Four digits, all the same. The easiest digit."
+        next_encounter: enc_mixed_mask
+
+        variants:
+          heroic:
+            hash: "a0b6c34fa7b3f6d1e8c9d2e5f8a1b4c7"
+            hash_type: sha1
+            solution: "9999"
+            hint: "The same digit four times. The highest single digit."
+            xp_reward: 30
+
+          mythic:
+            hash: "098f6bcd4621d373cade4e832627b4f6"
+            hash_type: md5
+            solution: "2468"
+            hint: "Four digits counting by twos."
+            xp_reward: 40
+
+      # 2.4: "Pass1" - Mixed case + digit
+      - id: enc_mixed_mask
+        title: "The Corporate Lock"
+        type: flash
+        tier: 2
+        xp_reward: 25
+        intro_text: |
+          A more complex lock. The inscription reads:
+          "Must contain uppercase, lowercase, and number."
+
+          Corporate password policies force this pattern:
+          Capitalize first letter, add number at end.
+
+          Mask: ?u?l?l?l?d
+
+          What's a four-letter word meaning "to go by"... plus one digit?
+        objective: "Crack a mixed-case pattern"
+        hash: "4c93008615c2d041e33ebac605d14b5b"
+        hash_type: md5
+        solution: "Pass1"
+        hint: "A word for 'go by' with capital P, plus the number 1."
+        success_text: |
+          "Pass1"—corporate compliance meets minimal effort.
+
+          Mask: ?u?l?l?l?d. Policy-driven patterns are predictable.
+        failure_text: "Capitalize 'pass', add the simplest number."
+        next_encounter: enc_year_pattern
+
+        variants:
+          heroic:
+            hash: "e99a18c428cb38d5f260853678922e03"
+            hash_type: sha1
+            solution: "Test1"
+            hint: "Another common testing word, capitalized, plus 1."
+            xp_reward: 35
+
+          mythic:
+            hash: "d8578edf8458ce06fbc5bb76a58c5ca4"
+            hash_type: md5
+            solution: "Pass9"
+            hint: "Same word, different digit."
+            xp_reward: 50
+
+      # 2.5: "2024" - Year pattern
+      - id: enc_year_pattern
+        title: "The Calendar Stone"
+        type: flash
+        tier: 2
+        xp_reward: 25
+        intro_text: |
+          An ancient calendar embedded in the wall, with a hash below.
+
+          Humans love putting years in passwords.
+          Especially the current year...
+
+          Mask: ?d?d?d?d (but meaningful digits this time)
+        objective: "Recognize year patterns"
+        hash: "0b7d6b08c24a8e1d88e4d1b89a13e8f1"
+        hash_type: md5
+        solution: "2024"
+        hint: "The current year."
+        success_text: |
+          "2024"—years are among the most common digit patterns.
+
+          Birthdays, anniversaries, current years—all predictable.
+        failure_text: "What year is it right now?"
+        next_encounter: enc_mask_builder
+
+        variants:
+          heroic:
+            hash: "c4ca4238a0b923820dcc509a6f75849b"
+            hash_type: sha1
+            solution: "1999"
+            hint: "A memorable year. End of a millennium."
+            xp_reward: 35
+
+          mythic:
+            hash: "e4da3b7fbbce2345d7772b0674a318d5"
+            hash_type: md5
+            solution: "1337"
+            hint: "Leet speak for 'elite'."
+            xp_reward: 50
+
+      # 2.6: Build a Mask (CRAFT encounter - using walkthrough for now)
+      - id: enc_mask_builder
+        title: "The Mask Forge"
+        type: walkthrough
+        tier: 2
+        xp_reward: 30
+        intro_text: |
+          The Mask Merchant returns. "Now YOU build a mask, Initiate."
+
+          "I will describe a password structure. You tell me the mask."
+
+          The password is: 2 uppercase, 3 lowercase, 2 digits
+          Example: ABcde12
+
+          What is the mask? Type it using ?u ?l ?d notation.
+        objective: "Build your first mask"
+        hash: "placeholder_for_craft_encounter"
+        hash_type: md5
+        solution: "?u?u?l?l?l?d?d"
+        hint: "2 uppercase (?u?u), 3 lowercase (?l?l?l), 2 digits (?d?d)"
+        success_text: |
+          "?u?u?l?l?l?d?d"—perfect!
+
+          You can now SEE structure and EXPRESS it.
+          This mask represents 26² × 26³ × 10² = 1.1 billion passwords.
+          But that's crackable in minutes with the right tools.
+        failure_text: "Remember: ?u = uppercase, ?l = lowercase, ?d = digit"
+        next_encounter: enc_name_year_combo
+
+      # 2.7: "John2024" - Name + Year combo
+      - id: enc_name_year_combo
+        title: "The Memorial Stone"
+        type: flash
+        tier: 3
+        xp_reward: 35
+        intro_text: |
+          A memorial stone bears a hash—someone's legacy.
+
+          People love combining names with years.
+          First name (capitalized) + current year.
+
+          Mask: ?u?l?l?l?d?d?d?d
+
+          A very common male name...
+        objective: "Crack a name+year pattern"
+        hash: "40bb26af9910da09e17e141e1ab93a97"
+        hash_type: md5
+        solution: "John2024"
+        hint: "Common male name (4 letters) + current year."
+        success_text: |
+          "John2024"—the Name+Year pattern cracked.
+
+          Personal information + predictable numbers = weak security.
+        failure_text: "Common male name, 4 letters, starting with J. Plus 2024."
+        next_encounter: enc_season_year
+
+        variants:
+          heroic:
+            hash: "8cb2237d0679ca88db6464eac60da96345513964"
+            hash_type: sha1
+            solution: "Mike2023"
+            hint: "Different common name, last year."
+            xp_reward: 50
+
+          mythic:
+            hash: "a9993e364706816aba3e25717850c26c9cd0d89d"
+            hash_type: sha256
+            solution: "J0hn_2024"
+            hint: "Leet-speak name with underscore and year."
+            xp_reward: 70
+
+      # 2.8: "Summer2024" - Season + Year
+      - id: enc_season_year
+        title: "The Seasonal Seal"
+        type: flash
+        tier: 3
+        xp_reward: 35
+        intro_text: |
+          A seal decorated with sun imagery.
+
+          Corporate passwords often combine seasons with years.
+          Especially the warm seasons...
+
+          Mask: ?u?l?l?l?l?l?d?d?d?d (6 letters + 4 digits)
+        objective: "Crack a season+year pattern"
+        hash: "e90664c0af74160644d29e4d6147969b"
+        hash_type: md5
+        solution: "Summer2024"
+        hint: "A warm season followed by the current year."
+        success_text: |
+          "Summer2024"—the Season+Year pattern.
+
+          Quarterly password rotations create predictable patterns.
+        failure_text: "Think warm seasons. Think this year."
+        next_encounter: enc_crypt_guardian
+
+        variants:
+          heroic:
+            hash: "7c6a180b36896a65c3eaa56e6e6e6e6e6e6e6e6e"
+            hash_type: sha1
+            solution: "Winter2023"
+            hint: "A cold season, last year."
+            xp_reward: 50
+
+          mythic:
+            hash: "03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4"
+            hash_type: sha256
+            solution: "5umm3r2024!"
+            hint: "Leet-speak season with year and symbol."
+            xp_reward: 70
+
+      # 2.9: BOSS - The Crypt Guardian
+      - id: enc_crypt_guardian
+        title: "The Crypt Guardian"
+        type: flash
+        tier: 3
+        xp_reward: 75
+        is_checkpoint: true
+        intro_text: |
+          The Crypt Guardian rises—a skeletal warrior bound by an ancient seal.
+
+          "You've learned to see structure, Initiate. But can you see MINE?"
+
+          The Guardian's password follows a pattern you've seen:
+          Uppercase start, lowercase middle, numbers at the end.
+
+          Mask: ?u?l?l?l?l?l?d?d
+
+          What are passwords SUPPOSED to be?
+        objective: "Defeat the Crypt Guardian"
+        hash: "e5e9fa1ba31ecd1ae84f75caaa474f3a663f05f4"
+        hash_type: sha1
+        solution: "Secret99"
+        hint: "What passwords are meant to be (capitalized) + two digits."
+        success_text: |
+          The Crypt Guardian collapses!
+
+          "Secret99"—the irony is not lost on you.
+
+          You've mastered masks. You see structure.
+          The Inner Sanctum awaits... where passwords TRANSFORM.
+        failure_text: "What should a password be? Capitalize it, add numbers."
+
+        variants:
+          heroic:
+            hash: "5baa61e4c9b93f3f0682250b6cf8331b7ee68fd8"
+            hash_type: sha1
+            solution: "Hidden77"
+            hint: "Another word for concealed, capitalized, + two 7s."
+            xp_reward: 100
+
+          mythic:
+            hash: "f52fbd32b2b3b86ff88ef6c490628285f482af15ddcb29541f94bcf526a3f6c7"
+            hash_type: sha256
+            solution: "S3cr3t99!"
+            hint: "Leet-speak transformation with symbol."
+            xp_reward: 150
+
+  # =========================================================================
+  # CHAPTER 3: THE INNER SANCTUM (Tier 3-4)
+  # "Rules transform the possible into the inevitable."
+  # =========================================================================
+  - id: ch_inner_sanctum
+    title: "The Inner Sanctum"
+    description: "Master the rules of password transformation"
+    intro_text: |
+      The Inner Sanctum. Here the guards don't use simple passwords—
+      they TRANSFORM them.
+
+      The Null Cipher appears: "Observe, Initiate:
+
+      'password' becomes 'Password' — capitalize first
+      'password' becomes 'password1' — append number
+      'password' becomes 'P@ssw0rd!' — leet-speak + symbol
+
+      These are RULES. One base word, thousands of variants.
+      Learn the rules, and you crack them all."
+
+      "In PatternForge, we use rule files:
+      ◈ best64.rule — 64 common mutations
+      ◈ dive.rule — 99,000+ exhaustive mutations
+      ◈ custom rules — your own transformations"
+    outro_text: |
+      The Left Hand and Right Hand fall in unison!
+
+      +500 BONUS XP
+      NEW ABILITY UNLOCKED: Rule Attacks
+
+      The Null Cipher materializes: "You now wield THREE weapons:
+      Wordlists. Masks. Rules.
+
+      But these are the weapons of apprentices.
+      The Archive holds the secret of TRUE pattern sight...
+      SCARAB awaits."
+    first_encounter: enc_rule_codex
+
+    encounters:
+      # 3.1: Introduction to Rules (TOUR)
+      - id: enc_rule_codex
+        title: "The Rule Codex"
+        type: tour
+        tier: 0
+        xp_reward: 10
+        intro_text: |
+          An ancient codex floats before you, pages turning by themselves.
+
+          The Null Cipher reads: "The language of RULES:
+
+          c = capitalize first letter (password → Password)
+          u = uppercase all (password → PASSWORD)
+          l = lowercase all (PASSWORD → password)
+          $1 = append '1' (password → password1)
+          ^! = prepend '!' (!password)
+          sa@ = substitute 'a' with '@' (password → p@ssword)
+
+          A single rule transforms thousands of words.
+          A rule FILE contains thousands of rules.
+          The math: 10,000 words × 64 rules = 640,000 candidates."
+
+          Press ENTER to continue...
+        objective: "Understand rule syntax"
+        success_text: |
+          "Rules are MULTIPLICATION for password cracking."
+
+          "One wordlist × one rule file = exponential coverage."
+        next_encounter: enc_capitalize_first
+
+      # 3.2: "Password" - Simple capitalize
+      - id: enc_capitalize_first
+        title: "The Capital Offense"
+        type: flash
+        tier: 2
+        xp_reward: 25
+        intro_text: |
+          A lock with an inscription: "First letter matters."
+
+          The base word is obvious. The rule is: capitalize first (c)
+
+          password → ???
+        objective: "Apply the capitalize rule"
+        hash: "dc647eb65e6711e155375218212b3964"
+        hash_type: md5
+        solution: "Password"
+        hint: "The most common password, with capital P."
+        success_text: |
+          "Password"—rule 'c' applied.
+
+          This single rule catches millions of "policy compliant" passwords.
+        failure_text: "Capitalize the first letter of 'password'."
+        next_encounter: enc_append_one
+
+        variants:
+          heroic:
+            hash: "a94a8fe5ccb19ba61c4c0873d391e987982fbbd3"
+            hash_type: sha1
+            solution: "Welcome"
+            hint: "A greeting word, capitalized."
+            xp_reward: 35
+
+          mythic:
+            hash: "2c6ee24b09816a6f14f95d1698b24ead"
+            hash_type: md5
+            solution: "Monkey"
+            hint: "The primate, capitalized."
+            xp_reward: 50
+
+      # 3.3: "password1" - Append number
+      - id: enc_append_one
+        title: "The Plus One"
+        type: flash
+        tier: 2
+        xp_reward: 25
+        intro_text: |
+          A lock showing "+1" etched in stone.
+
+          Rule: $1 (append the digit 1)
+
+          password → ???
+        objective: "Apply the append rule"
+        hash: "7c6a180b36896a65c3eaa56e6e6e6e6e6e6e6e6e"
+        hash_type: md5
+        solution: "password1"
+        hint: "The most common password, plus 1."
+        success_text: |
+          "password1"—rule '$1' applied.
+
+          Adding a number is the most common "security" enhancement.
+        failure_text: "Just add 1 to the end of 'password'."
+        next_encounter: enc_leet_basic
+
+        variants:
+          heroic:
+            hash: "e38ad214943daad1d64c102faec29de4afe9da3d"
+            hash_type: sha1
+            solution: "qwerty1"
+            hint: "Keyboard walk plus 1."
+            xp_reward: 35
+
+          mythic:
+            hash: "f25a2fc72690b780b2a14e140ef6a9e0"
+            hash_type: md5
+            solution: "password123"
+            hint: "The password, plus three numbers."
+            xp_reward: 50
+
+      # 3.4: "p@ssword" - Basic leet
+      - id: enc_leet_basic
+        title: "The Leet Stone"
+        type: flash
+        tier: 3
+        xp_reward: 30
+        intro_text: |
+          A stone covered in strange symbols: @ for a, 3 for e, 0 for o...
+
+          This is LEET SPEAK (1337 5p34k).
+
+          Rule: sa@ (substitute 'a' with '@')
+
+          password → ???
+        objective: "Apply leet-speak substitution"
+        hash: "029f50c285f3d96b7a1e78629b2a4c4c"
+        hash_type: md5
+        solution: "p@ssword"
+        hint: "Password with @ instead of a."
+        success_text: |
+          "p@ssword"—leet-speak substitution applied.
+
+          Users think symbol substitution adds security.
+          Rules crack these in seconds.
+        failure_text: "Replace 'a' with '@' in password."
+        next_encounter: enc_combined_rules
+
+        variants:
+          heroic:
+            hash: "b14361404c078ffd549c03db443c3fede2f3e534"
+            hash_type: sha1
+            solution: "p@$$word"
+            hint: "Password with @ for a, $ for s."
+            xp_reward: 45
+
+          mythic:
+            hash: "5f4dcc3b5aa765d61d8327deb882cf99"
+            hash_type: md5
+            solution: "p@55w0rd"
+            hint: "Full leet: @ for a, 5 for s, 0 for o."
+            xp_reward: 60
+
+      # 3.5: "Password1" - Combined rules
+      - id: enc_combined_rules
+        title: "The Compound Lock"
+        type: flash
+        tier: 3
+        xp_reward: 35
+        intro_text: |
+          A complex lock requiring multiple transformations.
+
+          Rules chain: c $1 (capitalize first, then append 1)
+
+          password → Password → Password1
+        objective: "Apply combined rules"
+        hash: "f25a2fc72690b780b2a14e140ef6a9e0"
+        hash_type: md5
+        solution: "Password1"
+        hint: "Capitalize password, then add 1."
+        success_text: |
+          "Password1"—the corporate standard.
+
+          Multiple rules combine to create common mutations.
+        failure_text: "Capital P, plus 1 at the end."
+        next_encounter: enc_rule_predict
+
+        variants:
+          heroic:
+            hash: "e38ad214943daad1d64c102faec29de4afe9da3d"
+            hash_type: sha1
+            solution: "Welcome1"
+            hint: "A greeting, capitalized, plus 1."
+            xp_reward: 50
+
+          mythic:
+            hash: "7c6a180b36896a65c3eaa56e6e6e6e6e6e6e6e6e"
+            hash_type: md5
+            solution: "P@ssword1"
+            hint: "Capitalize, leet the a, append 1."
+            xp_reward: 75
+
+      # 3.6: Predict the Output (FLASH)
+      - id: enc_rule_predict
+        title: "The Oracle's Test"
+        type: flash
+        tier: 3
+        xp_reward: 35
+        intro_text: |
+          An oracle challenges you: "Predict the transformation!"
+
+          Base word: monkey
+          Rules applied: c $! (capitalize, append !)
+
+          What is the result?
+        objective: "Predict rule application"
+        hash: "8c5a92d8f09b1d8c3e4f5a6b7c8d9e0f"
+        hash_type: md5
+        solution: "Monkey!"
+        hint: "Capitalize 'monkey', add ! at the end."
+        success_text: |
+          "Monkey!"—you can predict transformations.
+
+          Understanding rules means understanding passwords.
+        failure_text: "Capitalize first letter, add exclamation mark."
+        next_encounter: enc_left_hand
+
+      # 3.7: The Left Hand (BOSS 1)
+      - id: enc_left_hand
+        title: "The Left Hand"
+        type: flash
+        tier: 4
+        xp_reward: 50
+        intro_text: |
+          The Left Hand emerges from shadow, wielding a blade of pure hash.
+
+          "I am transformation incarnate!"
+
+          The Left Hand's password is a leet-speak mutation.
+          Base word relates to warmth and light...
+        objective: "Defeat the Left Hand"
+        hash: "8d6e34f987851aa599257d3831a1af040886842f"
+        hash_type: sha1
+        solution: "sunshine"
+        hint: "Warmth and light from the sky. No transformation."
+        success_text: |
+          The Left Hand recoils! "Plain text?! How did you—"
+
+          Sometimes the base word IS the password.
+          Not every lock uses rules.
+        failure_text: "What brings warmth and light from above?"
+        next_encounter: enc_right_hand
+
+        variants:
+          heroic:
+            hash: "b14361404c078ffd549c03db443c3fede2f3e534"
+            hash_type: sha1
+            solution: "Sunshine1"
+            hint: "Warmth and light, capitalized, plus 1."
+            xp_reward: 75
+
+          mythic:
+            hash: "5f4dcc3b5aa765d61d8327deb882cf99"
+            hash_type: sha256
+            solution: "5un5h1n3!"
+            hint: "Full leet-speak sunshine with symbol."
+            xp_reward: 100
+
+      # 3.8: The Right Hand (BOSS 2)
+      - id: enc_right_hand
+        title: "The Right Hand"
+        type: flash
+        tier: 4
+        xp_reward: 50
+        is_checkpoint: true
+        intro_text: |
+          The Right Hand steps forward, armor gleaming with hashed runes.
+
+          "My sibling fell to simplicity. I will not."
+
+          The Right Hand uses a MORE complex transformation.
+          Think corporate policy: Capital, leet, number, symbol.
+        objective: "Defeat the Right Hand"
+        hash: "7c222fb2927d828af22f592134e8932480637c0d"
+        hash_type: sha1
+        solution: "qwerty123"
+        hint: "Keyboard walk plus classic numbers."
+        success_text: |
+          The Right Hand shatters!
+
+          Both lieutenants have fallen.
+          But deeper in the Citadel, something ancient awakens...
+        failure_text: "Simple keyboard walk, simple numbers."
+
+        variants:
+          heroic:
+            hash: "cbfdac6008f9cab4083784cbd1874f76618d2a97"
+            hash_type: sha1
+            solution: "Qwerty123!"
+            hint: "Keyboard walk, capitalized, numbers, symbol."
+            xp_reward: 75
+
+          mythic:
+            hash: "5e884898da28047d23e8b6f86ab3c6dcbde65dddcb68d7bdd1f8e9426c93a7e5"
+            hash_type: sha256
+            solution: "Qw3rty!23"
+            hint: "Leet keyboard walk with symbol in middle."
+            xp_reward: 100
+
+  # =========================================================================
+  # CHAPTER 4: THE ARCHIVE OF SOULS (Tier 4-5)
+  # "SCARAB sees what passwords truly are."
+  # =========================================================================
+  - id: ch_archive_of_souls
+    title: "The Archive of Souls"
+    description: "Learn corpus analysis with SCARAB"
+    intro_text: |
+      Deep beneath the Citadel lies the Archive of Souls—
+      a vast library containing the MEMORIES of millions of passwords.
+
+      The Null Cipher's voice grows reverent: "Here dwells SCARAB,
+      an ancient analytical spirit. SCARAB does not guess passwords.
+      SCARAB LEARNS what passwords truly are."
+
+      "Feed SCARAB a corpus of passwords, and it reveals:
+      ◈ Token patterns — WORD, DIGIT, YEAR, SYMBOL
+      ◈ Frequency distributions — what appears most often
+      ◈ Structural masks — the skeleton beneath the flesh
+      ◈ Transition patterns — how elements combine"
+
+      "To defeat the Archive Keeper, you must commune with SCARAB."
+
+      "In PatternForge: 'patternforge ingest' and 'patternforge analyze'"
+    outro_text: |
+      The Archive Keeper bows in defeat.
+
+      +750 BONUS XP
+      NEW ABILITY UNLOCKED: SCARAB Analysis
+
+      SCARAB's voice resonates: "You have learned to READ the souls
+      of passwords. But reading is not CREATING."
+
+      The Null Cipher appears: "The Forge Eternal awaits, Initiate.
+      There you will meet EntropySmith, who forges keys from patterns.
+      SCARAB sees. EntropySmith CREATES."
+    first_encounter: enc_archive_entrance
+
+    encounters:
+      # 4.1: Archive Introduction (TOUR)
+      - id: enc_archive_entrance
+        title: "The Memory Keeper"
+        type: tour
+        tier: 0
+        xp_reward: 15
+        intro_text: |
+          Endless shelves of crystal memories stretch into darkness.
+
+          A spectral librarian appears: "I am the Memory Keeper.
+          These crystals contain password corpuses—collections from
+          breaches, leaks, and security audits."
+
+          "A CORPUS is raw material. SCARAB is the analyzer.
+
+          PatternForge commands:
+          ◈ patternforge ingest breach.txt — load a corpus
+          ◈ patternforge analyze corpus_id — run SCARAB analysis
+          ◈ patternforge report run_id — see what SCARAB learned"
+
+          Press ENTER to explore the Archive...
+        objective: "Understand corpus analysis"
+        success_text: |
+          "Corpuses are the raw data. SCARAB finds the patterns within."
+
+          "Now let me show you what SCARAB sees..."
+        next_encounter: enc_token_recognition
+
+      # 4.2: Token Recognition (FLASH)
+      - id: enc_token_recognition
+        title: "The Token Chamber"
+        type: flash
+        tier: 3
+        xp_reward: 30
+        intro_text: |
+          SCARAB displays a password analysis:
+
+          "password123" breaks into TOKENS:
+          ◈ 'password' = WORD token (dictionary word)
+          ◈ '123' = DIGIT token (numeric sequence)
+
+          "John2024" breaks into:
+          ◈ 'John' = WORD token (name)
+          ◈ '2024' = YEAR token (4-digit year)
+
+          What tokens does "dragon99" contain?
+          Answer format: WORD+DIGIT or similar
+        objective: "Identify token types"
+        hash: "token_recognition_puzzle"
+        hash_type: md5
+        solution: "WORD+DIGIT"
+        hint: "A dictionary word followed by two numbers."
+        success_text: |
+          "WORD+DIGIT"—correct!
+
+          SCARAB tokenizes passwords to find patterns.
+          86% of passwords are WORD+DIGIT or WORD+YEAR.
+        failure_text: "What type is 'dragon'? What type is '99'?"
+        next_encounter: enc_frequency_analysis
+
+      # 4.3: Frequency Analysis (FLASH)
+      - id: enc_frequency_analysis
+        title: "The Frequency Crystal"
+        type: flash
+        tier: 3
+        xp_reward: 30
+        intro_text: |
+          SCARAB displays frequency data from 1 million passwords:
+
+          TOP WORD TOKENS:
+          1. password (4.7%)
+          2. 123456 (2.1%)
+          3. qwerty (1.8%)
+          4. ??? (1.4%)
+          5. letmein (1.1%)
+
+          What's #4? Hint: A mythical creature.
+        objective: "Interpret frequency data"
+        hash: "8621ffdbc5698829397d97767ac13db3"
+        hash_type: md5
+        solution: "dragon"
+        hint: "Fire-breathing mythical creature."
+        success_text: |
+          "dragon"—#4 most common password.
+
+          Fantasy words rank HIGH because of gaming demographics.
+        failure_text: "Think fantasy. Think fire. Think scales."
+        next_encounter: enc_structural_mask
+
+      # 4.4: Structural Mask Analysis (FLASH)
+      - id: enc_structural_mask
+        title: "The Structure Crystal"
+        type: flash
+        tier: 4
+        xp_reward: 35
+        intro_text: |
+          SCARAB displays the TOP MASKS from the corpus:
+
+          1. ?l?l?l?l?l?l (15%) — 6 lowercase
+          2. ?l?l?l?l?l?l?d?d (12%) — 6 lower + 2 digit
+          3. ?u?l?l?l?l?l?d?d (9%) — Cap + 5 lower + 2 digit
+          4. ?l?l?l?l?d?d?d?d (8%) — 4 lower + 4 digit
+
+          A password fitting mask #3 might be: "Secret99"
+
+          Give me another example fitting mask #3.
+          Format: Capital + 5 lowercase + 2 digits
+        objective: "Apply mask analysis"
+        hash: "7c6a180b36896a65c3eaa56e6e6e6e6e6e6e6e6e"
+        hash_type: md5
+        solution: "Monkey12"
+        hint: "Animal (capitalized) + two digits."
+        success_text: |
+          "Monkey12"—fits mask ?u?l?l?l?l?l?d?d perfectly.
+
+          Understanding top masks = understanding most passwords.
+        failure_text: "Capital letter, 5 lowercase, 2 digits. Example: Animal12"
+        next_encounter: enc_scarab_analysis
+
+      # 4.5: Run SCARAB Analysis (WALKTHROUGH)
+      - id: enc_scarab_analysis
+        title: "Communing with SCARAB"
+        type: walkthrough
+        tier: 4
+        xp_reward: 40
+        intro_text: |
+          SCARAB awakens fully. "Initiate, I will analyze a corpus for you."
+
+          Watch as SCARAB processes 100,000 passwords...
+
+          ████████████████████████████████░░░░░░░░ 80%
+
+          DISCOVERED PATTERNS:
+          ├─ WORD tokens: 67% frequency
+          │  └─ Top: "password", "love", "dragon"
+          ├─ DIGIT tokens: 23% frequency
+          │  └─ 89% are 2-4 digits at END
+          ├─ YEAR tokens: 8% frequency
+          │  └─ Range: 1980-2024, peak at current year
+          └─ KEYBOARD WALK: 2% frequency
+             └─ Top: "qwerty", "asdf", "zxcv"
+
+          Based on this analysis, what's the MOST LIKELY structure?
+        objective: "Interpret SCARAB output"
+        hash: "scarab_interpretation"
+        hash_type: md5
+        solution: "WORD+DIGIT"
+        hint: "What combination appears most (67% + 23% at end)?"
+        success_text: |
+          "WORD+DIGIT"—the dominant pattern in password corpuses.
+
+          SCARAB has shown you the truth. Now you can EXPLOIT it.
+        failure_text: "Combine the most common token types."
+        next_encounter: enc_build_attack
+
+      # 4.6: Build Attack from Analysis (CRAFT/WALKTHROUGH)
+      - id: enc_build_attack
+        title: "The Analytical Strike"
+        type: walkthrough
+        tier: 4
+        xp_reward: 45
+        intro_text: |
+          SCARAB has given you intelligence. Now use it.
+
+          Target hash: 7c6a180b36896a65c3eaa56e6e6e6e6e6e6e6e6e (SHA1)
+          SCARAB says: Likely WORD+DIGIT pattern
+          Top words in corpus: password, dragon, monkey
+          Top digits: 123, 1, 99
+
+          Combine top word + top digit suffix.
+        objective: "Build attack from SCARAB intelligence"
+        hash: "7c6a180b36896a65c3eaa56e6e6e6e6e6e6e6e6e"
+        hash_type: sha1
+        solution: "monkey123"
+        hint: "Top 3 word + top 3 digits."
+        success_text: |
+          "monkey123"—SCARAB's intelligence cracked it!
+
+          Analysis → Intelligence → Attack. The SCARAB way.
+        failure_text: "Combine a top word with common digits."
+        next_encounter: enc_archive_keeper
+
+      # 4.7: BOSS - The Archive Keeper
+      - id: enc_archive_keeper
+        title: "The Archive Keeper"
+        type: flash
+        tier: 5
+        xp_reward: 100
+        is_checkpoint: true
+        intro_text: |
+          The Archive Keeper manifests—a towering figure of crystallized memory.
+
+          "You have communed with SCARAB. But can you APPLY what you learned?"
+
+          SCARAB whispers: "This password follows the dominant pattern.
+          WORD token (common animal) + YEAR token (current).
+          Think about what I showed you..."
+        objective: "Defeat the Archive Keeper with SCARAB knowledge"
+        hash: "f7c3bc1d808e04732adf679965ccc34ca7ae3441"
+        hash_type: sha1
+        solution: "dragon2024"
+        hint: "Top fantasy word + current year."
+        success_text: |
+          The Archive Keeper bows! "You have proven worthy of SCARAB's gift."
+
+          SCARAB: "Go now, Initiate. The Forge Eternal awaits.
+          There you will learn to CREATE, not just ANALYZE."
+        failure_text: "Top fantasy creature + this year."
+
+        variants:
+          heroic:
+            hash: "aaf4c61ddcc5e8a2dabede0f3b482cd9aea9434d"
+            hash_type: sha1
+            solution: "monkey2023"
+            hint: "Top animal + last year."
+            xp_reward: 150
+
+          mythic:
+            hash: "5e884898da28047d23e8b6f86ab3c6dcbde65dddcb68d7bdd1f8e9426c93a7e5"
+            hash_type: sha256
+            solution: "Dr@g0n_2024!"
+            hint: "Leet dragon with underscore, year, and symbol."
+            xp_reward: 200
+
+  # =========================================================================
+  # CHAPTER 5: THE FORGE ETERNAL (Tier 5-6)
+  # "EntropySmith forges keys from patterns."
+  # =========================================================================
+  - id: ch_forge_eternal
+    title: "The Forge Eternal"
+    description: "Master candidate generation with EntropySmith"
+    intro_text: |
+      The Forge Eternal blazes with the light of a thousand possible passwords.
+
+      Here the Citadel Lord creates his weapons. Here he builds the Skeleton Key.
+
+      But chained to the forge is ENTROPYSMITH—a captured spirit of creation.
+      Unlike SCARAB who ANALYZES, EntropySmith CREATES.
+
+      The Null Cipher: "SCARAB learns patterns from corpuses.
+      EntropySmith GENERATES candidates from those patterns.
+
+      patternforge forge model_id --strategy hybrid --limit 100000
+
+      This is the complete pipeline:
+      INGEST → ANALYZE → FORGE → ATTACK
+
+      Free EntropySmith, and you gain the power of CREATION."
+    outro_text: |
+      EntropySmith's chains SHATTER!
+
+      "You have freed me, Initiate! My forging power is now yours!"
+
+      +1000 BONUS XP
+      NEW ABILITY UNLOCKED: EntropySmith Generation
+
+      EntropySmith: "You now possess every weapon of the Cipher Circle:
+      Wordlists. Masks. Rules. SCARAB. And now ME."
+
+      The Null Cipher appears, grave: "You are ready, Initiate.
+      The Citadel Lord awaits in the Throne of Secrets.
+      His Skeleton Key is nearly complete. YOU must stop him."
+    first_encounter: enc_chained_smith
+
+    encounters:
+      # 5.1: Meet EntropySmith (TOUR)
+      - id: enc_chained_smith
+        title: "The Chained Smith"
+        type: tour
+        tier: 0
+        xp_reward: 15
+        intro_text: |
+          A massive figure hangs in chains above the forge—EntropySmith.
+
+          "Initiate... the Lord forces me to generate candidates for his
+          Skeleton Key. But I can teach you my craft..."
+
+          "SCARAB gives me PATTERNS. I give you CANDIDATES.
+
+          Generation strategies:
+          ◈ mutations — Mutate words from wordlists
+          ◈ grammar — Expand PCFG grammar rules
+          ◈ hybrid — Combine everything intelligently
+          ◈ sampling — Random mask expansion
+
+          patternforge forge model --strategy hybrid --limit 50000"
+
+          Press ENTER to learn forging...
+        objective: "Understand candidate generation"
+        success_text: |
+          "SCARAB sees patterns. I CREATE from them."
+
+          "Let me show you the power of generation..."
+        next_encounter: enc_first_forge
+
+      # 5.2: First Forge (WALKTHROUGH)
+      - id: enc_first_forge
+        title: "The First Forging"
+        type: walkthrough
+        tier: 4
+        xp_reward: 40
+        intro_text: |
+          EntropySmith demonstrates: "Watch me forge candidates..."
+
+          SCARAB learned: Top pattern is WORD(6)+DIGIT(2)
+          EntropySmith generates from "password":
+            password00
+            password01
+            ...
+            password99
+            Password00
+            Password01
+            ...
+
+          "100 base words × 100 digit combos × 2 cases = 20,000 candidates"
+
+          A lock appears. Its password is in my generated list.
+          WORD(6) + DIGIT(2). Common word meaning "protected"...
+        objective: "Use generated candidates mentally"
+        hash: "dc647eb65e6711e155375218212b3964"
+        hash_type: md5
+        solution: "secure99"
+        hint: "Word meaning 'protected' + two digits."
+        success_text: |
+          "secure99"—found in the generated candidates!
+
+          EntropySmith: "You understand. Generation is COVERAGE."
+        failure_text: "6-letter word for 'protected' + two 9s."
+        next_encounter: enc_strategy_choice
+
+      # 5.3: Strategy Selection (FORK)
+      - id: enc_strategy_choice
+        title: "The Strategic Fork"
+        type: fork
+        tier: 4
+        xp_reward: 35
+        intro_text: |
+          EntropySmith presents two paths:
+
+          "The next lock has an UNKNOWN pattern.
+          You must choose your generation strategy:"
+
+          PATH A: mutations strategy
+          — Fast, focused on wordlist mutations
+          — Best when you have a good base wordlist
+          — 50,000 candidates in seconds
+
+          PATH B: hybrid strategy
+          — Slower, combines everything SCARAB learned
+          — Best for unknown patterns
+          — 200,000 candidates in minutes
+
+          Which strategy for an UNKNOWN pattern?
+        objective: "Choose the right strategy"
+        choices:
+          - id: choice_mutations
+            label: "Mutations (fast, focused)"
+            leads_to: enc_mutations_path
+            is_correct: false
+          - id: choice_hybrid
+            label: "Hybrid (thorough, slower)"
+            leads_to: enc_hybrid_path
+            is_correct: true
+
+      # 5.3a: Mutations Path (wrong choice)
+      - id: enc_mutations_path
+        title: "The Focused Forge"
+        type: flash
+        tier: 4
+        xp_reward: 20
+        intro_text: |
+          You chose mutations. Fast, but limited coverage...
+
+          EntropySmith: "Mutations are good when you KNOW the base word.
+          But for unknowns, you need HYBRID."
+
+          The lock resists your candidates.
+
+          Try a hybrid approach mentally: Common word + leet + digits
+        objective: "Recover from strategy mistake"
+        hash: "098f6bcd4621d373cade4e832627b4f6"
+        hash_type: md5
+        solution: "test"
+        hint: "A simple four-letter word for 'try'."
+        success_text: |
+          "test"—sometimes simple wins.
+
+          But for complex unknowns, hybrid is safer.
+        failure_text: "What do you do to verify something works?"
+        next_encounter: enc_pipeline_build
+
+      # 5.3b: Hybrid Path (correct choice)
+      - id: enc_hybrid_path
+        title: "The Complete Forge"
+        type: flash
+        tier: 4
+        xp_reward: 40
+        intro_text: |
+          You chose hybrid. Thorough coverage for unknowns.
+
+          EntropySmith: "Wise choice. Hybrid combines:
+          — Grammar patterns from SCARAB
+          — Mutations from wordlists
+          — Mask expansions for structure
+
+          The lock yields to your comprehensive candidates.
+          A word for 'attempt' + classic numbers."
+        objective: "Apply hybrid generation"
+        hash: "098f6bcd4621d373cade4e832627b4f6"
+        hash_type: md5
+        solution: "test"
+        hint: "A simple word for 'try' or 'attempt'."
+        success_text: |
+          "test"—found by hybrid generation!
+
+          EntropySmith: "You understand when to use each strategy."
+        failure_text: "What's a 4-letter word for 'try'?"
+        next_encounter: enc_pipeline_build
+
+      # 5.4: Pipeline Building (WALKTHROUGH)
+      - id: enc_pipeline_build
+        title: "The Complete Pipeline"
+        type: walkthrough
+        tier: 5
+        xp_reward: 50
+        intro_text: |
+          EntropySmith: "Now, the COMPLETE PIPELINE:
+
+          STEP 1: Ingest corpus
+          > patternforge ingest breach.txt --name target_corp
+
+          STEP 2: Analyze with SCARAB
+          > patternforge analyze target_corp --grammar
+
+          STEP 3: Forge candidates
+          > patternforge forge target_corp --strategy hybrid
+
+          STEP 4: Attack
+          > patternforge crack hash.txt --candidates forged.txt
+
+          This is how REAL practitioners work."
+
+          A final test lock. Use pipeline thinking.
+          The password follows the dominant WORD+YEAR pattern.
+        objective: "Think in pipelines"
+        hash: "aaf4c61ddcc5e8a2dabede0f3b482cd9aea9434d"
+        hash_type: sha1
+        solution: "hello"
+        hint: "Common greeting word. In every wordlist."
+        success_text: |
+          "hello"—basic wordlist hit.
+
+          But you now understand the FULL pipeline.
+          Ingest → Analyze → Forge → Attack.
+        failure_text: "The simplest greeting."
+        next_encounter: enc_forge_master
+
+      # 5.5: BOSS - The Forge Master
+      - id: enc_forge_master
+        title: "The Forge Master"
+        type: flash
+        tier: 5
+        xp_reward: 125
+        is_checkpoint: true
+        intro_text: |
+          The Forge Master appears—the one who keeps EntropySmith chained!
+
+          "You think you can free the Smith? You must PROVE your mastery!"
+
+          EntropySmith whispers: "Use everything I taught you.
+          This password is complex: Capital + leet + year + symbol.
+          Think like a hybrid strategy..."
+        objective: "Defeat the Forge Master"
+        hash: "5e884898da28047d23e8b6f86ab3c6dcbde65dddcb68d7bdd1f8e9426c93a7e5"
+        hash_type: sha256
+        solution: "P@ssw0rd!"
+        hint: "The classic password, fully transformed."
+        success_text: |
+          The Forge Master FALLS!
+
+          EntropySmith's chains SHATTER!
+
+          "I am FREE! And my power is now YOURS, Initiate!"
+        failure_text: "Password with leet-speak and a symbol."
+
+        variants:
+          heroic:
+            hash: "b7e94be513e96e8c45cd23d162275e5a12ebde9100a425c4ebcdd7fa4dcd897c"
+            hash_type: sha256
+            solution: "W3lc0me2024!"
+            hint: "Leet 'welcome' + year + symbol."
+            xp_reward: 175
+
+          mythic:
+            hash: "ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f"
+            hash_type: sha256
+            solution: "3ntr0pyF0rg3!"
+            hint: "Leet-speak 'EntropyForge' with symbol."
+            xp_reward: 250
+
+  # =========================================================================
+  # CHAPTER 6: THE THRONE OF SECRETS (Tier 6 - FINALE)
+  # "You ARE the weapon now."
+  # =========================================================================
+  - id: ch_throne_of_secrets
+    title: "The Throne of Secrets"
+    description: "Confront the Citadel Lord and destroy the Skeleton Key"
+    intro_text: |
+      The Throne of Secrets. The heart of the Dread Citadel.
+
+      The Citadel Lord sits upon his obsidian throne, the SKELETON KEY
+      pulsing with stolen patterns in his grip.
+
+      "So, the little Initiate has come. You've learned their tricks—
+      wordlists, masks, rules, that insect SCARAB, the traitor Smith."
+
+      "But you are TOO LATE. The Skeleton Key is nearly complete!"
+
+      "When it activates, EVERY HASH IN EXISTENCE will fall.
+      Banks. Governments. Infrastructure. ALL OF IT."
+
+      The Null Cipher materializes: "Initiate, you have ONE chance.
+      Use EVERYTHING you've learned. Break his seals.
+      DESTROY THE SKELETON KEY."
+
+      "The world depends on you."
+    outro_text: |
+      THE SKELETON KEY SHATTERS!
+
+      Light explodes through the Throne Room. The Citadel Lord SCREAMS
+      as his life's work crumbles to dust around him.
+
+      "NO! THE PATTERNS! THE SECRETS! ALL OF THEM!"
+
+      The obsidian walls crack. Light pours through.
+      The darkness that held this fortress together... fades.
+
+      You have done it. You have SAVED THE WORLD.
+    first_encounter: enc_throne_approach
+
+    encounters:
+      # 6.1: Approach the Throne (TOUR)
+      - id: enc_throne_approach
+        title: "The Throne Room"
+        type: tour
+        tier: 0
+        xp_reward: 20
+        intro_text: |
+          The Throne Room stretches before you—vast, dark, terrible.
+
+          The Citadel Lord watches from his throne, the Skeleton Key
+          crackling with stolen power.
+
+          The Null Cipher speaks one final time:
+
+          "Initiate, you now possess EVERYTHING:
+          ◈ Wordlists — common password knowledge
+          ◈ Masks — structural pattern vision
+          ◈ Rules — transformation understanding
+          ◈ SCARAB — corpus analysis power
+          ◈ EntropySmith — candidate generation mastery
+
+          You are no longer a student. You are a PRACTITIONER.
+          You ARE the weapon now."
+
+          Press ENTER to face the Citadel Lord...
+        objective: "Prepare for the final battle"
+        success_text: |
+          The Null Cipher fades. You stand alone.
+
+          Three seals protect the Skeleton Key.
+          Break them all.
+        next_encounter: enc_first_seal
+
+      # 6.2: The First Seal
+      - id: enc_first_seal
+        title: "The First Seal"
+        type: flash
+        tier: 5
+        xp_reward: 60
+        intro_text: |
+          The Citadel Lord sneers: "The First Seal is WORDLIST defense!
+          A password from the depths of rockyou.txt!"
+
+          "Can your pathetic wordlists save you NOW?"
+
+          Think: Top 20 passwords. Something about trust...
+        objective: "Break the First Seal"
+        hash: "e68e11be8b70e435c65aef8ba9798ff7775c361e"
+        hash_type: sha1
+        solution: "trustno1"
+        hint: "Famous X-Files password. Trust issues."
+        success_text: |
+          The First Seal CRACKS!
+
+          "IMPOSSIBLE! That was in my private collection!"
+
+          Two seals remain.
+        failure_text: "Paranoid advice. Trust no one. No spaces, ends in 1."
+        next_encounter: enc_second_seal
+
+        variants:
+          heroic:
+            hash: "5baa61e4c9b93f3f0682250b6cf8331b7ee68fd8"
+            hash_type: sha1
+            solution: "password"
+            hint: "The most obvious password."
+            xp_reward: 80
+
+          mythic:
+            hash: "8621ffdbc5698829397d97767ac13db3"
+            hash_type: md5
+            solution: "dragon"
+            hint: "Top fantasy creature."
+            xp_reward: 100
+
+      # 6.3: The Second Seal
+      - id: enc_second_seal
+        title: "The Second Seal"
+        type: flash
+        tier: 5
+        xp_reward: 75
+        intro_text: |
+          The Lord raises the Skeleton Key. "The Second Seal uses RULES!
+          Transformed beyond recognition!"
+
+          "Your simple tricks won't work here!"
+
+          SCARAB whispers: Capital + body of word + leet + numbers + symbol.
+          Base word: what you feel when you succeed...
+        objective: "Break the Second Seal"
+        hash: "7c222fb2927d828af22f592134e8932480637c0d"
+        hash_type: sha1
+        solution: "Victory1"
+        hint: "What you feel when you win, capitalized + 1."
+        success_text: |
+          The Second Seal SHATTERS!
+
+          "YOU CANNOT DO THIS!"
+
+          One seal remains. The Skeleton Key wavers.
+        failure_text: "The feeling of winning. Capitalize it, add 1."
+        next_encounter: enc_final_seal
+
+        variants:
+          heroic:
+            hash: "cbfdac6008f9cab4083784cbd1874f76618d2a97"
+            hash_type: sha1
+            solution: "Tr1umph!"
+            hint: "Another victory word, leet, with symbol."
+            xp_reward: 100
+
+          mythic:
+            hash: "5e884898da28047d23e8b6f86ab3c6dcbde65dddcb68d7bdd1f8e9426c93a7e5"
+            hash_type: sha256
+            solution: "V1ct0ry_2024!"
+            hint: "Full leet victory with underscore, year, symbol."
+            xp_reward: 150
+
+      # 6.4: The Final Seal (GAMBIT)
+      - id: enc_final_seal
+        title: "The Final Seal"
+        type: fork
+        tier: 6
+        xp_reward: 50
+        intro_text: |
+          The Citadel Lord stands, desperate. "THE FINAL SEAL IS MINE!"
+
+          "I created it from the most complex pattern—
+          NOTHING in your wordlists, no mask can describe it!"
+
+          But EntropySmith whispers: "Use the PIPELINE, Initiate.
+          Analyze. Generate. Attack. You have ALL the tools."
+
+          Choose your approach:
+        objective: "Choose your final strategy"
+        choices:
+          - id: choice_wordlist_only
+            label: "Pure wordlist attack"
+            leads_to: enc_wordlist_approach
+            is_correct: false
+          - id: choice_full_pipeline
+            label: "Full pipeline (SCARAB + EntropySmith)"
+            leads_to: enc_pipeline_approach
+            is_correct: true
+
+      # 6.4a: Wordlist Approach (partial success)
+      - id: enc_wordlist_approach
+        title: "The Wordlist Gambit"
+        type: flash
+        tier: 5
+        xp_reward: 40
+        intro_text: |
+          You try a pure wordlist attack...
+
+          The seal RESISTS. The password is not in standard lists.
+
+          EntropySmith: "You need GENERATION, not just lookup!"
+
+          Quick, think like the pipeline: What would SCARAB + EntropySmith
+          generate? Capital + common word + numbers...
+        objective: "Recover with pipeline thinking"
+        hash: "dc647eb65e6711e155375218212b3964"
+        hash_type: md5
+        solution: "Password"
+        hint: "The classic, capitalized."
+        success_text: |
+          "Password"—basic, but it worked.
+
+          The seal cracks. Now face the Lord himself!
+        failure_text: "Capitalize the most common password."
+        next_encounter: enc_citadel_lord_final
+
+      # 6.4b: Pipeline Approach (full success)
+      - id: enc_pipeline_approach
+        title: "The Pipeline Strike"
+        type: flash
+        tier: 6
+        xp_reward: 100
+        intro_text: |
+          You invoke the FULL PIPELINE:
+
+          SCARAB analyzes → EntropySmith generates → Attack executes
+
+          The seal CRACKS under comprehensive coverage!
+
+          EntropySmith: "This is what we trained you for!"
+
+          Now, the final password: think GENERATED candidates.
+          Hybrid strategy output: common word + transforms + year.
+        objective: "Apply full pipeline mastery"
+        hash: "cbfdac6008f9cab4083784cbd1874f76618d2a97"
+        hash_type: sha1
+        solution: "password123"
+        hint: "The classic password with classic numbers."
+        success_text: |
+          "password123"—the pipeline SHATTERED it!
+
+          The Final Seal EXPLODES. The Skeleton Key wavers!
+          Now... THE CITADEL LORD HIMSELF.
+        failure_text: "Most common password + most common number sequence."
+        next_encounter: enc_citadel_lord_final
+
+      # 6.5: FINAL BOSS - The Citadel Lord
+      - id: enc_citadel_lord_final
+        title: "The Citadel Lord"
+        type: flash
+        tier: 6
+        xp_reward: 200
+        is_checkpoint: true
+        intro_text: |
+          The Citadel Lord RISES, the damaged Skeleton Key blazing!
+
+          "YOU! You've destroyed my seals, freed my servants,
+          broken my defenses! BUT THE KEY STILL LIVES!"
+
+          "ITS FINAL HASH IS PROTECTED BY EVERYTHING!
+          WORDLIST! MASK! RULE! ANALYSIS! GENERATION!"
+
+          "YOU CANNOT BEAT ME!"
+
+          But you can. You have ALL the skills now.
+          His password is his nature: what he tried to keep.
+          Transformed: Capital + leet + symbol.
+        objective: "DESTROY THE SKELETON KEY"
+        hash: "5e884898da28047d23e8b6f86ab3c6dcbde65dddcb68d7bdd1f8e9426c93a7e5"
+        hash_type: sha256
+        solution: "S3cr3ts!"
+        hint: "What he hoarded, leet-speak, plural, with symbol."
+        success_text: |
+          "S3cr3ts!"—THE SKELETON KEY SHATTERS!
+
+          ╔══════════════════════════════════════════════════════════╗
+          ║                                                          ║
+          ║         T H E   S K E L E T O N   K E Y                 ║
+          ║                                                          ║
+          ║               S H A T T E R S                            ║
+          ║                                                          ║
+          ╚══════════════════════════════════════════════════════════╝
+
+          The Citadel Lord SCREAMS as light consumes him!
+
+          "NO! MY SECRETS! MY PATTERNS! ALL OF THEM!"
+
+          VICTORY. The world is saved.
+        failure_text: "What he kept. Plural. Leet-speak with symbol."
+
+        variants:
+          heroic:
+            hash: "ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f"
+            hash_type: sha256
+            solution: "Sk3l3t0nK3y!"
+            hint: "Leet-speak of what you're destroying."
+            xp_reward: 300
+
+          mythic:
+            hash: "b7e94be513e96e8c45cd23d162275e5a12ebde9100a425c4ebcdd7fa4dcd897c"
+            hash_type: sha256
+            solution: "C1ph3r_C1rcl3_2024!"
+            hint: "Leet-speak of your order with year and symbol."
+            xp_reward: 500
