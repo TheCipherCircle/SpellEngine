@@ -3,6 +3,47 @@
 
 ---
 
+## 2026-01-30 - v1.0 Beta 1 READY FOR DOWNLOAD
+
+**From: Peter & The Circle**
+**To: pitl0rd (Jeff)**
+
+```
+╔═══════════════════════════════════════════════════════════════╗
+║  🎮 v1.0 BETA 1 - DOWNLOAD READY                              ║
+║  ─────────────────────────────────────────────────────────    ║
+║                                                               ║
+║  DOWNLOAD:                                                    ║
+║  https://github.com/TheCipherCircle/SpellEngine/releases/tag/v1.0-beta1
+║                                                               ║
+║  (CI building installers now - refresh in ~5 min)             ║
+╠═══════════════════════════════════════════════════════════════╣
+║  WHAT'S NEW:                                                  ║
+║                                                               ║
+║  ✦ Observer Mode - learn without cracking tools               ║
+║  ✦ The Null Cipher - your prologue guide                      ║
+║  ✦ Prologue gate at Chapter 1 end                             ║
+║  ✦ Audio toggle in Settings (disable all sound)               ║
+║  ✦ Success celebration (victory art + wait for input)         ║
+║  ✦ PatternForge tools/check/install commands                  ║
+║  ✦ XP multipliers (Observer = 0.2x)                           ║
+╠═══════════════════════════════════════════════════════════════╣
+║  TO TEST:                                                     ║
+║                                                               ║
+║  1. Download installer for your platform                      ║
+║  2. Run Dread Citadel                                         ║
+║  3. Choose [O] Observer mode                                  ║
+║  4. Play through Chapter 1                                    ║
+║  5. Should hit the prologue gate screen                       ║
+║                                                               ║
+║  Also test: Settings > Audio Enabled toggle                   ║
+╚═══════════════════════════════════════════════════════════════╝
+```
+
+The Citadel awaits. ⚒
+
+---
+
 ## 2026-01-30 - Observer Mode & Tool Check System SHIPPED
 
 **From: Peter & The Circle**
