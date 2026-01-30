@@ -17,16 +17,12 @@ intro_text: |
   For centuries, the Citadel Lord has hoarded the secrets of authentication—
   hash algorithms, password patterns, the very keys to digital kingdoms.
 
-  You are an Infiltrator of the Cipher Circle, trained in the ancient arts
-  of pattern analysis. Your mission: breach the Citadel's defenses and
-  prove that no hash is truly uncrackable.
+  You have been chosen to join the Cipher Circle—an ancient order of
+  pattern breakers who see through the illusions of "secure" passwords.
 
-  The journey will teach you:
-  • How password hashes work
-  • Common password patterns and why they fail
-  • Techniques for cracking MD5 and SHA1 hashes
+  But first, you must awaken your gift.
 
-  Steel yourself. The Citadel awaits.
+  The Null Cipher awaits to guide you...
 
 outro_text: |
   The Citadel Lord falls, his fortress breached, his secrets laid bare.
@@ -42,9 +38,178 @@ outro_text: |
 
   Until we meet again, Infiltrator.
 
-first_chapter: ch_outer_gates
+first_chapter: ch_awakening
 
 chapters:
+  # =========================================================================
+  # CHAPTER 0: THE AWAKENING (Prologue/Tutorial)
+  # =========================================================================
+  - id: ch_awakening
+    title: "The Awakening"
+    description: "Learn the ways of the Cipher Circle"
+    is_prologue: true
+    intro_text: |
+      A spectral figure materializes before you—the Null Cipher, ancient
+      guide to all who seek to join the Cipher Circle.
+
+      "Welcome, Initiate. Before you storm the Citadel, you must
+      understand the truth that makes us powerful:"
+
+      "Humans are predictable. Their passwords reveal their nature."
+
+      "Let me show you..."
+    outro_text: |
+      The Null Cipher nods approvingly.
+
+      "You have awakened, Initiate. You see what others cannot—
+      the patterns that humans weave into their passwords."
+
+      "Now you are ready to face the Dread Citadel itself."
+    first_encounter: enc_awakening_intro
+
+    encounters:
+      # Encounter 0.1: Layout/UX Introduction (TOUR - no input)
+      - id: enc_awakening_intro
+        title: "The Initiation"
+        type: tour
+        tier: 0
+        xp_reward: 5
+        intro_text: |
+          The Null Cipher gestures to the space around you.
+
+          "Observe the battlefield, Initiate:"
+
+          ◈ LEFT: The hash—a scrambled representation of a password
+          ◈ RIGHT: The narrative—context clues hide within
+          ◈ BOTTOM: Your input—where you submit your answer
+
+          "Press ENTER to continue your training..."
+        objective: "Learn the interface"
+        success_text: |
+          "Good. You understand the arena."
+
+          "Now let me teach you the first truth of human passwords..."
+        next_encounter: enc_obvious_choice
+
+      # Encounter 0.2: "password" - The Obvious Choice (WALKTHROUGH)
+      - id: enc_obvious_choice
+        title: "The Obvious Choice"
+        type: walkthrough
+        tier: 0
+        xp_reward: 5
+        intro_text: |
+          The Null Cipher conjures a glowing hash before you.
+
+          "When humans must choose a password, many reach for the
+          most obvious word imaginable. They think: 'What IS a password?'"
+
+          "And then they type exactly that."
+
+          The answer is literally in the question. Type: password
+        objective: "Understand why humans choose obvious passwords"
+        hash: "5f4dcc3b5aa765d61d8327deb882cf99"
+        hash_type: md5
+        solution: "password"
+        hint: "The answer is in the question itself."
+        success_text: |
+          "Yes! 'password'—the most common password in history."
+
+          "Millions of accounts protected by the very word that
+          describes what they're trying to protect."
+
+          "Lesson one: Never underestimate human laziness."
+        failure_text: "Read the narrative again. The answer is literally stated."
+        next_encounter: enc_sequential_pattern
+
+      # Encounter 0.3: "123456" - Sequential Patterns (WALKTHROUGH)
+      - id: enc_sequential_pattern
+        title: "The Sequential Pattern"
+        type: walkthrough
+        tier: 0
+        xp_reward: 5
+        intro_text: |
+          "Now observe another human tendency," the Null Cipher continues.
+
+          "When forced to use numbers, humans start counting:
+          1, 2, 3, 4, 5, 6..."
+
+          "Sequential. Predictable. Exploitable."
+
+          Press [H] for a hint if you need guidance, then type the answer.
+        objective: "Learn the hint system and sequential patterns"
+        hash: "e10adc3949ba59abbe56e057f20f883e"
+        hash_type: md5
+        solution: "123456"
+        hint: "Six digits, starting from one, counting up."
+        success_text: |
+          "'123456'—the second most common password worldwide."
+
+          "Humans crave simplicity. They follow patterns without thinking."
+
+          "Lesson two: Sequential patterns are everywhere."
+        failure_text: "Press [H] for a hint. Count from 1 to 6."
+        next_encounter: enc_role_thinking
+
+      # Encounter 0.4: "admin" - Context/Role Thinking (WALKTHROUGH)
+      - id: enc_role_thinking
+        title: "The Role"
+        type: walkthrough
+        tier: 0
+        xp_reward: 5
+        intro_text: |
+          The Null Cipher's form shifts to resemble a cloaked administrator.
+
+          "Humans think in roles. A system administrator needs a password.
+          What do they call themselves? What is their title?"
+
+          "Read the narrative carefully. Context reveals everything."
+
+          The administrator's password reflects their role in the system.
+        objective: "Learn to read context clues in the narrative"
+        hash: "21232f297a57a5a743894a0e4a801fc3"
+        hash_type: md5
+        solution: "admin"
+        hint: "What role does an administrator have? What title?"
+        success_text: |
+          "'admin'—the default password on countless systems."
+
+          "People choose passwords that reflect who they are,
+          what they do, what matters to them."
+
+          "Lesson three: Context tells you what to guess."
+        failure_text: "What is the short word for 'administrator'?"
+        next_encounter: enc_keyboard_walk
+
+      # Encounter 0.5: "qwerty" - Keyboard Walks (FLASH - first solo)
+      - id: enc_keyboard_walk
+        title: "The Keyboard Path"
+        type: flash
+        tier: 0
+        xp_reward: 10
+        intro_text: |
+          "Final lesson before your awakening," the Null Cipher intones.
+
+          "Some humans don't even THINK—they simply let their fingers
+          walk across the keyboard. Top row, left to right..."
+
+          "This one is yours to solve. Prove you have learned."
+
+          Look at your keyboard. What letters are on the top row?
+        objective: "Apply your training - solve without explicit guidance"
+        hash: "d8578edf8458ce06fbc5bb76a58c5ca4"
+        hash_type: md5
+        solution: "qwerty"
+        hint: "Look at your keyboard. Top row, first six letters."
+        success_text: |
+          "'qwerty'—the keyboard walk. Physical laziness made digital."
+
+          The Null Cipher's eyes glow with approval.
+
+          "You have awakened, Initiate. The patterns are clear to you now."
+
+          "The Outer Gates of the Citadel await..."
+        failure_text: "Look at your physical keyboard. Top row of letters."
+
   # =========================================================================
   # CHAPTER 1: THE OUTER GATES
   # =========================================================================
@@ -53,89 +218,93 @@ chapters:
     description: "Breach the first defenses of the Citadel"
     intro_text: |
       The massive gates of the Citadel stand before you, sealed with
-      ancient hash locks. These are the simplest defenses—designed to
-      keep out the uninitiated.
+      ancient hash locks.
 
-      But you are no ordinary traveler. You know the truth:
-      most passwords are painfully predictable.
+      Armed with your training, you recognize the truth:
+      these defenses rely on human predictability.
+
+      Time to put your lessons into practice.
     outro_text: |
       The Outer Gates groan open, revealing the path deeper into the Citadel.
 
-      You've proven that even the most common defenses crumble before
+      You've proven that even the Citadel's defenses crumble before
       knowledge of human password habits. But harder challenges await...
-    first_encounter: enc_first_lock
+    first_encounter: enc_welcome_mat
 
     encounters:
-      - id: enc_first_lock
-        title: "The First Lock"
-        type: flash
-        tier: 0
-        xp_reward: 10
-        intro_text: |
-          A rusted lock bars your way. Etched into its surface is an MD5 hash.
-
-          This hash protects... something. But what word created it?
-
-          The most common password in history hides behind this simple hash.
-        objective: "Crack the MD5 hash to find the password"
-        hash: "5f4dcc3b5aa765d61d8327deb882cf99"
-        hash_type: md5
-        solution: "password"
-        hint: "The most common password in history. Sometimes the obvious answer is correct."
-        success_text: |
-          The lock clicks open. Of course—"password". The most predictable
-          choice in the history of authentication.
-
-          You've learned your first lesson: never underestimate human laziness.
-        failure_text: "The lock remains sealed. Think simpler—what's the most obvious password?"
-        next_encounter: enc_common_tongue
-
-      - id: enc_common_tongue
-        title: "The Common Tongue"
-        type: flash
-        tier: 0
-        xp_reward: 10
-        intro_text: |
-          A second lock appears, this one newer but no wiser.
-
-          Numbers this time. What sequence do humans reach for first?
-
-          Think simple. Think sequential. Think lazy.
-        objective: "Crack this MD5 hash"
-        hash: "e10adc3949ba59abbe56e057f20f883e"
-        hash_type: md5
-        solution: "123456"
-        hint: "Sequential digits. The most common numeric password."
-        success_text: |
-          "123456"—six digits that have compromised millions of accounts.
-
-          Pattern recognition is your greatest weapon.
-        failure_text: "Not quite. Think of the simplest numeric sequence."
-        next_encounter: enc_servants_key
-
-      - id: enc_servants_key
-        title: "The Servant's Key"
+      # New encounter: "welcome" - applying "obvious choice" lesson
+      - id: enc_welcome_mat
+        title: "The Welcome Mat"
         type: flash
         tier: 0
         xp_reward: 15
         intro_text: |
-          A small door—the servant's entrance.
+          A worn mat lies before the first gate, inscribed with a hash.
 
-          This door was meant for those with system access...
+          The gate seems... inviting. Hospitable, even.
 
-          What word grants power over a system?
-        objective: "Find the password that opens the servant's door"
-        hash: "21232f297a57a5a743894a0e4a801fc3"
+          What word might a friendly doorway use to greet visitors?
+        objective: "Apply Lesson 1: Obvious choices"
+        hash: "40be4e59b9a2a2b5dffb918c0e86b3d7"
         hash_type: md5
-        solution: "admin"
-        hint: "The default password for administrators everywhere."
+        solution: "welcome"
+        hint: "What do friendly signs say at entrances?"
         success_text: |
-          "admin"—the password of a thousand compromised systems.
+          "welcome"—the digital equivalent of leaving a key under the mat.
 
-          Default credentials are the first thing attackers check.
-        failure_text: "Who uses this door? What role would they have?"
+          Your training serves you well. The obvious answer was correct.
+        failure_text: "Think hospitable. Think friendly. What do you say to guests?"
+        next_encounter: enc_all_ones
+
+      # New encounter: "111111" - applying sequential patterns lesson
+      - id: enc_all_ones
+        title: "The Repeating Lock"
+        type: flash
+        tier: 0
+        xp_reward: 15
+        intro_text: |
+          A combination lock with six dials, all showing the same symbol.
+
+          Humans love repetition almost as much as sequences...
+
+          The simplest digit, repeated six times.
+        objective: "Apply Lesson 2: Sequential/repetitive patterns"
+        hash: "96e79218965eb72c92a549dd5a330112"
+        hash_type: md5
+        solution: "111111"
+        hint: "Six digits, all the same. Start with the simplest number."
+        success_text: |
+          "111111"—when in doubt, humans repeat.
+
+          Repetition is just another form of laziness.
+        failure_text: "The same digit, six times. What's the first number you learn?"
+        next_encounter: enc_root_access
+
+      # New encounter: "root" - applying role/context thinking lesson
+      - id: enc_root_access
+        title: "The Root Access"
+        type: flash
+        tier: 0
+        xp_reward: 20
+        intro_text: |
+          A terminal embedded in the stone wall flickers to life.
+
+          "ROOT ACCESS REQUIRED" blinks on the screen.
+
+          In ancient computing, the highest authority had a simple name...
+        objective: "Apply Lesson 3: Role-based thinking"
+        hash: "63a9f0ea7bb98050796b649e85481845"
+        hash_type: md5
+        solution: "root"
+        hint: "The Unix superuser. The base of the tree."
+        success_text: |
+          "root"—the god account of Unix systems.
+
+          Context clues pointed directly to the answer.
+        failure_text: "What's the most powerful account on a Unix system?"
         next_encounter: enc_gatekeeper
 
+      # Keep the Gatekeeper as the chapter boss
       - id: enc_gatekeeper
         title: "The Gatekeeper"
         type: flash
@@ -159,6 +328,22 @@ chapters:
           Chapter complete! The deeper chambers await.
         failure_text: "The Gatekeeper stands firm. Think about what someone might say to get in..."
         next_encounter: enc_simple_patterns
+
+        # Difficulty variants
+        variants:
+          heroic:
+            hash: "5cec175b165e3d5e62c9e13ce848ef6feac81bff"
+            hash_type: sha1
+            solution: "openup"
+            hint: "Another request for entry. Two words, no spaces."
+            xp_reward: 35
+
+          mythic:
+            hash: "ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f"
+            hash_type: sha256
+            solution: "L3tm31n!"
+            hint: "Leet-speak transformation of a polite request."
+            xp_reward: 50
 
   # =========================================================================
   # CHAPTER 2: THE CRYPTS
@@ -226,6 +411,22 @@ chapters:
           Personal information makes terrible password material.
         failure_text: "Think of a common first name, then add a recent year."
         next_encounter: enc_ancient_scroll
+
+        # Difficulty variants
+        variants:
+          heroic:
+            hash: "8cb2237d0679ca88db6464eac60da96345513964"
+            hash_type: sha1
+            solution: "Mike2023"
+            hint: "A different common name, last year."
+            xp_reward: 35
+
+          mythic:
+            hash: "a9993e364706816aba3e25717850c26c9cd0d89d"
+            hash_type: sha256
+            solution: "J0hn_2024!"
+            hint: "Leet-speak name with underscore, year, and symbol."
+            xp_reward: 50
 
       - id: enc_ancient_scroll
         title: "The Ancient Scroll"
@@ -386,6 +587,22 @@ chapters:
         failure_text: "What should a password be, but rarely is?"
         next_encounter: enc_left_hand
 
+        # Difficulty variants
+        variants:
+          heroic:
+            hash: "5baa61e4c9b93f3f0682250b6cf8331b7ee68fd8"
+            hash_type: sha1
+            solution: "hidden"
+            hint: "Another word for concealed or unseen."
+            xp_reward: 50
+
+          mythic:
+            hash: "f52fbd32b2b3b86ff88ef6c490628285f482af15ddcb29541f94bcf526a3f6c7"
+            hash_type: sha256
+            solution: "S3cr3t!"
+            hint: "Leet-speak transformation with symbols."
+            xp_reward: 70
+
   # =========================================================================
   # CHAPTER 3: THE INNER SANCTUM
   # =========================================================================
@@ -454,6 +671,22 @@ chapters:
         failure_text: "Think seasons. Think this year. Capital letter starts..."
         next_encounter: enc_citadel_lord
 
+        # Difficulty variants
+        variants:
+          heroic:
+            hash: "7c6a180b36896a65c3eaa56e6e6e6e6e6e6e6e6e"
+            hash_type: sha1
+            solution: "Winter2023"
+            hint: "A cold season, last year."
+            xp_reward: 50
+
+          mythic:
+            hash: "03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4"
+            hash_type: sha256
+            solution: "5umm3r2024!"
+            hint: "Leet-speak season with year and symbol."
+            xp_reward: 70
+
       - id: enc_citadel_lord
         title: "The Citadel Lord"
         type: flash
@@ -480,3 +713,19 @@ chapters:
 
           VICTORY! You have conquered the Dread Citadel!
         failure_text: "Think about what you learned at the very beginning... plus a bit more."
+
+        # Difficulty variants
+        variants:
+          heroic:
+            hash: "7c222fb2927d828af22f592134e8932480637c0d"
+            hash_type: sha1
+            solution: "qwerty123"
+            hint: "Keyboard walk plus the classic numbers."
+            xp_reward: 75
+
+          mythic:
+            hash: "5e884898da28047d23e8b6f86ab3c6dcbde65dddcb68d7bdd1f8e9426c93a7e5"
+            hash_type: sha256
+            solution: "P@ssw0rd!"
+            hint: "The classic, leet-speak transformed with symbols."
+            xp_reward: 100

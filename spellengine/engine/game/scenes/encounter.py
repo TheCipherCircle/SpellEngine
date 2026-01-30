@@ -496,7 +496,14 @@ class EncounterScene(Scene):
                 if game_mode == 'observer':
                     prompts.append(("S", "Skip"))
                 else:
-                    prompts.append(("H", "Hint"))
+                    # Show hint status based on difficulty restrictions
+                    can_use, status = state.can_use_hint()
+                    if status == "free":
+                        prompts.append(("H", "Hint"))
+                    elif can_use:
+                        prompts.append(("H", f"Hint ({status})"))
+                    else:
+                        prompts.append(("H", f"Hint [{status}]"))
 
         # Add retreat option for boss encounters (if checkpoint available)
         is_boss = encounter.id in BOSS_ENCOUNTERS
@@ -898,16 +905,55 @@ class EncounterScene(Scene):
             self.client.audio.play_sfx("typing_key")
 
     def _on_hint_click(self) -> None:
-        """Toggle hint visibility and track hint usage."""
-        was_hidden = not self.show_hint
-        self.show_hint = not self.show_hint
+        """Toggle hint visibility and track hint usage with difficulty restrictions."""
+        state = self.client.adventure_state
 
-        # Track hint usage (only count first reveal per encounter)
-        if self.show_hint and was_hidden and not self._hint_used_this_encounter:
+        # If hint is showing, just hide it (no cost to hide)
+        if self.show_hint:
+            self.show_hint = False
+            return
+
+        # Check if hint can be used (only matters when revealing, not hiding)
+        can_use, status = state.can_use_hint()
+
+        if not can_use:
+            # Show feedback that hint is unavailable
+            if status == "none left":
+                self.feedback_message = "No hints remaining this chapter"
+            elif status == "not enough XP":
+                self.feedback_message = "Not enough XP for hint (25 XP required)"
+            else:
+                self.feedback_message = f"Hint unavailable: {status}"
+            self.feedback_color = Colors.WARNING
+            self.feedback_timer = 2.0
+
+            # Play error sound
+            if self.client.audio:
+                self.client.audio.play_sfx("error")
+            return
+
+        # Use the hint and get the XP cost
+        xp_cost = state.use_hint()
+
+        # Track that hint was used for this encounter (for clean solve tracking)
+        if not self._hint_used_this_encounter:
             self._hint_used_this_encounter = True
-            self.client.adventure_state.state.hints_used += 1
+            state.state.hints_used += 1
 
-        if self.show_hint and self.client.audio:
+        # Show the hint
+        self.show_hint = True
+
+        # Update status panel to reflect XP change if any
+        if xp_cost > 0:
+            self.feedback_message = f"-{xp_cost} XP"
+            self.feedback_color = Colors.WARNING
+            self.feedback_timer = 1.5
+            self._update_status_panel()
+
+        # Update prompts to reflect new hint status
+        self._update_prompts()
+
+        if self.client.audio:
             self.client.audio.play_sfx("hint_reveal")
 
     def _log_crack_to_session(self, hash_value: str, command: str, result: str) -> None:

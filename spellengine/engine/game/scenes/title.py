@@ -209,20 +209,57 @@ class TitleScene(Scene):
         """Handle settings button click."""
         self.change_scene("settings")
 
+    def _is_difficulty_unlocked(self, difficulty: DifficultyLevel) -> bool:
+        """Check if a difficulty is unlocked.
+
+        Args:
+            difficulty: The difficulty to check
+
+        Returns:
+            True if unlocked, False if locked
+        """
+        # NORMAL and HEROIC always available
+        if difficulty in (DifficultyLevel.NORMAL, DifficultyLevel.HEROIC):
+            return True
+
+        # MYTHIC requires Heroic completion
+        if difficulty == DifficultyLevel.MYTHIC:
+            # Check if player has completed Heroic on this campaign
+            # Need to load from save state if available
+            if self.client.adventure_state:
+                campaign_id = self.campaign.id if self.campaign else ""
+                completed = self.client.adventure_state.state.completed_difficulties.get(campaign_id, [])
+                return DifficultyLevel.HEROIC.value in completed
+            return False
+
+        return True
+
     def _cycle_difficulty(self, direction: int = 1) -> None:
-        """Cycle through difficulty levels.
+        """Cycle through difficulty levels, skipping locked ones.
 
         Args:
             direction: 1 for next, -1 for previous
         """
         difficulties = list(DifficultyLevel)
         current_idx = difficulties.index(self._selected_difficulty)
-        new_idx = (current_idx + direction) % len(difficulties)
-        self._selected_difficulty = difficulties[new_idx]
 
-        # Play UI sound
+        # Try each difficulty in order until we find an unlocked one
+        for _ in range(len(difficulties)):
+            new_idx = (current_idx + direction) % len(difficulties)
+            new_diff = difficulties[new_idx]
+
+            if self._is_difficulty_unlocked(new_diff):
+                self._selected_difficulty = new_diff
+                # Play UI sound
+                if self.client.audio:
+                    self.client.audio.play_sfx("story_advance")
+                return
+
+            current_idx = new_idx
+
+        # If no unlocked difficulty found, play error sound
         if self.client.audio:
-            self.client.audio.play_sfx("story_advance")
+            self.client.audio.play_sfx("error")
 
     def _on_credits(self) -> None:
         """Handle credits button click."""
@@ -406,20 +443,28 @@ class TitleScene(Scene):
 
         # Get difficulty info
         diff_info = DIFFICULTY_INFO[self._selected_difficulty]
+        is_locked = not self._is_difficulty_unlocked(self._selected_difficulty)
 
-        # Draw difficulty name with colored text
+        # Draw difficulty name with colored text (or grayed if locked)
         name_font = fonts.get_font(Typography.SIZE_SUBHEADER, bold=True)
-        name_surface = name_font.render(
-            diff_info["name"], Typography.ANTIALIAS, diff_info["color"]
-        )
+        name_color = Colors.TEXT_DIM if is_locked else diff_info["color"]
+        name_text = diff_info["name"]
+        if is_locked:
+            name_text = f"🔒 {name_text}"
+        name_surface = name_font.render(name_text, Typography.ANTIALIAS, name_color)
         name_x = content.x + (content.width - name_surface.get_width()) // 2
         name_y = content.y + 5
         surface.blit(name_surface, (name_x, name_y))
 
-        # Draw XP multiplier
+        # Draw XP multiplier or locked message
         xp_font = fonts.get_label_font()
-        xp_text = f"XP: {diff_info['xp_mult']}"
-        xp_surface = xp_font.render(xp_text, Typography.ANTIALIAS, Colors.YELLOW)
+        if is_locked:
+            xp_text = "Complete Heroic to unlock"
+            xp_color = Colors.TEXT_DIM
+        else:
+            xp_text = f"XP: {diff_info['xp_mult']}"
+            xp_color = Colors.YELLOW
+        xp_surface = xp_font.render(xp_text, Typography.ANTIALIAS, xp_color)
         xp_x = content.x + (content.width - xp_surface.get_width()) // 2
         xp_y = name_y + name_font.get_height() + 5
         surface.blit(xp_surface, (xp_x, xp_y))
@@ -433,6 +478,7 @@ class TitleScene(Scene):
         surface.blit(hint_surface, (hint_x, hint_y))
 
         # Draw difficulty indicator dots (like WoW skull rating)
+        # Locked difficulties show as locked icons
         difficulties = list(DifficultyLevel)
         current_idx = difficulties.index(self._selected_difficulty)
         dot_size = 8
@@ -443,10 +489,25 @@ class TitleScene(Scene):
 
         for i, diff in enumerate(difficulties):
             dot_x = dot_start_x + i * dot_spacing
-            dot_color = DIFFICULTY_INFO[diff]["color"] if i <= current_idx else Colors.BG_DARKEST
+            is_diff_locked = not self._is_difficulty_unlocked(diff)
+            is_selected = i == current_idx
 
-            # Filled circle for current and below, outline for above
-            if i <= current_idx:
+            if is_diff_locked:
+                # Draw lock icon (small X) for locked difficulties
+                pygame.draw.line(
+                    surface, Colors.TEXT_DIM,
+                    (dot_x + 2, dot_y + 2),
+                    (dot_x + dot_size - 2, dot_y + dot_size - 2), 1
+                )
+                pygame.draw.line(
+                    surface, Colors.TEXT_DIM,
+                    (dot_x + dot_size - 2, dot_y + 2),
+                    (dot_x + 2, dot_y + dot_size - 2), 1
+                )
+            elif i <= current_idx:
+                # Filled circle for current and below
+                dot_color = DIFFICULTY_INFO[diff]["color"]
                 pygame.draw.circle(surface, dot_color, (dot_x + dot_size // 2, dot_y + dot_size // 2), dot_size // 2)
             else:
+                # Outline for above current
                 pygame.draw.circle(surface, Colors.BORDER, (dot_x + dot_size // 2, dot_y + dot_size // 2), dot_size // 2, 1)

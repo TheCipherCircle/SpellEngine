@@ -13,8 +13,10 @@ from spellengine.adventures.models import (
     Campaign,
     Chapter,
     Choice,
+    DifficultyLevel,
     Encounter,
     EncounterType,
+    EncounterVariant,
 )
 
 
@@ -108,6 +110,21 @@ def _parse_encounter(data: dict[str, Any], base_path: Path) -> Encounter:
     if hash_file and not Path(hash_file).is_absolute():
         hash_file = str(base_path / hash_file)
 
+    # Parse difficulty variants if present
+    variants = None
+    if "variants" in data:
+        variants = {}
+        for diff_name, variant_data in data["variants"].items():
+            # Convert string name to DifficultyLevel enum
+            diff_level = DifficultyLevel(diff_name.lower())
+            variants[diff_level] = EncounterVariant(
+                hash=variant_data.get("hash", data.get("hash", "")),
+                hash_type=variant_data.get("hash_type", data.get("hash_type", "md5")),
+                solution=variant_data.get("solution", data.get("solution", "")),
+                hint=variant_data.get("hint", data.get("hint", "")),
+                xp_reward=variant_data.get("xp_reward", data.get("xp_reward", 10)),
+            )
+
     return Encounter(
         id=data["id"],
         title=data["title"],
@@ -129,6 +146,7 @@ def _parse_encounter(data: dict[str, Any], base_path: Path) -> Encounter:
         tier=data.get("tier", 0),
         xp_reward=data.get("xp_reward", 10),
         clue_url=data.get("clue_url"),
+        variants=variants,
     )
 
 

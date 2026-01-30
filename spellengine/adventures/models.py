@@ -272,6 +272,12 @@ class PlayerState(BaseModel):
     hints_used: int = Field(0, description="Number of hints used")
     clean_solves: int = Field(0, description="Encounters solved without hints on first try")
 
+    # Hint tracking for difficulty restrictions
+    chapter_hints_used: dict[str, int] = Field(
+        default_factory=dict,
+        description="chapter_id -> hints used count (for Heroic mode limit)"
+    )
+
     # Session
     started_at: str | None = Field(None, description="ISO timestamp of session start")
     last_played: str | None = Field(None, description="ISO timestamp of last action")
@@ -280,6 +286,12 @@ class PlayerState(BaseModel):
     rogue_mode: bool = Field(False, description="True if playing in text-only rogue mode")
     game_mode: str = Field("full", description="Game mode (full/hashcat/john/observer)")
     prologue_complete: bool = Field(False, description="True if prologue/tutorial completed")
+
+    # Difficulty unlock tracking
+    completed_difficulties: dict[str, list[str]] = Field(
+        default_factory=dict,
+        description="campaign_id -> list of completed difficulty levels (for unlocking higher difficulties)"
+    )
 
 
 class GameOverOptions(str, Enum):

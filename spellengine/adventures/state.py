@@ -143,6 +143,130 @@ class AdventureState:
         encounter = self.current_encounter
         return encounter.get_solution_for_difficulty(self.difficulty)
 
+    def can_use_hint(self) -> tuple[bool, str]:
+        """Check if a hint can be used at the current difficulty.
+
+        Returns:
+            Tuple of (can_use, reason_or_status).
+            - For NORMAL: (True, "free") - unlimited free hints
+            - For HEROIC: (True, "2 left") or (False, "none left")
+            - For MYTHIC: (True, "-25 XP") or (False, "not enough XP")
+            - For Observer: (True, "free") - always free in learning mode
+        """
+        # Observer mode always gets free hints (learning mode)
+        if self.game_mode == "observer":
+            return True, "free"
+
+        config = self.HINT_CONFIG.get(self.difficulty, self.HINT_CONFIG[DifficultyLevel.NORMAL])
+
+        # NORMAL: Unlimited free hints
+        if config["unlimited"]:
+            return True, "free"
+
+        # HEROIC: Limited hints per chapter
+        if config["per_chapter"] > 0:
+            chapter_id = self.state.chapter_id
+            hints_used = self.state.chapter_hints_used.get(chapter_id, 0)
+            remaining = config["per_chapter"] - hints_used
+            if remaining > 0:
+                return True, f"{remaining} left"
+            else:
+                return False, "none left"
+
+        # MYTHIC: Hints cost XP
+        cost = config["cost"]
+        if cost > 0:
+            if self.state.total_xp >= cost:
+                return True, f"-{cost} XP"
+            else:
+                return False, "not enough XP"
+
+        return True, "free"
+
+    def use_hint(self) -> int:
+        """Use a hint, applying any restrictions.
+
+        Returns:
+            XP cost of the hint (0 if free, or the amount deducted).
+            Returns -1 if hint cannot be used.
+        """
+        can_use, reason = self.can_use_hint()
+        if not can_use:
+            return -1
+
+        # Observer mode: free hints
+        if self.game_mode == "observer":
+            return 0
+
+        config = self.HINT_CONFIG.get(self.difficulty, self.HINT_CONFIG[DifficultyLevel.NORMAL])
+
+        # NORMAL: Free
+        if config["unlimited"]:
+            return 0
+
+        # HEROIC: Track chapter usage
+        if config["per_chapter"] > 0:
+            chapter_id = self.state.chapter_id
+            current = self.state.chapter_hints_used.get(chapter_id, 0)
+            self.state.chapter_hints_used[chapter_id] = current + 1
+            return 0
+
+        # MYTHIC: Deduct XP
+        cost = config["cost"]
+        if cost > 0:
+            self.state.total_xp -= cost
+            self.state.xp_earned = max(0, self.state.xp_earned - cost)
+            return cost
+
+        return 0
+
+    def get_hint_status(self) -> str:
+        """Get a display string for hint availability.
+
+        Returns:
+            Status string like "(H) Hint", "(H) Hint (2 left)", "(H) Hint (-25 XP)"
+        """
+        can_use, status = self.can_use_hint()
+        if status == "free":
+            return "(H) Hint"
+        elif can_use:
+            return f"(H) Hint ({status})"
+        else:
+            return f"(H) Hint [{status}]"
+
+    def is_difficulty_unlocked(self, difficulty: DifficultyLevel, campaign_id: str | None = None) -> bool:
+        """Check if a difficulty level is unlocked for a campaign.
+
+        Unlock rules:
+        - NORMAL: Always available
+        - HEROIC: Always available (no gate)
+        - MYTHIC: Requires Heroic completion
+
+        In Observer mode, all difficulties are available (no unlock gate).
+
+        Args:
+            difficulty: The difficulty level to check
+            campaign_id: Campaign ID to check (uses current campaign if None)
+
+        Returns:
+            True if the difficulty is unlocked
+        """
+        # Observer mode: all difficulties available
+        if self.game_mode == "observer":
+            return True
+
+        # NORMAL and HEROIC are always available
+        if difficulty in (DifficultyLevel.NORMAL, DifficultyLevel.HEROIC):
+            return True
+
+        # MYTHIC requires Heroic completion
+        if difficulty == DifficultyLevel.MYTHIC:
+            cid = campaign_id or self.campaign.id
+            completed = self.state.completed_difficulties.get(cid, [])
+            return DifficultyLevel.HEROIC.value in completed
+
+        return True
+
     @property
     def is_complete(self) -> bool:
         """Check if the campaign is complete."""
@@ -183,12 +307,28 @@ class AdventureState:
         "observer": 0.2,  # 20% XP - saw it, didn't crack it
     }
 
+    # XP multipliers by difficulty level
+    DIFFICULTY_MULTIPLIERS = {
+        DifficultyLevel.NORMAL: 1.0,   # Standard XP (learning)
+        DifficultyLevel.HEROIC: 1.5,   # 50% bonus (replay value)
+        DifficultyLevel.MYTHIC: 2.0,   # Double XP (challenge)
+    }
+
+    # Hint restrictions by difficulty level
+    HINT_CONFIG = {
+        DifficultyLevel.NORMAL: {"unlimited": True, "per_chapter": 0, "cost": 0},
+        DifficultyLevel.HEROIC: {"unlimited": False, "per_chapter": 3, "cost": 0},
+        DifficultyLevel.MYTHIC: {"unlimited": False, "per_chapter": 0, "cost": 25},
+    }
+
     def _handle_success(self, encounter: Encounter) -> dict:
         """Handle successful encounter completion."""
-        # Award XP (difficulty-adjusted, then mode-adjusted)
+        # Award XP (base → difficulty multiplier → mode multiplier)
+        # Example: Mythic + Observer = 100 × 2.0 × 0.2 = 40 XP
         base_xp = encounter.get_xp_for_difficulty(self.difficulty)
-        multiplier = self.XP_MULTIPLIERS.get(self.game_mode, 1.0)
-        xp_reward = int(base_xp * multiplier)
+        diff_mult = self.DIFFICULTY_MULTIPLIERS.get(self.difficulty, 1.0)
+        mode_mult = self.XP_MULTIPLIERS.get(self.game_mode, 1.0)
+        xp_reward = int(base_xp * diff_mult * mode_mult)
 
         self.state.xp_earned += xp_reward
         self.state.total_xp += xp_reward
@@ -371,12 +511,21 @@ class AdventureState:
             campaign_achievements = self._check_campaign_achievements()
             all_achievements = chapter_achievements + campaign_achievements
 
+            # Track difficulty completion for unlock system
+            campaign_id = self.campaign.id
+            difficulty_name = self.difficulty.value
+            if campaign_id not in self.state.completed_difficulties:
+                self.state.completed_difficulties[campaign_id] = []
+            if difficulty_name not in self.state.completed_difficulties[campaign_id]:
+                self.state.completed_difficulties[campaign_id].append(difficulty_name)
+
             # Emit campaign completion event
             self._emit_event(EVENT_CAMPAIGN_COMPLETED, {
                 "campaign_id": self.campaign.id,
                 "total_xp": self.state.total_xp,
                 "total_deaths": self.state.deaths,
                 "achievements": [u.achievement_id for u in all_achievements],
+                "difficulty": difficulty_name,
             })
 
             return {
