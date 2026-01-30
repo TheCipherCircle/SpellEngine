@@ -665,7 +665,7 @@ New members under Anvil review for their first two weeks:
 
 | Member | GitHub Handle | Access Granted | Anvil Review Until | Status |
 |--------|---------------|----------------|-------------------|--------|
-| Jeff | bluscreenofjeff | 2026-01-30 | 2026-02-13 | Active |
+| *(none active)* | - | - | - | - |
 
 Once the review period ends with clean submissions, move to Alumni below.
 
@@ -674,7 +674,7 @@ Once the review period ends with clean submissions, move to Alumni below.
 
 | Member | Completed | Notes |
 |--------|-----------|-------|
-| - | - | - |
+| Jeff | 2026-01-30 | Promoted directly to T3 Adept - review waived |
 
 ---
 
