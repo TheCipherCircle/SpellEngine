@@ -5,12 +5,13 @@ Features:
 - Title overlaid at top center
 - Menu options beneath title
 - Flashing "START" option (arcade style)
-- Difficulty info in upper left corner
+- Difficulty selector (Normal/Heroic/Mythic - WoW-inspired)
 - Full Gruvbox styling
 """
 
 from typing import TYPE_CHECKING, Any
 
+from spellengine.adventures.models import DifficultyLevel
 from spellengine.engine.game.scenes.base import Scene
 from spellengine.engine.game.ui import (
     Colors,
@@ -29,6 +30,29 @@ if TYPE_CHECKING:
     import pygame
     from spellengine.adventures.models import Campaign
     from spellengine.engine.game.client import GameClient
+
+
+# Difficulty display info - WoW Blackrock Mountain style
+DIFFICULTY_INFO = {
+    DifficultyLevel.NORMAL: {
+        "name": "NORMAL",
+        "color": Colors.SUCCESS,  # Green
+        "description": "Standard challenge - good for learning",
+        "xp_mult": "1.0x",
+    },
+    DifficultyLevel.HEROIC: {
+        "name": "HEROIC",
+        "color": Colors.BLUE,  # Blue
+        "description": "Harder hashes, fewer hints",
+        "xp_mult": "1.5x",
+    },
+    DifficultyLevel.MYTHIC: {
+        "name": "MYTHIC",
+        "color": Colors.PURPLE,  # Purple (epic)
+        "description": "Expert mode - no mercy",
+        "xp_mult": "2.0x",
+    },
+}
 
 
 class TitleScene(Scene):
@@ -65,6 +89,10 @@ class TitleScene(Scene):
         self._flash_visible: bool = True
         self._flash_interval: float = 0.5  # Toggle every 0.5 seconds (1 second cycle)
         self._start_menu_index: int = 0  # Index of START item in menu
+
+        # Difficulty selection (WoW-style)
+        self._selected_difficulty: DifficultyLevel = DifficultyLevel.NORMAL
+        self._difficulty_panel: Panel | None = None
 
     def enter(self, **kwargs: Any) -> None:
         """Enter the title scene.
@@ -113,6 +141,19 @@ class TitleScene(Scene):
             bg_color=Colors.BG_DARK,
         )
 
+        # Create difficulty selector panel (upper right)
+        diff_panel_width = 220
+        diff_panel_height = 100
+        self._difficulty_panel = Panel(
+            screen_w - LAYOUT["panel_margin"] - diff_panel_width - LAYOUT["border_width"],
+            LAYOUT["panel_margin"] + LAYOUT["border_width"] + 10,
+            diff_panel_width,
+            diff_panel_height,
+            title="DIFFICULTY",
+            major=False,
+            bg_color=Colors.BG_DARK,
+        )
+
     def _create_menu(self) -> None:
         """Create the menu with appropriate items."""
         screen_w, screen_h = self.client.screen_size
@@ -128,6 +169,7 @@ class TitleScene(Scene):
             items.append(MenuItem("START", "N", self._on_start))
             self._start_menu_index = 0  # "START" is first item
 
+        items.append(MenuItem("Settings", "S", self._on_settings))
         items.append(MenuItem("Credits", "R", self._on_credits))
         items.append(MenuItem("Quit", "ESC", self._on_quit))
 
@@ -148,19 +190,39 @@ class TitleScene(Scene):
         self.menu = None
         self.main_panel = None
         self.tagline_panel = None
+        self._difficulty_panel = None
         self._splash = None
 
     def _on_start(self) -> None:
         """Handle start button click."""
-        self.change_scene("encounter", resume=False)
+        self.change_scene("encounter", resume=False, difficulty=self._selected_difficulty)
 
     def _on_resume(self) -> None:
         """Handle resume button click."""
-        self.change_scene("encounter", resume=True)
+        self.change_scene("encounter", resume=True, difficulty=self._selected_difficulty)
 
     def _on_new_game(self) -> None:
         """Handle new game button click."""
-        self.change_scene("encounter", resume=False)
+        self.change_scene("encounter", resume=False, difficulty=self._selected_difficulty)
+
+    def _on_settings(self) -> None:
+        """Handle settings button click."""
+        self.change_scene("settings")
+
+    def _cycle_difficulty(self, direction: int = 1) -> None:
+        """Cycle through difficulty levels.
+
+        Args:
+            direction: 1 for next, -1 for previous
+        """
+        difficulties = list(DifficultyLevel)
+        current_idx = difficulties.index(self._selected_difficulty)
+        new_idx = (current_idx + direction) % len(difficulties)
+        self._selected_difficulty = difficulties[new_idx]
+
+        # Play UI sound
+        if self.client.audio:
+            self.client.audio.play_sfx("story_advance")
 
     def _on_credits(self) -> None:
         """Handle credits button click."""
@@ -178,10 +240,19 @@ class TitleScene(Scene):
         if self.menu:
             self.menu.handle_event(event)
 
-        # ESC to quit
+        # ESC to quit, D/Left/Right for difficulty
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
                 self._on_quit()
+            elif event.key == pygame.K_d:
+                # D key cycles difficulty forward
+                self._cycle_difficulty(1)
+            elif event.key == pygame.K_LEFT:
+                # Left arrow cycles difficulty backward
+                self._cycle_difficulty(-1)
+            elif event.key == pygame.K_RIGHT:
+                # Right arrow cycles difficulty forward
+                self._cycle_difficulty(1)
 
     def update(self, dt: float) -> None:
         """Update scene - handles flashing START animation."""
@@ -278,6 +349,10 @@ class TitleScene(Scene):
         if self.menu:
             self._draw_menu_with_flashing_start(surface)
 
+        # === DIFFICULTY SELECTOR: Upper right corner (WoW-style) ===
+        if self._difficulty_panel:
+            self._draw_difficulty_panel(surface, fonts)
+
         # === TAGLINE: Bottom panel ===
         if self.tagline_panel:
             self.tagline_panel.draw(surface)
@@ -313,3 +388,65 @@ class TitleScene(Scene):
             self.menu.items[start_index].label = original_label
         else:
             self.menu.draw(surface)
+
+    def _draw_difficulty_panel(self, surface: "pygame.Surface", fonts: Any) -> None:
+        """Draw the difficulty selector panel (WoW Blackrock Mountain style).
+
+        Args:
+            surface: Surface to draw on
+            fonts: FontManager instance
+        """
+        import pygame
+
+        if not self._difficulty_panel:
+            return
+
+        self._difficulty_panel.draw(surface)
+        content = self._difficulty_panel.content_rect
+
+        # Get difficulty info
+        diff_info = DIFFICULTY_INFO[self._selected_difficulty]
+
+        # Draw difficulty name with colored text
+        name_font = fonts.get_font(Typography.SIZE_SUBHEADER, bold=True)
+        name_surface = name_font.render(
+            diff_info["name"], Typography.ANTIALIAS, diff_info["color"]
+        )
+        name_x = content.x + (content.width - name_surface.get_width()) // 2
+        name_y = content.y + 5
+        surface.blit(name_surface, (name_x, name_y))
+
+        # Draw XP multiplier
+        xp_font = fonts.get_label_font()
+        xp_text = f"XP: {diff_info['xp_mult']}"
+        xp_surface = xp_font.render(xp_text, Typography.ANTIALIAS, Colors.YELLOW)
+        xp_x = content.x + (content.width - xp_surface.get_width()) // 2
+        xp_y = name_y + name_font.get_height() + 5
+        surface.blit(xp_surface, (xp_x, xp_y))
+
+        # Draw navigation hint
+        hint_font = fonts.get_small_font()
+        hint_text = "[D] or [←][→] to change"
+        hint_surface = hint_font.render(hint_text, Typography.ANTIALIAS, Colors.TEXT_DIM)
+        hint_x = content.x + (content.width - hint_surface.get_width()) // 2
+        hint_y = content.y + content.height - hint_font.get_height() - 5
+        surface.blit(hint_surface, (hint_x, hint_y))
+
+        # Draw difficulty indicator dots (like WoW skull rating)
+        difficulties = list(DifficultyLevel)
+        current_idx = difficulties.index(self._selected_difficulty)
+        dot_size = 8
+        dot_spacing = 16
+        total_width = len(difficulties) * dot_spacing - (dot_spacing - dot_size)
+        dot_start_x = content.x + (content.width - total_width) // 2
+        dot_y = xp_y + xp_font.get_height() + 8
+
+        for i, diff in enumerate(difficulties):
+            dot_x = dot_start_x + i * dot_spacing
+            dot_color = DIFFICULTY_INFO[diff]["color"] if i <= current_idx else Colors.BG_DARKEST
+
+            # Filled circle for current and below, outline for above
+            if i <= current_idx:
+                pygame.draw.circle(surface, dot_color, (dot_x + dot_size // 2, dot_y + dot_size // 2), dot_size // 2)
+            else:
+                pygame.draw.circle(surface, Colors.BORDER, (dot_x + dot_size // 2, dot_y + dot_size // 2), dot_size // 2, 1)

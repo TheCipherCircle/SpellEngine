@@ -242,6 +242,71 @@ def cmd_list(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_export(args: argparse.Namespace) -> int:
+    """Export campaign to PDF for paper/classroom mode."""
+    from pathlib import Path
+
+    campaign_id = args.campaign
+
+    if not campaign_id:
+        print("Error: Campaign ID required.")
+        print("Usage: spellengine export <campaign_id> [--output PATH]")
+        return 1
+
+    # Find the campaign
+    campaigns = get_campaigns()
+    campaign = next((c for c in campaigns if c["id"] == campaign_id), None)
+
+    if not campaign:
+        print(f"Campaign not found: {campaign_id}")
+        print()
+        print("Available campaigns:")
+        for c in campaigns:
+            print(f"  {c['id']} - {c['title']}")
+        return 1
+
+    # Load the campaign
+    try:
+        from spellengine.adventures.loader import load_campaign
+        from spellengine.adventures.export import CampaignExporter
+
+        campaign_file = campaign["path"] / "campaign.yaml"
+        if not campaign_file.exists():
+            print(f"Campaign file not found: {campaign_file}")
+            return 1
+
+        loaded_campaign = load_campaign(campaign_file)
+
+        # Determine output path
+        output_path = args.output
+        if not output_path:
+            output_path = f"{campaign_id}_worksheet.pdf"
+
+        output_path = Path(output_path)
+
+        # Export
+        exporter = CampaignExporter(loaded_campaign)
+
+        if args.answers_only:
+            result_path = exporter.export_answer_key(output_path)
+            print(f"Answer key exported: {result_path}")
+        else:
+            result_path = exporter.export_pdf(output_path, include_answers=args.with_answers)
+            print(f"PDF exported: {result_path}")
+
+        return 0
+
+    except ImportError as e:
+        print(f"Error: Missing dependency - {e}")
+        print("Install with: pip install reportlab")
+        return 1
+    except Exception as e:
+        print(f"Error exporting campaign: {e}")
+        import traceback
+        traceback.print_exc()
+        return 1
+
+
 def cmd_selftest(args: argparse.Namespace) -> int:
     """Run self-tests on campaigns for CI validation."""
     from spellengine.adventures.selftest import run_selftest, print_report
@@ -469,6 +534,34 @@ def main(argv: list[str] | None = None) -> int:
         help="Show detailed output",
     )
     selftest_parser.set_defaults(func=cmd_selftest)
+
+    # export command (Paper Campaign Mode)
+    export_parser = subparsers.add_parser(
+        "export",
+        help="Export campaign to PDF for paper/classroom mode",
+    )
+    export_parser.add_argument(
+        "campaign",
+        nargs="?",
+        default=None,
+        help="Campaign ID to export (e.g., dread-citadel)",
+    )
+    export_parser.add_argument(
+        "--output", "-o",
+        default=None,
+        help="Output PDF path (default: <campaign>_worksheet.pdf)",
+    )
+    export_parser.add_argument(
+        "--with-answers",
+        action="store_true",
+        help="Include answer key at end of PDF",
+    )
+    export_parser.add_argument(
+        "--answers-only",
+        action="store_true",
+        help="Export only the answer key",
+    )
+    export_parser.set_defaults(func=cmd_export)
 
     # Parse args
     args = parser.parse_args(argv)

@@ -30,6 +30,7 @@ dependencies = [
     "patternforge>=0.1.0",
     "pygame>=2.5.0",
     "pyyaml>=6.0",
+    "reportlab>=4.0.0",  # PDF generation for paper campaign export
 ]
 
 [project.optional-dependencies]
