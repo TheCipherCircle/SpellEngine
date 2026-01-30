@@ -4,8 +4,10 @@ from spellengine.adventures.models import (
     Campaign,
     Chapter,
     Choice,
+    DifficultyLevel,
     Encounter,
     EncounterType,
+    EncounterVariant,
     GameOverOptions,
     OutcomeType,
     PlayerState,
@@ -86,14 +88,25 @@ from spellengine.adventures.assets import (
     ArtStyle,
     DEFAULT_ART_STYLE,
 )
+from spellengine.adventures.hash_index import (
+    CampaignHashIndex,
+    HashLookupResult,
+    create_hash_index,
+)
+from spellengine.adventures.export import (
+    CampaignExporter,
+    export_campaign_pdf,
+)
 
 __all__ = [
     # Models
     "Campaign",
     "Chapter",
     "Choice",
+    "DifficultyLevel",
     "Encounter",
     "EncounterType",
+    "EncounterVariant",
     "GameOverOptions",
     "OutcomeType",
     "PlayerState",
@@ -165,4 +178,11 @@ __all__ = [
     "AssetLoader",
     "ArtStyle",
     "DEFAULT_ART_STYLE",
+    # Hash Index
+    "CampaignHashIndex",
+    "HashLookupResult",
+    "create_hash_index",
+    # PDF Export
+    "CampaignExporter",
+    "export_campaign_pdf",
 ]

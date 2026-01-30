@@ -9,6 +9,28 @@ from typing import Any
 from pydantic import BaseModel, ConfigDict, Field
 
 
+class DifficultyLevel(str, Enum):
+    """Difficulty levels for encounters - inspired by WoW raid difficulties."""
+
+    NORMAL = "normal"      # Standard experience
+    HEROIC = "heroic"      # Harder hashes, fewer hints
+    MYTHIC = "mythic"      # Expert-level challenges
+
+
+class EncounterVariant(BaseModel):
+    """A difficulty variant for an encounter.
+
+    Each variant can have different hashes, hints, and XP rewards,
+    allowing the same encounter to scale with player skill level.
+    """
+
+    hash: str = Field(..., description="Hash to crack for this variant")
+    hash_type: str = Field(..., description="Hash type: md5, sha1, sha256")
+    solution: str = Field(..., description="Expected solution/password")
+    hint: str = Field(..., description="Hint for this difficulty level")
+    xp_reward: int = Field(..., description="XP reward for this variant")
+
+
 class EncounterType(str, Enum):
     """Skeleton types for encounters."""
 
@@ -96,8 +118,83 @@ class Encounter(BaseModel):
     tier: int = Field(0, ge=0, le=6, description="Difficulty tier (0=trivial, 6=expert)")
     xp_reward: int = Field(10, description="Grains of sand awarded")
 
+    # Difficulty Variants (for multi-difficulty support)
+    variants: dict[DifficultyLevel, EncounterVariant] | None = Field(
+        None,
+        description="Difficulty variants with different hashes/hints/XP"
+    )
+
     # Knowledge Base Links
     clue_url: str | None = Field(None, description="Hashtopia knowledge base link (hashtopia://path/to/page.md)")
+
+    def get_variant(self, difficulty: DifficultyLevel) -> "EncounterVariant | None":
+        """Get the encounter variant for a specific difficulty level.
+
+        Args:
+            difficulty: The difficulty level to get variant for
+
+        Returns:
+            EncounterVariant if variants exist for this difficulty, None otherwise
+        """
+        if self.variants is None:
+            return None
+        return self.variants.get(difficulty)
+
+    def get_hash_for_difficulty(self, difficulty: DifficultyLevel) -> str | None:
+        """Get the hash for a specific difficulty, falling back to default.
+
+        Args:
+            difficulty: The difficulty level
+
+        Returns:
+            Hash string for the difficulty, or default hash if no variant
+        """
+        variant = self.get_variant(difficulty)
+        if variant:
+            return variant.hash
+        return self.hash
+
+    def get_hint_for_difficulty(self, difficulty: DifficultyLevel) -> str | None:
+        """Get the hint for a specific difficulty, falling back to default.
+
+        Args:
+            difficulty: The difficulty level
+
+        Returns:
+            Hint string for the difficulty, or default hint if no variant
+        """
+        variant = self.get_variant(difficulty)
+        if variant:
+            return variant.hint
+        return self.hint
+
+    def get_xp_for_difficulty(self, difficulty: DifficultyLevel) -> int:
+        """Get the XP reward for a specific difficulty, falling back to default.
+
+        Args:
+            difficulty: The difficulty level
+
+        Returns:
+            XP reward for the difficulty, or default XP if no variant
+        """
+        variant = self.get_variant(difficulty)
+        if variant:
+            return variant.xp_reward
+        return self.xp_reward
+
+    def get_solution_for_difficulty(self, difficulty: DifficultyLevel) -> str | None:
+        """Get the solution for a specific difficulty, falling back to default.
+
+        Args:
+            difficulty: The difficulty level
+
+        Returns:
+            Solution string for the difficulty, or default solution if no variant
+        """
+        variant = self.get_variant(difficulty)
+        if variant:
+            return variant.solution
+        return self.solution
 
 
 class Chapter(BaseModel):
@@ -148,6 +245,12 @@ class PlayerState(BaseModel):
     campaign_id: str = Field(..., description="Current campaign")
     chapter_id: str = Field(..., description="Current chapter")
     encounter_id: str = Field(..., description="Current encounter")
+
+    # Difficulty setting
+    difficulty: DifficultyLevel = Field(
+        DifficultyLevel.NORMAL,
+        description="Selected difficulty level (Normal/Heroic/Mythic)"
+    )
 
     # History
     completed_encounters: list[str] = Field(default_factory=list)

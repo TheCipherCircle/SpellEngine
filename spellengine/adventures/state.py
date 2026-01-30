@@ -12,6 +12,7 @@ import json
 from spellengine.adventures.models import (
     Campaign,
     Chapter,
+    DifficultyLevel,
     Encounter,
     GameOverOptions,
     OutcomeType,
@@ -49,6 +50,7 @@ class AdventureState:
         save_path: Path | None = None,
         achievement_manager: AchievementManager | None = None,
         event_callbacks: dict[str, Callable[[dict], None]] | None = None,
+        difficulty: DifficultyLevel = DifficultyLevel.NORMAL,
     ) -> None:
         """Initialize adventure state.
 
@@ -59,11 +61,13 @@ class AdventureState:
             achievement_manager: Optional achievement manager (created if not provided)
             event_callbacks: Optional dict of event_type -> callback function
                 for profile hooks. Callbacks receive event data dict.
+            difficulty: Selected difficulty level (Normal/Heroic/Mythic)
         """
         self.campaign = campaign
         self.save_path = save_path
         self.achievement_manager = achievement_manager or create_achievement_manager()
         self.event_callbacks = event_callbacks or {}
+        self.difficulty = difficulty
 
         # Track deaths within current chapter for no-death achievements
         self._chapter_deaths: int = 0
@@ -87,6 +91,7 @@ class AdventureState:
             chapter_id=first_chapter.id,
             encounter_id=first_chapter.first_encounter,
             started_at=datetime.now(timezone.utc).isoformat(),
+            difficulty=difficulty,
         )
 
     def _emit_event(self, event_type: str, data: dict) -> None:
@@ -114,6 +119,26 @@ class AdventureState:
     def current_encounter(self) -> Encounter:
         """Get the current encounter."""
         return self._encounters[self.state.encounter_id]
+
+    def get_current_hash(self) -> str | None:
+        """Get the hash for current encounter at current difficulty."""
+        encounter = self.current_encounter
+        return encounter.get_hash_for_difficulty(self.difficulty)
+
+    def get_current_hint(self) -> str | None:
+        """Get the hint for current encounter at current difficulty."""
+        encounter = self.current_encounter
+        return encounter.get_hint_for_difficulty(self.difficulty)
+
+    def get_current_xp_reward(self) -> int:
+        """Get the XP reward for current encounter at current difficulty."""
+        encounter = self.current_encounter
+        return encounter.get_xp_for_difficulty(self.difficulty)
+
+    def get_current_solution(self) -> str | None:
+        """Get the solution for current encounter at current difficulty."""
+        encounter = self.current_encounter
+        return encounter.get_solution_for_difficulty(self.difficulty)
 
     @property
     def is_complete(self) -> bool:
@@ -149,9 +174,10 @@ class AdventureState:
 
     def _handle_success(self, encounter: Encounter) -> dict:
         """Handle successful encounter completion."""
-        # Award XP
-        self.state.xp_earned += encounter.xp_reward
-        self.state.total_xp += encounter.xp_reward
+        # Award XP (difficulty-adjusted)
+        xp_reward = encounter.get_xp_for_difficulty(self.difficulty)
+        self.state.xp_earned += xp_reward
+        self.state.total_xp += xp_reward
 
         # Mark complete
         is_first_crack = len(self.state.completed_encounters) == 0
@@ -161,9 +187,10 @@ class AdventureState:
         # Emit success event for profile hooks
         self._emit_event(EVENT_ENCOUNTER_SUCCESS, {
             "encounter_id": encounter.id,
-            "xp_awarded": encounter.xp_reward,
+            "xp_awarded": xp_reward,
             "is_first": is_first_crack,
             "total_xp": self.state.total_xp,
+            "difficulty": self.difficulty.value,
         })
 
         # Update checkpoint if applicable
@@ -186,7 +213,7 @@ class AdventureState:
             return {
                 "action": "continue",
                 "next_encounter": encounter.next_encounter,
-                "xp_awarded": encounter.xp_reward,
+                "xp_awarded": xp_reward,
                 "message": encounter.success_text,
                 "achievements_unlocked": [u.achievement_id for u in newly_unlocked],
             }
