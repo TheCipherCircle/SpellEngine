@@ -4,11 +4,9 @@ The core gameplay screen following the sacred M&M layout:
 - 60% left: Encounter viewport (art + boss)
 - 40% right: Status panel (chapter, XP, hints, clean solves)
 - Bottom left: Narrative panel (boss text, prompts)
-- Bottom right: Hash/Input panel (hash display, input field)
+- Bottom right: Hash/Terminal panel (embedded terminal for theatrical cracking)
 """
 
-import subprocess
-import threading
 from typing import TYPE_CHECKING, Any
 
 from spellengine.engine.game.scenes.base import Scene
@@ -26,7 +24,9 @@ from spellengine.engine.game.ui import (
     TextValidator,
     UIAuditLog,
 )
-from spellengine.adventures.models import EncounterType, OutcomeType
+from spellengine.engine.game.ui.terminal import TerminalPanel, TheatricalCracker
+from spellengine.adventures.models import DifficultyLevel, EncounterType, OutcomeType
+from spellengine.adventures.hash_index import CampaignHashIndex
 
 if TYPE_CHECKING:
     import pygame
@@ -101,8 +101,11 @@ class EncounterScene(Scene):
         self.narrative_panel: Panel | None = None
         self.hash_panel: Panel | None = None
 
-        # Input
-        self.textbox: TextBox | None = None
+        # Input - Terminal for hash cracking, TextBox as fallback
+        self.terminal: TerminalPanel | None = None
+        self.theatrical_cracker: TheatricalCracker | None = None
+        self.hash_index: CampaignHashIndex | None = None
+        self.textbox: TextBox | None = None  # Fallback for non-hash encounters
         self.choice_buttons: list[tuple[str, str]] = []  # (key, label) for fork choices
 
         # State
@@ -142,6 +145,13 @@ class EncounterScene(Scene):
         self._hint_used_this_encounter: bool = False
         self._attempts_this_encounter: int = 0
 
+        # Success celebration state
+        self._celebrating_success: bool = False
+        self._celebration_timer: float = 0.0
+        self._celebration_phase: int = 0  # 0=flash, 1=art_swap, 2=waiting
+        self._pending_result: dict | None = None
+        self._xp_awarded: int = 0
+
     def enter(self, **kwargs: Any) -> None:
         """Enter the encounter scene."""
         screen_w, screen_h = self.client.screen_size
@@ -162,6 +172,13 @@ class EncounterScene(Scene):
         self._boss_attempts = 0  # Reset attempts for new encounter
         self._hint_used_this_encounter = False
         self._attempts_this_encounter = 0
+
+        # Reset celebration state
+        self._celebrating_success = False
+        self._celebration_timer = 0.0
+        self._celebration_phase = 0
+        self._pending_result = None
+        self._xp_awarded = 0
 
         # Calculate layout dimensions (M&M sacred ratios)
         margin = LAYOUT["panel_margin"]
@@ -239,31 +256,52 @@ class EncounterScene(Scene):
         # Update status panel
         self._update_status_panel()
 
+        # Build hash index for theatrical cracking (once per campaign)
+        if self.hash_index is None:
+            self.hash_index = CampaignHashIndex(self.client.campaign)
+
         # Create input or choice buttons
-        # TOUR/WALKTHROUGH encounters don't need a textbox - just Enter to continue
+        # TOUR/WALKTHROUGH encounters don't need input - just Enter to continue
         if is_narrative_only:
+            self.terminal = None
             self.textbox = None
         elif encounter.encounter_type in (EncounterType.FORK, EncounterType.GAMBIT):
             # FORK and GAMBIT have choices - show choice buttons
+            self.terminal = None
             self.textbox = None
             self._create_choice_buttons(encounter.choices)
         else:
-            # Create text input for hash cracking (FLASH, CHALLENGE, BOSS, etc.)
+            # Create embedded terminal for hash cracking (FLASH, CHALLENGE, BOSS, etc.)
+            import pygame
             hash_content = self.hash_panel.content_rect
-            input_height = 40
-            # Position textbox with room for prompt label above and hint below
-            input_y = hash_content.y + hash_content.height - input_height - 35
 
-            self.textbox = TextBox(
+            # Terminal fills most of the hash panel
+            terminal_rect = pygame.Rect(
                 hash_content.x,
-                input_y,
+                hash_content.y,
                 hash_content.width,
-                input_height,
-                placeholder="Enter password...",
-                on_submit=self._on_answer_submit,
-                on_keystroke=self._on_keystroke,
+                hash_content.height,
             )
-            self.textbox.focus()
+
+            self.terminal = TerminalPanel(
+                rect=terminal_rect,
+                on_command=self._on_terminal_command,
+            )
+            self.terminal.focus()
+
+            # Initialize theatrical cracker
+            self.theatrical_cracker = TheatricalCracker(self.terminal)
+
+            # Welcome message in terminal
+            current_hash = state.get_current_hash()
+            if current_hash:
+                hash_type = (encounter.hash_type or "MD5").upper()
+                self.terminal.add_system_message(f"Target acquired: {hash_type} hash")
+                self.terminal.add_info(f"Hash: {current_hash[:32]}{'...' if len(current_hash) > 32 else ''}")
+                self.terminal.add_output("")
+                self.terminal.add_output("Type password to submit, or 'crack' to auto-crack.")
+
+            self.textbox = None  # Not using textbox when terminal is active
 
         # Create prompt bar
         narrative_content = self.narrative_panel.content_rect
@@ -273,7 +311,9 @@ class EncounterScene(Scene):
 
         # In Observer Mode, auto-reveal the answer for hash encounters
         game_mode = getattr(self.client, 'game_mode', 'full')
-        if game_mode == 'observer' and encounter.hint and encounter.solution:
+        current_hint = state.get_current_hint()
+        current_solution = state.get_current_solution()
+        if game_mode == 'observer' and current_hint and current_solution:
             self.show_hint = True  # Auto-show answer in observer mode
 
         # Play dungeon ambiance
@@ -383,14 +423,23 @@ class EncounterScene(Scene):
         total_enc = len(chapter.encounters) if chapter else 0
         self.status_panel.add_stat("Encounter", f"{enc_idx}/{total_enc}")
 
-        # XP
+        # XP (difficulty-adjusted)
         current_xp = state.state.xp_earned
-        # Calculate total possible XP
+        # Calculate total possible XP using difficulty-adjusted rewards
         total_xp = sum(
-            sum(e.xp_reward for e in ch.encounters)
+            sum(e.get_xp_for_difficulty(state.difficulty) for e in ch.encounters)
             for ch in self.client.campaign.chapters
         )
         self.status_panel.add_stat("XP", f"{current_xp}/{total_xp}", Colors.YELLOW)
+
+        # Difficulty indicator (WoW-style color)
+        difficulty_colors = {
+            DifficultyLevel.NORMAL: Colors.SUCCESS,
+            DifficultyLevel.HEROIC: Colors.BLUE,
+            DifficultyLevel.MYTHIC: Colors.PURPLE,
+        }
+        diff_color = difficulty_colors.get(state.difficulty, Colors.TEXT_MUTED)
+        self.status_panel.add_stat("Difficulty", state.difficulty.value.upper(), diff_color)
 
         # Separator
         self.status_panel.add_stat("", "")
@@ -411,8 +460,10 @@ class EncounterScene(Scene):
         if not self.prompt_bar:
             return
 
-        encounter = self.client.adventure_state.current_encounter
         state = self.client.adventure_state
+        encounter = state.current_encounter
+        current_hash = state.get_current_hash()
+        current_hint = state.get_current_hint()
         prompts = []
 
         # For TOUR/WALKTHROUGH encounters - just show Enter to continue
@@ -424,10 +475,10 @@ class EncounterScene(Scene):
 
             # Show [F] Crack option if we have tools and a hash
             game_mode = getattr(self.client, 'game_mode', 'full')
-            if game_mode != 'observer' and encounter.hash:
+            if game_mode != 'observer' and current_hash:
                 prompts.append(("F", "Crack"))
 
-            if encounter.hint:
+            if current_hint:
                 # In observer mode, show Skip option instead of Hint
                 if game_mode == 'observer':
                     prompts.append(("S", "Skip"))
@@ -456,6 +507,8 @@ class EncounterScene(Scene):
         if self.client.audio:
             self.client.audio.stop_ambiance()
 
+        self.terminal = None
+        self.theatrical_cracker = None
         self.textbox = None
         self.choice_buttons = []
         self.viewport_panel = None
@@ -469,20 +522,32 @@ class EncounterScene(Scene):
         self._lock_icon = None
         self._result_panel = None
 
+        # Reset celebration state
+        self._celebrating_success = False
+        self._celebration_timer = 0.0
+        self._celebration_phase = 0
+        self._pending_result = None
+        self._xp_awarded = 0
+
     def _on_answer_submit(self, answer: str) -> None:
         """Handle answer submission."""
-        encounter = self.client.adventure_state.current_encounter
+        state = self.client.adventure_state
+        encounter = state.current_encounter
 
         # Track attempt
         self._attempts_this_encounter += 1
 
+        # Get difficulty-adjusted values
+        current_hash = state.get_current_hash()
+        current_solution = state.get_current_solution()
+
         # Check answer
         correct = False
-        if encounter.hash and encounter.hash_type:
+        if current_hash and encounter.hash_type:
             from spellengine.adventures.validation import validate_crack
-            correct = validate_crack(answer, encounter.hash, encounter.hash_type)
-        elif encounter.solution:
-            correct = answer.lower().strip() == encounter.solution.lower().strip()
+            correct = validate_crack(answer, current_hash, encounter.hash_type)
+        elif current_solution:
+            correct = answer.lower().strip() == current_solution.lower().strip()
         else:
             if encounter.encounter_type in (
                 EncounterType.TOUR,
@@ -505,25 +570,34 @@ class EncounterScene(Scene):
             ):
                 self.client.adventure_state.state.clean_solves += 1
 
-            # DISABLED - sounds too intrusive, needs redesign
-            # if self.client.audio:
-            #     if is_narrative:
-            #         self.client.audio.play_sfx("story_advance")
-            #     else:
-            #         self.client.audio.play_sfx("crack_success")
-
-            # Skip result panel and flash for narrative encounters
-            if not is_narrative:
-                self._result_panel = self.client.assets.get_ui_element(
-                    self.client.campaign.id, "panel_success"
-                )
-                self._result_panel_timer = 1.5
-
-                if self.textbox:
-                    self.textbox.flash_success()
-
+            # Record the outcome but don't process yet
             result = self.client.adventure_state.record_outcome(OutcomeType.SUCCESS)
-            self._handle_result(result)
+
+            # Skip celebration for narrative encounters - advance immediately
+            if is_narrative:
+                self._handle_result(result)
+                return
+
+            # Start the success celebration sequence
+            from spellengine.engine.settings import get_settings
+            settings = get_settings()
+
+            # Store result for later processing
+            self._pending_result = result
+            self._xp_awarded = result.get("xp_awarded", 0)
+
+            # Phase 0: Flash and initial sound
+            self._celebrating_success = True
+            self._celebration_timer = 0.0
+            self._celebration_phase = 0
+
+            # Green flash (respects settings)
+            if settings.flash_enabled:
+                self.client.flash_success()
+
+            # Success crack sound (respects reduce_motion setting)
+            if self.client.audio and not settings.reduce_motion:
+                self.client.audio.play_sfx("crack_success")
         else:
             # DISABLED - sounds too intrusive
             # if self.client.audio:
@@ -537,6 +611,10 @@ class EncounterScene(Scene):
             if self.textbox:
                 self.textbox.flash_error()
                 self.textbox.clear()
+
+            # Screen shake and flash for clear failure feedback
+            self.client.shake(intensity=4, duration=0.2)
+            self.client.flash_failure()
 
             # Check if this is a BOSS encounter with limited attempts
             is_boss = encounter.encounter_type in (
@@ -560,6 +638,84 @@ class EncounterScene(Scene):
 
             self.feedback_color = Colors.ERROR
             self.feedback_timer = 2.0
+
+            # Show error in terminal too
+            if self.terminal:
+                self.terminal.add_error("Incorrect password")
+
+    def _on_terminal_command(self, command: str) -> None:
+        """Handle command from embedded terminal.
+
+        Commands:
+        - 'crack' or 'c': Start theatrical cracking animation
+        - 'hint' or 'h': Show/toggle hint
+        - 'help' or '?': Show available commands
+        - 'clear': Clear terminal output
+        - Anything else: Treat as password submission
+        """
+        cmd = command.lower().strip()
+
+        if cmd in ('crack', 'c'):
+            self._start_theatrical_crack()
+        elif cmd in ('hint', 'h'):
+            self._on_hint_click()
+            if self.terminal:
+                state = self.client.adventure_state
+                current_hint = state.get_current_hint()
+                if current_hint:
+                    self.terminal.add_info(f"Hint: {current_hint}")
+                else:
+                    self.terminal.add_output("No hint available for this encounter.")
+        elif cmd in ('help', '?'):
+            if self.terminal:
+                self.terminal.add_output("")
+                self.terminal.add_system_message("Available commands:")
+                self.terminal.add_output("  crack, c  - Auto-crack the hash (theatrical mode)")
+                self.terminal.add_output("  hint, h   - Show hint for this encounter")
+                self.terminal.add_output("  clear     - Clear terminal output")
+                self.terminal.add_output("  <password> - Submit password directly")
+                self.terminal.add_output("")
+        elif cmd == 'clear':
+            if self.terminal:
+                self.terminal.clear()
+        elif cmd:
+            # Treat as password submission
+            self._on_answer_submit(command)
+
+    def _start_theatrical_crack(self) -> None:
+        """Start theatrical cracking using the hash index."""
+        if not self.terminal or not self.hash_index or not self.theatrical_cracker:
+            return
+
+        # Don't start if already cracking
+        if self.theatrical_cracker.is_active:
+            self.terminal.add_output("Crack already in progress...")
+            return
+
+        state = self.client.adventure_state
+        encounter = state.current_encounter
+        current_hash = state.get_current_hash()
+
+        if not current_hash:
+            self.terminal.add_error("No hash to crack in this encounter.")
+            return
+
+        # Look up the hash in our index
+        result = self.hash_index.lookup(current_hash)
+
+        if result.found:
+            # Start theatrical reveal with hash info for syntax display
+            self.theatrical_cracker.start(
+                solution=result.solution,
+                hash_value=current_hash,
+                hash_type=encounter.hash_type or "md5",
+                show_syntax=True,  # Show equivalent hashcat/john commands
+            )
+            self._cracking = True
+        else:
+            # Hash not in index - shouldn't happen for campaign hashes
+            self.terminal.add_error("Hash not found in campaign index.")
+            self.terminal.add_output("Try entering the password manually.")
 
     def _on_choice_select(self, choice_index: int) -> None:
         """Handle fork choice selection."""
@@ -648,10 +804,14 @@ class EncounterScene(Scene):
         Logs output to the test session terminal (single window for all cracks).
         The cracking animation plays while the command runs.
         """
-        encounter = self.client.adventure_state.current_encounter
+        state = self.client.adventure_state
+        encounter = state.current_encounter
+
+        # Get difficulty-adjusted hash
+        current_hash = state.get_current_hash()
 
         # Only crack if there's a hash
-        if not encounter.hash:
+        if not current_hash:
             return
 
         # Don't start if already cracking
@@ -663,7 +823,7 @@ class EncounterScene(Scene):
         if game_mode == 'observer':
             return  # No cracking in observer mode
 
-        hash_value = encounter.hash
+        hash_value = current_hash
 
         # Build command string for logging
         import sys
@@ -751,8 +911,27 @@ class EncounterScene(Scene):
 
         encounter = self.client.adventure_state.current_encounter
 
-        # Handle text input (only for non-TOUR encounters)
-        if self.textbox:
+        # Block all input during celebration phases 0 and 1 (animation playing)
+        if self._celebrating_success and self._celebration_phase < 2:
+            return
+
+        # Handle celebration input (phase 2 = waiting for keypress)
+        if self._celebrating_success and self._celebration_phase == 2:
+            if event.type == pygame.KEYDOWN:
+                # Any key advances during celebration
+                self._celebrating_success = False
+                self._celebration_timer = 0.0
+                self._celebration_phase = 0
+                if self._pending_result:
+                    self._handle_result(self._pending_result)
+                    self._pending_result = None
+                return
+
+        # Handle terminal input (for hash-cracking encounters)
+        if self.terminal:
+            self.terminal.handle_event(event)
+        # Fallback to textbox if no terminal
+        elif self.textbox:
             self.textbox.handle_event(event)
 
         # Keyboard shortcuts
@@ -781,17 +960,24 @@ class EncounterScene(Scene):
             elif event.key == pygame.K_s:
                 # [S] key - Skip challenge in Observer Mode (auto-submit solution)
                 game_mode = getattr(self.client, 'game_mode', 'full')
-                if game_mode == 'observer' and encounter.solution:
-                    self._on_answer_submit(encounter.solution)
+                current_solution = self.client.adventure_state.get_current_solution()
+                if game_mode == 'observer' and current_solution:
+                    self._on_answer_submit(current_solution)
             elif event.key == pygame.K_SPACE:
                 # Skip typewriter effect
                 if self.typewriter:
                     self.typewriter.skip()
             elif event.key == pygame.K_f:
-                # [F] key - Crack with PatternForge
+                # [F] key - Crack hash (theatrical mode with terminal)
                 game_mode = getattr(self.client, 'game_mode', 'full')
-                if game_mode != 'observer' and encounter.hash and not self._cracking:
-                    self._run_crack_command()
+                current_hash = self.client.adventure_state.get_current_hash()
+                if game_mode != 'observer' and current_hash and not self._cracking:
+                    if self.terminal and self.theatrical_cracker:
+                        # Use theatrical cracking with embedded terminal
+                        self._start_theatrical_crack()
+                    else:
+                        # Fallback to subprocess-based cracking
+                        self._run_crack_command()
 
             elif event.key == pygame.K_b:
                 # [B] key - Retreat from boss encounter (costs a death)
@@ -825,11 +1011,41 @@ class EncounterScene(Scene):
 
     def update(self, dt: float) -> None:
         """Update scene state."""
+        # Update celebration sequence
+        if self._celebrating_success:
+            self._celebration_timer += dt
+
+            # Phase 0 (0-0.2s): Flash phase - transition to art swap
+            if self._celebration_phase == 0 and self._celebration_timer >= 0.2:
+                self._celebration_phase = 1
+                # Play XP gain sound when art swaps in
+                if self.client.audio:
+                    self.client.audio.play_sfx("xp_gain")
+
+            # Phase 1 (0.2-1.5s): Art swap - transition to waiting
+            elif self._celebration_phase == 1 and self._celebration_timer >= 1.5:
+                self._celebration_phase = 2
+                # Now waiting indefinitely for user input
+
         # Update typewriter effect
         if self.typewriter:
             self.typewriter.update(dt)
 
-        # Update textbox cursor
+        # Update terminal
+        if self.terminal:
+            self.terminal.update(dt)
+
+        # Update theatrical cracker
+        if self.theatrical_cracker and self.theatrical_cracker.is_active:
+            crack_complete = self.theatrical_cracker.update(dt)
+            if crack_complete:
+                # Theatrical crack finished - auto-submit the solution
+                self._cracking = False
+                solution = self.theatrical_cracker.result
+                if solution:
+                    self._on_answer_submit(solution)
+
+        # Update textbox cursor (fallback)
         if self.textbox:
             self.textbox.update(dt)
 
@@ -915,18 +1131,17 @@ class EncounterScene(Scene):
         if self.hash_panel:
             self.hash_panel.draw(surface)
 
-        # Draw viewport content
-        self._draw_viewport(surface, encounter)
+        # Draw viewport content - use celebration viewport during success sequence
+        if self._celebrating_success and self._celebration_phase >= 1:
+            self._draw_celebration_viewport(surface)
+        else:
+            self._draw_viewport(surface, encounter)
 
         # Draw narrative content
         self._draw_narrative(surface, encounter)
 
         # Draw hash panel content
         self._draw_hash_panel(surface, encounter)
-
-        # Draw result panel overlay
-        if self._result_panel:
-            self._draw_result_overlay(surface)
 
     def _draw_viewport(self, surface: "pygame.Surface", encounter: "Encounter") -> None:
         """Draw the viewport panel content (art + boss)."""
@@ -1031,6 +1246,76 @@ class EncounterScene(Scene):
             lock_y = content.y + 10
             surface.blit(lock_img, (lock_x, lock_y))
 
+    def _draw_celebration_viewport(self, surface: "pygame.Surface") -> None:
+        """Draw the celebration viewport during success sequence.
+
+        Shows enlarged panel_success.png with XP gained and pulsing continue prompt.
+        """
+        import pygame
+        import math
+
+        if not self.viewport_panel:
+            return
+
+        content = self.viewport_panel.content_rect
+        fonts = get_fonts()
+
+        # Fill viewport with dark background
+        pygame.draw.rect(surface, Colors.BG_DARKEST, content)
+
+        # Get victory art
+        victory_art = self.client.assets.get_ui_element(
+            self.client.campaign.id, "panel_success"
+        )
+
+        if victory_art:
+            # Scale to 60% of viewport size
+            art_w, art_h = victory_art.get_size()
+            max_w = int(content.width * 0.6)
+            max_h = int(content.height * 0.5)
+            scale = min(max_w / art_w, max_h / art_h, 1.5)  # Allow some upscaling
+
+            new_w = int(art_w * scale)
+            new_h = int(art_h * scale)
+            scaled_art = pygame.transform.scale(victory_art, (new_w, new_h))
+
+            # Center art in upper portion of viewport
+            art_x = content.x + (content.width - new_w) // 2
+            art_y = content.y + int(content.height * 0.15)
+
+            surface.blit(scaled_art, (art_x, art_y))
+
+            # Draw XP text below art
+            xp_y = art_y + new_h + 30
+        else:
+            # No art, position XP text higher
+            xp_y = content.y + int(content.height * 0.35)
+
+        # Draw "+X XP" prominently
+        xp_font = fonts.get_font(Typography.SIZE_HEADER, bold=True)
+        xp_text = f"+{self._xp_awarded} XP"
+        xp_surface = xp_font.render(xp_text, Typography.ANTIALIAS, Colors.YELLOW)
+        xp_x = content.x + (content.width - xp_surface.get_width()) // 2
+        surface.blit(xp_surface, (xp_x, xp_y))
+
+        # Phase 2: Draw pulsing "Press SPACE to continue" prompt
+        if self._celebration_phase == 2:
+            # Pulse alpha between 0.4 and 1.0
+            pulse = 0.7 + 0.3 * math.sin(self._celebration_timer * 4.0)
+
+            prompt_font = fonts.get_font(Typography.SIZE_BODY)
+            prompt_text = "Press SPACE to continue"
+            prompt_surface = prompt_font.render(
+                prompt_text, Typography.ANTIALIAS, Colors.TEXT_PRIMARY
+            )
+
+            # Apply pulse by adjusting alpha
+            prompt_surface.set_alpha(int(255 * pulse))
+
+            prompt_x = content.x + (content.width - prompt_surface.get_width()) // 2
+            prompt_y = content.y + content.height - 60
+            surface.blit(prompt_surface, (prompt_x, prompt_y))
+
     def _draw_narrative(self, surface: "pygame.Surface", encounter: "Encounter") -> None:
         """Draw the narrative panel content."""
         if not self.narrative_panel:
@@ -1049,10 +1334,12 @@ class EncounterScene(Scene):
         surface.blit(title_surface, (content.x, y))
         y += title_font.get_height() + SPACING["sm"]
 
-        # Tier/XP indicator
+        # Tier/XP indicator (difficulty-adjusted)
+        state = self.client.adventure_state
+        xp_reward = state.get_current_xp_reward()
         tier_str = "*" * encounter.tier + "." * (6 - encounter.tier)
         info_font = fonts.get_label_font()
-        info_text = f"[{tier_str}]  +{encounter.xp_reward} XP"
+        info_text = f"[{tier_str}]  +{xp_reward} XP"
         info_surface = info_font.render(info_text, Typography.ANTIALIAS, Colors.YELLOW)
         surface.blit(info_surface, (content.x, y))
         y += info_font.get_height() + SPACING["md"]
@@ -1077,31 +1364,45 @@ class EncounterScene(Scene):
                 surface.blit(line_surface, (content.x, text_y))
                 text_y += line_height
 
-        # Objective - positioned at bottom of narrative panel
-        obj_y = content.y + content.height - 40
+        # Prompt bar (at very bottom)
+        if self.prompt_bar:
+            self.prompt_bar.draw(surface)
+
+        # Calculate positions from bottom up to avoid overlap
+        # Prompt bar is at content.height - 20, so stack above it
         obj_font = fonts.get_label_font()
+        line_height = obj_font.get_height() + 4  # Line height with small gap
+
+        # Check if hint will be shown
+        current_hint = state.get_current_hint()
+        current_solution = state.get_current_solution()
+        show_hint_line = self.show_hint and current_hint
+
+        # Position objective above prompt bar (and hint if showing)
+        if show_hint_line:
+            hint_y = content.y + content.height - 38  # Above prompt bar
+            obj_y = hint_y - line_height  # Above hint
+        else:
+            obj_y = content.y + content.height - 38  # Above prompt bar
+
+        # Draw objective
         obj_text = f"Objective: {encounter.objective}"
         obj_surface = obj_font.render(obj_text, Typography.ANTIALIAS, Colors.BLUE)
         surface.blit(obj_surface, (content.x, obj_y))
 
-        # Hint (if showing) - positioned below objective
-        if self.show_hint and encounter.hint:
-            hint_y = obj_y + SPACING["md"]
+        # Draw hint (if showing) - below objective, above prompt bar
+        if show_hint_line:
             # In observer mode, reveal the answer instead of just the hint
             if getattr(self.client, 'game_mode', 'full') == 'observer':
-                hint_text = f"Answer: {encounter.solution}"
+                hint_text = f"Answer: {current_solution}"
                 hint_color = Colors.GOLD  # Make answer stand out
             else:
-                hint_text = f"Hint: {encounter.hint}"
+                hint_text = f"Hint: {current_hint}"
                 hint_color = Colors.TEXT_MUTED
             hint_surface = obj_font.render(
                 hint_text, Typography.ANTIALIAS, hint_color
             )
             surface.blit(hint_surface, (content.x, hint_y))
-
-        # Prompt bar
-        if self.prompt_bar:
-            self.prompt_bar.draw(surface)
 
         # Feedback message
         if self.feedback_message:
@@ -1122,13 +1423,20 @@ class EncounterScene(Scene):
 
         content = self.hash_panel.content_rect
         fonts = get_fonts()
+        state = self.client.adventure_state
 
-        y = content.y
-
-        # For TOUR/WALKTHROUGH encounters - show narrative continuation prompt instead of hash
+        # For TOUR/WALKTHROUGH encounters - show narrative continuation prompt
         if encounter.encounter_type in (EncounterType.TOUR, EncounterType.WALKTHROUGH):
             self._draw_tour_panel(surface, content, fonts)
             return
+
+        # If terminal is active, render it and return
+        if self.terminal:
+            self.terminal.render(surface)
+            return
+
+        # === Fallback rendering (when no terminal) ===
+        y = content.y
 
         # Hash type with color
         if encounter.hash_type:
@@ -1139,129 +1447,45 @@ class EncounterScene(Scene):
             surface.blit(type_surface, (content.x, y))
             y += type_font.get_height() + SPACING["sm"]
 
-            # Separator
-            pygame.draw.line(
-                surface,
-                Colors.BORDER,
-                (content.x, y),
-                (content.x + content.width, y),
-                1,
-            )
+            pygame.draw.line(surface, Colors.BORDER, (content.x, y), (content.x + content.width, y), 1)
             y += SPACING["sm"]
 
-        # Hash value (wrapped) or cracked cleartext
-        if encounter.hash:
+        # Hash value
+        current_hash = state.get_current_hash()
+        if current_hash:
             hash_font = fonts.get_font(Typography.SIZE_LABEL)
 
-            # If crack complete, show the cleartext password
             if self._crack_complete and self._cracked_solution:
-                # Show "CRACKED!" label
                 cracked_label = fonts.get_font(Typography.SIZE_LABEL, bold=True)
                 label_surface = cracked_label.render("CRACKED!", Typography.ANTIALIAS, Colors.SUCCESS)
                 surface.blit(label_surface, (content.x, y))
                 y += int(cracked_label.get_height() * 1.5)
 
-                # Show the cleartext password in green
                 password_font = fonts.get_font(Typography.SIZE_SUBHEADER, bold=True)
-                password_surface = password_font.render(
-                    self._cracked_solution, Typography.ANTIALIAS, Colors.SUCCESS
-                )
+                password_surface = password_font.render(self._cracked_solution, Typography.ANTIALIAS, Colors.SUCCESS)
                 surface.blit(password_surface, (content.x, y))
-                y += int(password_font.get_height() * 1.2)
             else:
-                chars_per_line = content.width // (hash_font.size("0")[0] + 1)
-                if chars_per_line < 1:
-                    chars_per_line = 16
+                chars_per_line = max(16, content.width // (hash_font.size("0")[0] + 1))
+                hash_color = Colors.get_hash_color(encounter.hash_type or "MD5")
 
-                hash_type = encounter.hash_type or "MD5"
-                hash_color = Colors.get_hash_color(hash_type)
-
-                for i in range(0, len(encounter.hash), chars_per_line):
-                    line = encounter.hash[i:i + chars_per_line]
-                    # If cracking, scramble the hash display
-                    if self._cracking:
-                        import random
-                        scramble_chars = "0123456789abcdef"
-                        # Progressively reveal correct chars based on timer
-                        progress = min(self._crack_timer / self._crack_duration, 1.0)
-                        reveal_count = int(len(line) * progress)
-                        scrambled = ""
-                        for j, char in enumerate(line):
-                            if j < reveal_count:
-                                scrambled += char
-                            else:
-                                scrambled += random.choice(scramble_chars)
-                        line = scrambled
-                    line_surface = hash_font.render(
-                        line, Typography.ANTIALIAS, hash_color
-                    )
+                for i in range(0, len(current_hash), chars_per_line):
+                    line = current_hash[i:i + chars_per_line]
+                    line_surface = hash_font.render(line, Typography.ANTIALIAS, hash_color)
                     surface.blit(line_surface, (content.x, y))
                     y += int(hash_font.get_height() * 1.2)
 
-        # Draw cracking animation overlay
-        if self._cracking:
+        # Draw cracking animation overlay (legacy)
+        if self._cracking and not self.terminal:
             self._draw_cracking_overlay(surface, content, fonts)
-            return  # Skip normal input drawing while cracking
+            return
 
-        # [F] Crack option - only show when tools available
-        game_mode = getattr(self.client, 'game_mode', 'full')
-        if encounter.hash and game_mode != 'observer':
-            forge_font = fonts.get_small_font()
-            forge_text = "[F] Crack with PatternForge"
-            forge_surface = forge_font.render(
-                forge_text, Typography.ANTIALIAS, Colors.BLUE
-            )
-            forge_x = content.x + (content.width - forge_surface.get_width()) // 2
-            forge_y = y + SPACING["xs"]
-            surface.blit(forge_surface, (forge_x, forge_y))
-
-        # Draw text input or choice buttons
+        # Draw textbox fallback
         if self.textbox:
-            # Draw blank input indicator line (12 underscores + period)
-            indicator_font = fonts.get_font(Typography.SIZE_LABEL)
-            indicator_text = "____________."
-            indicator_surface = indicator_font.render(
-                indicator_text, Typography.ANTIALIAS, Colors.TEXT_MUTED
-            )
-            indicator_x = content.x
-            indicator_y = self.textbox.rect.y - indicator_font.get_height() - SPACING["lg"]
-            surface.blit(indicator_surface, (indicator_x, indicator_y))
-
-            # Draw visible prompt label above textbox
             prompt_font = fonts.get_font(Typography.SIZE_LABEL, bold=True)
-            prompt_text = "> Enter password:"
-            prompt_surface = prompt_font.render(
-                prompt_text, Typography.ANTIALIAS, Colors.CURSOR
-            )
-            prompt_x = content.x
+            prompt_surface = prompt_font.render("> Enter password:", Typography.ANTIALIAS, Colors.CURSOR)
             prompt_y = self.textbox.rect.y - prompt_font.get_height() - SPACING["sm"]
-            surface.blit(prompt_surface, (prompt_x, prompt_y))
-
-            # Draw the textbox itself
+            surface.blit(prompt_surface, (content.x, prompt_y))
             self.textbox.draw(surface)
-
-            # Input hint below textbox
-            inst_font = fonts.get_small_font()
-            inst_surface = inst_font.render(
-                "[ENTER] to submit",
-                Typography.ANTIALIAS,
-                Colors.TEXT_MUTED,
-            )
-            inst_x = content.x + (content.width - inst_surface.get_width()) // 2
-            inst_y = self.textbox.rect.y + self.textbox.rect.height + SPACING["sm"]
-            surface.blit(inst_surface, (inst_x, inst_y))
-
-            # First-time instruction
-            if self.is_first_encounter and not self.first_encounter_shown:
-                hint_surface = inst_font.render(
-                    "Type the password that produces this hash",
-                    Typography.ANTIALIAS,
-                    Colors.TEXT_DIM,
-                )
-                hint_x = content.x + (content.width - hint_surface.get_width()) // 2
-                hint_y = indicator_y - SPACING["md"]
-                surface.blit(hint_surface, (hint_x, hint_y))
-                self.first_encounter_shown = True
 
         elif self.choice_buttons:
             # Draw fork choices
