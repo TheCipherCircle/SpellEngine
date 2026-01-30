@@ -52,14 +52,24 @@ def main() -> int:
         print("This should not happen with the bundled executable.")
         return 1
 
-    # Check for cracking tools silently - default to observer mode for Windows
+    # Check for cracking tools - offer installation if missing
+    from spellengine.tools.installer import show_install_menu, get_hashcat_path, get_john_path
+
     tools = cli_module.check_cracking_tools()
+
+    # Also check local tools directory
+    local_hashcat = get_hashcat_path()
+    local_john = get_john_path()
+    if local_hashcat and not tools["hashcat"]:
+        tools["hashcat"] = str(local_hashcat)
+    if local_john and not tools["john"]:
+        tools["john"] = str(local_john)
+
     game_mode = cli_module.determine_game_mode(tools)
 
-    # For Windows exe, if no tools found, just go observer mode (no prompts)
+    # If no tools found, show installation menu
     if game_mode == cli_module.GAME_MODE_OBSERVER:
-        print("No cracking tools detected - running in Observer Mode")
-        print("(Hints will reveal answers)")
+        game_mode, tools = show_install_menu()
 
     # Find Dread Citadel campaign
     from spellengine.cli import get_campaigns

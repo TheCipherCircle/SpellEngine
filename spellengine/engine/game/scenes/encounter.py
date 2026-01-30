@@ -271,6 +271,11 @@ class EncounterScene(Scene):
         self.prompt_bar = PromptBar(narrative_content.x, prompt_y)
         self._update_prompts()
 
+        # In Observer Mode, auto-reveal the answer for hash encounters
+        game_mode = getattr(self.client, 'game_mode', 'full')
+        if game_mode == 'observer' and encounter.hint and encounter.solution:
+            self.show_hint = True  # Auto-show answer in observer mode
+
         # Play dungeon ambiance
         if self.client.audio:
             self.client.audio.play_ambiance("dungeon_ambiance", loop=True)
@@ -423,9 +428,9 @@ class EncounterScene(Scene):
                 prompts.append(("F", "Crack"))
 
             if encounter.hint:
-                # In observer mode, label shows "Answer" instead of "Hint"
+                # In observer mode, show Skip option instead of Hint
                 if game_mode == 'observer':
-                    prompts.append(("H", "Answer"))
+                    prompts.append(("S", "Skip"))
                 else:
                     prompts.append(("H", "Hint"))
 
@@ -773,6 +778,11 @@ class EncounterScene(Scene):
 
             if event.key == pygame.K_h:
                 self._on_hint_click()
+            elif event.key == pygame.K_s:
+                # [S] key - Skip challenge in Observer Mode (auto-submit solution)
+                game_mode = getattr(self.client, 'game_mode', 'full')
+                if game_mode == 'observer' and encounter.solution:
+                    self._on_answer_submit(encounter.solution)
             elif event.key == pygame.K_SPACE:
                 # Skip typewriter effect
                 if self.typewriter:
