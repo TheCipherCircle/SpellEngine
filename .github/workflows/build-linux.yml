@@ -34,6 +34,9 @@ jobs:
           python -m pip install --upgrade pip
           pip install pyinstaller pygame pyyaml psutil pydantic rich
 
+      - name: Self-test campaigns (validate YAML, flow, hashes)
+        run: python -m spellengine selftest --all
+
       - name: Build executable
         run: python scripts/build_linux_exe.py
 
