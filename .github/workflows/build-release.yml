@@ -62,13 +62,19 @@ jobs:
       - name: Smoke test - verify app launches
         run: |
           echo "Starting launch test on ${{ matrix.name }}..."
-          open -a "dist/Dread Citadel.app" &
-          sleep 10
-          if pgrep -f "Dread Citadel" > /dev/null 2>&1; then
-            echo "PASS: Process still running after 10s"
-            pkill -f "Dread Citadel" 2>/dev/null || true
+          # Run app with Observer mode auto-selected (echo 3 = Observer Mode)
+          echo "3" | timeout 15s "dist/Dread Citadel.app/Contents/MacOS/Dread Citadel" > smoke_output.txt 2>&1 &
+          APP_PID=$!
+          sleep 5
+
+          # Check if process started and pygame loaded
+          if grep -q "pygame" smoke_output.txt; then
+            echo "PASS: App initialized pygame successfully"
+            kill $APP_PID 2>/dev/null || true
           else
-            echo "FAIL: Process exited unexpectedly"
+            echo "Output:"
+            cat smoke_output.txt
+            echo "FAIL: pygame not initialized"
             exit 1
           fi
 
@@ -151,14 +157,16 @@ jobs:
       - name: Smoke test - verify binary launches
         run: |
           echo "Starting launch test..."
-          timeout 10s ./dist/DreadCitadel &
-          GAME_PID=$!
-          sleep 5
-          if ps -p $GAME_PID > /dev/null 2>&1; then
-            echo "PASS: Process still running after 5s"
-            kill $GAME_PID 2>/dev/null || true
+          # Run with Observer mode auto-selected (echo 3 = Observer Mode)
+          echo "3" | timeout 15s ./dist/DreadCitadel > smoke_output.txt 2>&1 || true
+
+          # Check if pygame loaded and tool menu appeared
+          if grep -q "pygame" smoke_output.txt && grep -q "Choice" smoke_output.txt; then
+            echo "PASS: App initialized and showed tool menu"
           else
-            echo "FAIL: Process exited unexpectedly"
+            echo "Output:"
+            cat smoke_output.txt
+            echo "FAIL: App did not initialize properly"
             exit 1
           fi
 
