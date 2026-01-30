@@ -435,7 +435,7 @@
         <div class="series">A Hashtopia Adventure</div>
         <h1 class="title">THE DREAD CITADEL</h1>
         <p class="subtitle">A Password Cracking Adventure</p>
-        <span class="version">v0.9.1-demo</span>
+        <span class="version" id="version-badge">Loading...</span>
     </header>
 
     <div class="container">
@@ -462,10 +462,10 @@
                         </div>
                         <div>
                             <div class="platform-name">macOS</div>
-                            <div class="platform-note">Apple Silicon & Intel • macOS 11+</div>
+                            <div class="platform-note">Apple Silicon (M1/M2/M3) • macOS 11+</div>
                         </div>
                     </div>
-                    <a href="https://github.com/TheCipherCircle/SpellEngine/releases/download/v0.9.1-demo/DreadCitadel-macOS.zip" class="download-btn">Download</a>
+                    <a id="download-macos" href="#" class="download-btn">Download</a>
                 </div>
 
                 <div class="download-card">
@@ -480,7 +480,7 @@
                             <div class="platform-note">Windows 10/11 • 64-bit</div>
                         </div>
                     </div>
-                    <a href="https://github.com/TheCipherCircle/SpellEngine/releases/download/v0.9.1-demo/DreadCitadel-Windows.zip" class="download-btn">Download</a>
+                    <a id="download-windows" href="#" class="download-btn">Download</a>
                 </div>
 
                 <div class="download-card">
@@ -495,7 +495,7 @@
                             <div class="platform-note">Ubuntu 20.04+ / Kali / Debian</div>
                         </div>
                     </div>
-                    <a href="https://github.com/TheCipherCircle/SpellEngine/releases/download/v0.9.1-demo/DreadCitadel-Linux.tar.gz" class="download-btn">Download</a>
+                    <a id="download-linux" href="#" class="download-btn">Download</a>
                 </div>
             </div>
         </div>
@@ -569,5 +569,52 @@
             <p class="copyright">&copy; 2026 The Cipher Circle. All rights reserved.</p>
         </footer>
     </div>
+    <script>
+        // Fetch latest release from GitHub API and update download links
+        const REPO = 'TheCipherCircle/SpellEngine';
+        const FALLBACK_VERSION = 'v0.9.1-demo';
+
+        async function loadLatestRelease() {
+            try {
+                const response = await fetch(`https://api.github.com/repos/${REPO}/releases/latest`);
+                if (!response.ok) throw new Error('Failed to fetch');
+
+                const release = await response.json();
+                const version = release.tag_name;
+
+                // Update version badge
+                document.getElementById('version-badge').textContent = version;
+
+                // Find assets and update download links
+                const assets = release.assets;
+
+                const macosAsset = assets.find(a => a.name.includes('macOS'));
+                const windowsAsset = assets.find(a => a.name.includes('Windows'));
+                const linuxAsset = assets.find(a => a.name.includes('Linux'));
+
+                if (macosAsset) {
+                    document.getElementById('download-macos').href = macosAsset.browser_download_url;
+                }
+                if (windowsAsset) {
+                    document.getElementById('download-windows').href = windowsAsset.browser_download_url;
+                }
+                if (linuxAsset) {
+                    document.getElementById('download-linux').href = linuxAsset.browser_download_url;
+                }
+
+            } catch (error) {
+                console.error('Failed to load release info:', error);
+                // Fallback to hardcoded version
+                document.getElementById('version-badge').textContent = FALLBACK_VERSION;
+                const base = `https://github.com/${REPO}/releases/download/${FALLBACK_VERSION}`;
+                document.getElementById('download-macos').href = `${base}/DreadCitadel-macOS.zip`;
+                document.getElementById('download-windows').href = `${base}/DreadCitadel-Windows.zip`;
+                document.getElementById('download-linux').href = `${base}/DreadCitadel-Linux.tar.gz`;
+            }
+        }
+
+        // Load on page ready
+        loadLatestRelease();
+    </script>
 </body>
 </html>
