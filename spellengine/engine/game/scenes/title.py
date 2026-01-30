@@ -6,6 +6,7 @@ Features:
 - Menu options beneath title
 - Flashing "START" option (arcade style)
 - Difficulty selector (Normal/Heroic/Mythic - WoW-inspired)
+- First-run welcome message (Hashtopia philosophy)
 - Full Gruvbox styling
 """
 
@@ -25,6 +26,21 @@ from spellengine.engine.game.ui import (
     get_fonts,
     draw_double_border_title,
 )
+
+
+# Welcome message for first-time players (Hashtopia philosophy)
+WELCOME_MESSAGE = """Welcome to the Cipher Circle, Initiate.
+
+Everything you need to succeed is already here.
+
+The passwords you seek? Hidden in patterns.
+The tools to find them? At your fingertips.
+The knowledge to master them? Woven into every challenge.
+
+No googling required. No external guides needed.
+The answers are here. Learn to see them.
+
+Press ENTER to begin your journey..."""
 
 if TYPE_CHECKING:
     import pygame
@@ -94,6 +110,11 @@ class TitleScene(Scene):
         self._selected_difficulty: DifficultyLevel = DifficultyLevel.NORMAL
         self._difficulty_panel: Panel | None = None
 
+        # First-run welcome message state
+        self._show_welcome: bool = False
+        self._welcome_panel: Panel | None = None
+        self._welcome_dismissed: bool = False
+
     def enter(self, **kwargs: Any) -> None:
         """Enter the title scene.
 
@@ -154,6 +175,31 @@ class TitleScene(Scene):
             bg_color=Colors.BG_DARK,
         )
 
+        # Show welcome message for first-time players (no save exists)
+        self._show_welcome = not self.has_save and not self._welcome_dismissed
+        if self._show_welcome:
+            self._create_welcome_panel()
+
+    def _create_welcome_panel(self) -> None:
+        """Create the welcome message panel for first-time players."""
+        screen_w, screen_h = self.client.screen_size
+
+        # Center the welcome panel
+        panel_width = min(600, screen_w - 100)
+        panel_height = min(400, screen_h - 100)
+        panel_x = (screen_w - panel_width) // 2
+        panel_y = (screen_h - panel_height) // 2
+
+        self._welcome_panel = Panel(
+            panel_x,
+            panel_y,
+            panel_width,
+            panel_height,
+            title="THE CIPHER CIRCLE",
+            major=True,
+            bg_color=Colors.BG_DARK,
+        )
+
     def _create_menu(self) -> None:
         """Create the menu with appropriate items."""
         screen_w, screen_h = self.client.screen_size
@@ -191,6 +237,7 @@ class TitleScene(Scene):
         self.main_panel = None
         self.tagline_panel = None
         self._difficulty_panel = None
+        self._welcome_panel = None
         self._splash = None
 
     def _on_start(self) -> None:
@@ -272,6 +319,17 @@ class TitleScene(Scene):
     def handle_event(self, event: "pygame.event.Event") -> None:
         """Handle events."""
         import pygame
+
+        # If welcome dialog is showing, only handle dismiss
+        if self._show_welcome:
+            if event.type == pygame.KEYDOWN:
+                if event.key in (pygame.K_RETURN, pygame.K_SPACE, pygame.K_ESCAPE):
+                    self._show_welcome = False
+                    self._welcome_dismissed = True
+                    # Play confirmation sound
+                    if self.client.audio:
+                        self.client.audio.play_sfx("story_advance")
+            return  # Block other input while welcome is showing
 
         # Menu handles keyboard navigation
         if self.menu:
@@ -404,6 +462,52 @@ class TitleScene(Scene):
                 center=self.tagline_panel.rect.center
             )
             surface.blit(tagline_surface, tagline_rect)
+
+        # === WELCOME DIALOG: First-run message (drawn on top) ===
+        if self._show_welcome:
+            self._draw_welcome_dialog(surface, fonts)
+
+    def _draw_welcome_dialog(self, surface: "pygame.Surface", fonts: Any) -> None:
+        """Draw the first-run welcome dialog.
+
+        Args:
+            surface: Surface to draw on
+            fonts: FontManager instance
+        """
+        import pygame
+
+        if not self._welcome_panel:
+            return
+
+        screen_w, screen_h = self.client.screen_size
+
+        # Draw semi-transparent overlay
+        overlay = pygame.Surface((screen_w, screen_h), pygame.SRCALPHA)
+        overlay.fill((0, 0, 0, 180))  # Dark overlay
+        surface.blit(overlay, (0, 0))
+
+        # Draw the welcome panel
+        self._welcome_panel.draw(surface)
+        content = self._welcome_panel.content_rect
+
+        # Draw the welcome message
+        body_font = fonts.get_font(Typography.SIZE_BODY)
+        line_height = body_font.get_height() + 4
+
+        # Split message into lines
+        lines = WELCOME_MESSAGE.strip().split("\n")
+        y = content.y + SPACING["md"]
+
+        for line in lines:
+            if line.strip():
+                # Render line
+                text_surface = body_font.render(
+                    line.strip(), Typography.ANTIALIAS, Colors.TEXT
+                )
+                # Center horizontally
+                text_x = content.x + (content.width - text_surface.get_width()) // 2
+                surface.blit(text_surface, (text_x, y))
+            y += line_height
 
     def _draw_menu_with_flashing_start(self, surface: "pygame.Surface") -> None:
         """Draw menu with flashing START option (arcade style).

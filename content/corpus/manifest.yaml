@@ -1,0 +1,75 @@
+# Training Corpus Manifest
+# PROPRIETARY - All Rights Reserved
+#
+# This corpus is curated from public password research and contains
+# common patterns for educational purposes. No PII included.
+
+id: training_corpus
+name: "SpellEngine Training Corpus"
+version: "1.0.0"
+description: |
+  A curated corpus of common password patterns for educational
+  password analysis training. Derived from public research on
+  password habits and common patterns.
+
+  Sources:
+  - EFF Diceware wordlist (public domain)
+  - Common password patterns from academic research
+  - Hashtopia documented mask patterns (empirically derived)
+
+license: "Educational Use Only"
+author: "The Cipher Circle"
+
+# Corpus composition
+composition:
+  common_words: 2048       # From EFF short wordlist
+  numeric_patterns: 1000   # Sequential, repeated, years
+  keyboard_patterns: 100   # qwerty, asdf, etc.
+  word_number_combos: 3000 # word+digits patterns
+  name_patterns: 1000      # Common names with variations
+  leet_patterns: 500       # l33t speak variations
+  season_patterns: 200     # Season+Year combinations
+  total_approximate: 10000
+
+# Pattern categories documented
+patterns:
+  # Tier 0: Trivial (prologue training)
+  - category: "obvious"
+    examples: ["password", "123456", "qwerty", "admin"]
+    discovery: "wordlist"
+
+  # Tier 1: Basic dictionary
+  - category: "dictionary"
+    examples: ["dragon", "master", "monkey", "shadow"]
+    discovery: "wordlist"
+
+  # Tier 2: Word+Number
+  - category: "word_digit"
+    mask: "?l?l?l?l?l?l?d?d"
+    examples: ["dragon12", "master99", "shadow21"]
+    discovery: "mask"
+
+  # Tier 3: Capitalized+Year
+  - category: "name_year"
+    mask: "?u?l?l?l?d?d?d?d"
+    examples: ["John2024", "Mike2023", "Sara2022"]
+    discovery: "mask"
+
+  # Tier 4: Leet substitutions
+  - category: "leet"
+    examples: ["dr@g0n", "p@ssw0rd", "m@st3r"]
+    discovery: "rules"
+
+  # Tier 5: Complex transforms
+  - category: "complex"
+    examples: ["Dr@g0n_2024!", "P@ssw0rd123!"]
+    discovery: "rules"
+
+# Educational metadata
+educational:
+  target_audience: "Beginners to intermediate"
+  learning_objectives:
+    - "Recognize common password patterns"
+    - "Understand mask notation"
+    - "Apply wordlist-based discovery"
+    - "Use rule-based transformations"

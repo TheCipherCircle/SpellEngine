@@ -1,0 +1,192 @@
+# Password Pattern Documentation
+# Common patterns observed in password research
+# Used for educational analysis training
+
+# =============================================================================
+# MASK NOTATION REFERENCE
+# =============================================================================
+# ?l = lowercase letter (a-z)
+# ?u = uppercase letter (A-Z)
+# ?d = digit (0-9)
+# ?s = symbol (!@#$%^&*...)
+# ?a = any printable ASCII
+# =============================================================================
+
+# =============================================================================
+# TIER 0: TRIVIAL PATTERNS (Prologue)
+# Discovery: Direct lookup / obvious guessing
+# =============================================================================
+
+# Literal "password"
+PATTERN: literal_password
+MASK: password
+EXAMPLES: password, Password, PASSWORD, passw0rd
+PREVALENCE: ~3-5% of all passwords
+NOTES: Most common password globally, appears in virtually all breaches
+
+# Sequential digits
+PATTERN: sequential_digits
+MASK: ?d?d?d?d?d?d
+EXAMPLES: 123456, 654321, 111111, 000000
+PREVALENCE: ~2-3% of all passwords
+NOTES: 123456 consistently ranks #1 or #2 most common
+
+# Keyboard walks
+PATTERN: keyboard_walk
+MASK: ?l?l?l?l?l?l
+EXAMPLES: qwerty, asdfgh, zxcvbn, qazwsx
+PREVALENCE: ~1-2% of all passwords
+NOTES: Adjacent keys typed in sequence
+
+# =============================================================================
+# TIER 1: BASIC DICTIONARY (Chapter 1)
+# Discovery: Simple wordlist attack
+# =============================================================================
+
+# Single dictionary word
+PATTERN: single_word
+MASK: ?l?l?l?l?l?l (varies 4-8 chars)
+EXAMPLES: dragon, master, monkey, shadow, letmein
+PREVALENCE: ~10-15% of passwords are single words
+NOTES: Common nouns, names, objects
+
+# Common names
+PATTERN: common_name
+MASK: ?l?l?l?l?l (varies 3-7 chars)
+EXAMPLES: michael, jennifer, ashley, jessica, daniel
+PREVALENCE: ~5-8% of passwords
+NOTES: First names are extremely common
+
+# =============================================================================
+# TIER 2: WORD+DIGIT PATTERNS (Chapter 2)
+# Discovery: Mask attack with hybrid wordlist
+# =============================================================================
+
+# Word + 2 digits
+PATTERN: word_dd
+MASK: ?l?l?l?l?l?l?d?d
+EXAMPLES: dragon12, master99, monkey21, shadow42
+PREVALENCE: ~15-20% of passwords
+NOTES: Most common pattern after single words
+
+# Word + 1 digit
+PATTERN: word_d
+MASK: ?l?l?l?l?l?l?d
+EXAMPLES: dragon1, master9, password7
+PREVALENCE: ~5-8% of passwords
+
+# Word + 3 digits
+PATTERN: word_ddd
+MASK: ?l?l?l?l?l?d?d?d
+EXAMPLES: dragon123, master999, shadow007
+PREVALENCE: ~3-5% of passwords
+
+# =============================================================================
+# TIER 3: CAPITALIZED PATTERNS (Chapter 3)
+# Discovery: Mask attack with capitalization rules
+# =============================================================================
+
+# Capitalized word + year
+PATTERN: Name_YYYY
+MASK: ?u?l?l?l?d?d?d?d
+EXAMPLES: John2024, Mike2023, Sara2022, Alex1999
+PREVALENCE: ~8-12% of passwords
+NOTES: Very common pattern, especially with birth years
+
+# Capitalized word + 2 digits
+PATTERN: Name_dd
+MASK: ?u?l?l?l?l?l?d?d
+EXAMPLES: Dragon12, Master99, Shadow21
+PREVALENCE: ~5-7% of passwords
+
+# Season + Year
+PATTERN: Season_YYYY
+MASK: ?u?l?l?l?l?l?d?d?d?d
+EXAMPLES: Summer2024, Winter2023, Spring2022, Autumn2021
+PREVALENCE: ~2-3% of passwords
+NOTES: Common in corporate environments with password rotation
+
+# =============================================================================
+# TIER 4: LEET SUBSTITUTIONS (Chapter 4)
+# Discovery: Rule-based attack with leet rules
+# =============================================================================
+
+# Basic leet (a→@, e→3, i→1, o→0)
+PATTERN: basic_leet
+MASK: varies
+EXAMPLES: p@ssword, dr@g0n, m@st3r, sh@d0w
+RULES: sa@, se3, si1, so0
+PREVALENCE: ~3-5% of passwords
+NOTES: Often used to "strengthen" weak passwords
+
+# Advanced leet
+PATTERN: advanced_leet
+MASK: varies
+EXAMPLES: p@55w0rd, dr@g0n!, m@$t3r
+RULES: sa@, se3, si1, so0, ss$, sl1, st7
+PREVALENCE: ~1-2% of passwords
+
+# =============================================================================
+# TIER 5: COMPLEX TRANSFORMS (Chapter 5)
+# Discovery: Full pipeline (wordlist + rules + masks)
+# =============================================================================
+
+# Word + symbol + digits
+PATTERN: word_symbol_digits
+MASK: ?l?l?l?l?l?l?s?d?d?d?d
+EXAMPLES: dragon!2024, master_123, shadow#99
+PREVALENCE: ~2-3% of passwords
+
+# Capitalized leet + symbol + year
+PATTERN: complex_Name
+MASK: ?u?l?l?l?l?l?s?d?d?d?d
+EXAMPLES: Dr@g0n_2024!, P@ssw0rd123!, M@st3r#2023
+PREVALENCE: ~1-2% of passwords
+NOTES: Often meets "complex password" requirements
+
+# =============================================================================
+# COMMON SUFFIXES (Appendable patterns)
+# =============================================================================
+
+SUFFIX_DIGITS:
+  1, 12, 123, 1234, 12345, 123456
+  01, 11, 21, 22, 69, 77, 88, 99
+  07, 08, 09, 10, 11, 12  # Recent years short form
+  2020, 2021, 2022, 2023, 2024, 2025, 2026
+  1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999
+  2000, 2001, 2002, 2003, 2004, 2005
+
+SUFFIX_SYMBOLS:
+  !, @, #, $, %, *, !!, @#, !@#
+  !1, @2, #3, !123, @123
+
+SUFFIX_COMBOS:
+  !1, 1!, !123, 123!, @1, 1@
+  _1, _12, _123, _2024
+
+# =============================================================================
+# MASK FREQUENCY RANKING (Top 20)
+# =============================================================================
+
+# Rank | Mask                  | Coverage | Example
+# -----|----------------------|----------|--------
+#   1  | ?l?l?l?l?l?l         | 15.2%    | dragon
+#   2  | ?l?l?l?l?l?l?l?l     | 12.1%    | password
+#   3  | ?l?l?l?l?l?l?d?d     |  8.4%    | dragon12
+#   4  | ?d?d?d?d?d?d         |  7.2%    | 123456
+#   5  | ?l?l?l?l?l?l?l       |  6.8%    | michael
+#   6  | ?u?l?l?l?l?l?d?d?d?d |  5.3%    | John2024
+#   7  | ?l?l?l?l?l?d?d       |  4.9%    | mike12
+#   8  | ?l?l?l?l?l?l?l?l?l   |  4.2%    | stephanie
+#   9  | ?l?l?l?l?l           |  3.8%    | admin
+#  10  | ?d?d?d?d?d?d?d?d     |  3.1%    | 12345678
+#  11  | ?l?l?l?l?l?l?d       |  2.9%    | dragon1
+#  12  | ?u?l?l?l?l?l?l?l     |  2.7%    | Password
+#  13  | ?l?l?l?l?l?l?d?d?d   |  2.4%    | dragon123
+#  14  | ?l?l?l?l             |  2.1%    | love
+#  15  | ?l?l?l?l?l?l?l?d     |  1.9%    | michael1
+#  16  | ?u?l?l?l?l?l?d?d     |  1.7%    | Dragon12
+#  17  | ?d?d?d?d?d?d?d       |  1.5%    | 1234567
+#  18  | ?l?l?l?l?l?l?l?l?d?d |  1.3%    | password12
+#  19  | ?l?l?l?l?d?d?d?d     |  1.1%    | john2024
+#  20  | ?u?l?l?l?l?l?l       |  0.9%    | Michael

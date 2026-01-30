@@ -8,6 +8,8 @@ from enum import Enum
 from typing import Any
 from pydantic import BaseModel, ConfigDict, Field
 
+from spellengine.adventures.keyspace import KeyspaceDefinition, KeyspaceMeta
+
 
 class DifficultyLevel(str, Enum):
     """Difficulty levels for encounters - inspired by WoW raid difficulties."""
@@ -22,13 +24,33 @@ class EncounterVariant(BaseModel):
 
     Each variant can have different hashes, hints, and XP rewards,
     allowing the same encounter to scale with player skill level.
+
+    Variants can be defined with:
+    1. Explicit hash/solution (static mode)
+    2. Keyspace definition (generated at build-time)
+
+    For keyspace-driven variants, the hash/solution are populated
+    by the campaign builder before the game loads the campaign.
     """
 
-    hash: str = Field(..., description="Hash to crack for this variant")
-    hash_type: str = Field(..., description="Hash type: md5, sha1, sha256")
-    solution: str = Field(..., description="Expected solution/password")
-    hint: str = Field(..., description="Hint for this difficulty level")
-    xp_reward: int = Field(..., description="XP reward for this variant")
+    # Static password definition (or populated from keyspace at build time)
+    hash: str | None = Field(None, description="Hash to crack for this variant")
+    hash_type: str | None = Field(None, description="Hash type: md5, sha1, sha256")
+    solution: str | None = Field(None, description="Expected solution/password")
+    hint: str | None = Field(None, description="Hint for this difficulty level")
+    xp_reward: int = Field(10, description="XP reward for this variant")
+
+    # Keyspace-driven definition (source YAML)
+    keyspace: KeyspaceDefinition | None = Field(
+        None,
+        description="Keyspace definition for password generation (build-time)"
+    )
+
+    # Educational metadata (preserved from keyspace after build)
+    keyspace_meta: KeyspaceMeta | None = Field(
+        None,
+        description="Metadata about generated password (for educational UI)"
+    )
 
 
 class EncounterType(str, Enum):
@@ -122,6 +144,18 @@ class Encounter(BaseModel):
     variants: dict[DifficultyLevel, EncounterVariant] | None = Field(
         None,
         description="Difficulty variants with different hashes/hints/XP"
+    )
+
+    # Keyspace-driven definition (source YAML)
+    keyspace: KeyspaceDefinition | None = Field(
+        None,
+        description="Keyspace definition for password generation (build-time)"
+    )
+
+    # Educational metadata (preserved from keyspace after build)
+    keyspace_meta: KeyspaceMeta | None = Field(
+        None,
+        description="Metadata about generated password (for educational UI)"
     )
 
     # Knowledge Base Links
