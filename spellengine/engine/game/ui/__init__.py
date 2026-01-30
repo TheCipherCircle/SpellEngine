@@ -32,6 +32,19 @@ from spellengine.engine.game.ui.text import TextRenderer, TypewriterText, draw_d
 from spellengine.engine.game.ui.menu import Menu, MenuItem, PromptBar
 from spellengine.engine.game.ui.hash_display import HashDisplay, HashInputPanel
 from spellengine.engine.game.ui.validator import TextValidator, UIAuditLog
+from spellengine.engine.game.ui.terminal import TerminalPanel, TerminalColors, TheatricalCracker
+from spellengine.engine.game.ui.effects import (
+    ScreenEffect,
+    ShakeEffect,
+    FlashEffect,
+    SuccessFlash,
+    FailureFlash,
+    ScanlineOverlay,
+    TextGlowEffect,
+    VignetteEffect,
+    EffectManager,
+)
+from spellengine.engine.game.ui.widgets import Slider, Toggle
 
 __all__ = [
     # Theme
@@ -58,4 +71,21 @@ __all__ = [
     # QA/Validation
     "TextValidator",
     "UIAuditLog",
+    # Terminal
+    "TerminalPanel",
+    "TerminalColors",
+    "TheatricalCracker",
+    # Visual Effects
+    "ScreenEffect",
+    "ShakeEffect",
+    "FlashEffect",
+    "SuccessFlash",
+    "FailureFlash",
+    "ScanlineOverlay",
+    "TextGlowEffect",
+    "VignetteEffect",
+    "EffectManager",
+    # Settings widgets
+    "Slider",
+    "Toggle",
 ]

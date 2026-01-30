@@ -10,9 +10,11 @@ from enum import Enum
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
+from spellengine.engine.game.ui.effects import EffectManager
+
 if TYPE_CHECKING:
     import pygame
-    from spellengine.adventures.models import Campaign
+    from spellengine.adventures.models import Campaign, DifficultyLevel
     from spellengine.adventures.state import AdventureState
     from spellengine.adventures.assets import AssetLoader
     from spellengine.engine.game.scenes.base import Scene
@@ -86,6 +88,9 @@ class GameClient:
 
         # Audio manager
         self.audio: "AudioManager | None" = None
+
+        # Effects manager
+        self.effects = EffectManager()
 
         # Scene management
         self._scenes: dict[str, "Scene"] = {}
@@ -226,24 +231,17 @@ class GameClient:
             self.screen_size = self._windowed_size
 
         elif mode == DisplayMode.FULLSCREEN_WINDOWED:
-            # Borderless fullscreen (covers screen but not exclusive)
-            display_info = pygame.display.Info()
-            screen_w, screen_h = display_info.current_w, display_info.current_h
-            self._screen = pygame.display.set_mode(
-                (screen_w, screen_h),
-                pygame.NOFRAME
-            )
-            self.screen_size = (screen_w, screen_h)
+            # Borderless fullscreen - use (0,0) to auto-detect current display
+            # Then get actual size from the created surface
+            self._screen = pygame.display.set_mode((0, 0), pygame.NOFRAME)
+            self.screen_size = self._screen.get_size()
 
         elif mode == DisplayMode.FULLSCREEN:
-            # True fullscreen (exclusive mode)
-            display_info = pygame.display.Info()
-            screen_w, screen_h = display_info.current_w, display_info.current_h
-            self._screen = pygame.display.set_mode(
-                (screen_w, screen_h),
-                pygame.FULLSCREEN
-            )
-            self.screen_size = (screen_w, screen_h)
+            # True fullscreen - use (0,0) to auto-detect current display
+            self._screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
+            self.screen_size = self._screen.get_size()
+
+        print(f"Display mode set: {mode.value}, size: {self.screen_size}")
 
         # Reinitialize scenes if they exist (they cache screen dimensions)
         if self._scenes and self._current_scene_name:
@@ -272,6 +270,28 @@ class GameClient:
         self._set_display_mode(modes[next_idx])
         print(f"Display mode: {self.display_mode.value}")
 
+    def _handle_resize(self, width: int, height: int) -> None:
+        """Handle window resize events.
+
+        Args:
+            width: New window width
+            height: New window height
+        """
+        import pygame
+
+        # Update tracked screen size
+        old_size = self.screen_size
+        self.screen_size = (width, height)
+
+        # In windowed mode, also update the windowed size
+        if self.display_mode == DisplayMode.WINDOWED:
+            self._windowed_size = (width, height)
+
+        # If size actually changed, reinitialize the current scene
+        if old_size != self.screen_size and self._current_scene:
+            print(f"Resize: {old_size} -> {self.screen_size}")
+            self._reinit_current_scene()
+
     def _init_scenes(self) -> None:
         """Initialize all scene objects."""
         from spellengine.engine.game.scenes.title import TitleScene
@@ -279,6 +299,7 @@ class GameClient:
         from spellengine.engine.game.scenes.game_over import GameOverScene
         from spellengine.engine.game.scenes.victory import VictoryScene
         from spellengine.engine.game.scenes.credits import CreditsScene
+        from spellengine.engine.game.scenes.settings import SettingsScene
 
         self._scenes = {
             "title": TitleScene(self),
@@ -286,25 +307,33 @@ class GameClient:
             "game_over": GameOverScene(self),
             "victory": VictoryScene(self),
             "credits": CreditsScene(self),
+            "settings": SettingsScene(self),
         }
 
-    def _init_adventure(self, resume: bool = False) -> None:
+    def _init_adventure(self, resume: bool = False, difficulty: "DifficultyLevel | None" = None) -> None:
         """Initialize the adventure state.
 
         Args:
             resume: Whether to resume from save
+            difficulty: Optional difficulty level override
         """
+        from spellengine.adventures.models import DifficultyLevel
         from spellengine.adventures.state import AdventureState
 
         self.save_dir.mkdir(parents=True, exist_ok=True)
 
         if resume and self.save_path.exists():
             self.adventure_state = AdventureState.load(self.campaign, self.save_path)
+            # If difficulty provided, update it (for resuming at different difficulty)
+            if difficulty:
+                self.adventure_state.difficulty = difficulty
+                self.adventure_state.state.difficulty = difficulty
         else:
             self.adventure_state = AdventureState(
                 self.campaign,
                 player_name=self.player_name,
                 save_path=self.save_path,
+                difficulty=difficulty or DifficultyLevel.NORMAL,
             )
 
     def _init_assets(self) -> None:
@@ -342,6 +371,16 @@ class GameClient:
         if self._current_scene:
             self._current_scene.exit()
 
+        # Handle special scene initialization for encounter
+        if scene_name == "encounter":
+            # Extract difficulty and resume from kwargs
+            difficulty = kwargs.pop("difficulty", None)
+            resume = kwargs.pop("resume", False)
+
+            # Reinitialize adventure if difficulty changed or starting new
+            if not resume or difficulty:
+                self._init_adventure(resume=resume, difficulty=difficulty)
+
         if scene_name in self._scenes:
             self._current_scene = self._scenes[scene_name]
             self._current_scene_name = scene_name
@@ -352,6 +391,23 @@ class GameClient:
     def quit(self) -> None:
         """Request game exit."""
         self._running = False
+
+    def shake(self, intensity: float = 10.0, duration: float = 0.3) -> None:
+        """Trigger a screen shake effect.
+
+        Args:
+            intensity: Shake intensity in pixels
+            duration: Shake duration in seconds
+        """
+        self.effects.shake(intensity, duration)
+
+    def flash_success(self) -> None:
+        """Trigger a green success flash effect."""
+        self.effects.flash_success()
+
+    def flash_failure(self) -> None:
+        """Trigger a red failure flash effect."""
+        self.effects.flash_failure()
 
     def _take_screenshot(self) -> None:
         """Capture and save a screenshot of the current frame."""
@@ -426,6 +482,9 @@ class GameClient:
                 # Display mode toggle (F11)
                 elif event.type == pygame.KEYDOWN and event.key == pygame.K_F11:
                     self.cycle_display_mode()
+                # Handle window resize events
+                elif event.type == pygame.VIDEORESIZE:
+                    self._handle_resize(event.w, event.h)
                 elif self._current_scene:
                     try:
                         self._current_scene.handle_event(event)
@@ -439,10 +498,28 @@ class GameClient:
                 except Exception as e:
                     print(f"Error in update: {e}")
 
+            # Update effects
+            self.effects.update(dt)
+
             # Draw
             if self._screen and self._current_scene:
                 try:
-                    self._current_scene.draw(self._screen)
+                    # Get shake offset from effects
+                    offset_x, offset_y = self.effects.get_offset()
+
+                    # Clear screen and draw scene with shake offset
+                    self._screen.fill((0, 0, 0))
+
+                    # Create a temporary surface for the scene content
+                    scene_surface = pygame.Surface(self.screen_size, pygame.SRCALPHA)
+                    self._current_scene.draw(scene_surface)
+
+                    # Blit scene with shake offset applied
+                    self._screen.blit(scene_surface, (offset_x, offset_y))
+
+                    # Apply visual effects (flash, etc.) to the screen
+                    self.effects.apply(self._screen)
+
                     pygame.display.flip()
                 except Exception as e:
                     print(f"Error in draw: {e}")
