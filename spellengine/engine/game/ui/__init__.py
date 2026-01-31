@@ -44,7 +44,10 @@ from spellengine.engine.game.ui.effects import (
     VignetteEffect,
     EffectManager,
 )
-from spellengine.engine.game.ui.widgets import Slider, Toggle
+from spellengine.engine.game.ui.widgets import Slider, Toggle, TimerWidget
+from spellengine.engine.game.ui.craft_panel import CraftPanel
+from spellengine.engine.game.ui.siege_panel import SiegePanel
+from spellengine.engine.game.ui.puzzle_panel import PuzzlePanel
 
 __all__ = [
     # Theme
@@ -88,4 +91,9 @@ __all__ = [
     # Settings widgets
     "Slider",
     "Toggle",
+    "TimerWidget",
+    # Encounter panels
+    "CraftPanel",
+    "SiegePanel",
+    "PuzzlePanel",
 ]

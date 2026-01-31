@@ -261,6 +261,137 @@ chapters:
 
           "Role-based passwords reveal the user's identity."
         failure_text: "Think about administrator roles."
+        next_encounter: enc_armory_tour
+
+      # TOUR: Introduction to wordlists
+      - id: enc_armory_tour
+        title: "The Armory"
+        type: tour
+        tier: 0
+        xp_reward: 10
+        intro_text: |
+          You discover the Citadel's armory—racks of weapons and tools.
+
+          A spectral quartermaster appears:
+
+          "Welcome, Initiate. Here you'll learn about WORDLISTS—
+          collections of common passwords that humans choose.
+
+          The training corpus contains thousands of real passwords.
+          When you attack, start with wordlists before trying random guesses.
+
+          Wordlists are FAST because they test likely patterns first."
+        objective: "Learn about wordlist attacks"
+        success_text: |
+          "Remember: wordlists exploit human predictability.
+          Most passwords exist in common wordlists."
+        next_encounter: enc_repeating_lock
+
+      # FLASH: Pattern recognition drill
+      - id: enc_repeating_lock
+        title: "The Repeating Lock"
+        type: flash
+        tier: 1
+        xp_reward: 15
+        intro_text: |
+          A lock mechanism clicks in a repeating pattern.
+
+          "This lock responds to REPETITION—humans often repeat
+          characters when forced to make longer passwords."
+
+          The password is 6 characters, repeating a 3-letter pattern.
+          Think: abc → abcabc
+        objective: "Identify the repeated pattern"
+
+        keyspace:
+          source: "training_corpus"
+          tokens: ["WORD"]
+          complexity: simple
+          discovery_method: wordlist
+          tier: 1
+          min_length: 6
+          max_length: 6
+
+        hash_type: md5
+        hint: "A short word repeated twice (like 'abcabc')."
+        success_text: |
+          The lock clicks open.
+
+          "Repetition is a common crutch. Users think 'longer = safer'
+          but repeating patterns are trivially predictable."
+        failure_text: "Try doubling a common 3-letter word."
+        next_encounter: enc_wordsmith_index
+
+      # LOOKUP: Find password in wordlist
+      - id: enc_wordsmith_index
+        title: "The Wordsmith's Index"
+        type: lookup
+        tier: 1
+        xp_reward: 15
+        intro_text: |
+          An ancient tome lies open—the Wordsmith's Index.
+
+          "Before cracking, one must LOOK before they LEAP.
+          Check if the password exists in your wordlist FIRST."
+
+          Use `patternforge lookup` to search wordlists.
+          The password is a common English word meaning 'courage'.
+        objective: "Look up the password in your wordlist"
+
+        keyspace:
+          source: "training_corpus"
+          tokens: ["WORD"]
+          complexity: simple
+          discovery_method: wordlist
+          tier: 1
+          min_length: 5
+          max_length: 8
+
+        hash_type: md5
+        hint: "Use 'patternforge lookup brave' or similar words meaning courage."
+        success_text: |
+          The tome glows with approval.
+
+          "Lookup before crack—always. It saves time and resources."
+        failure_text: "Search for synonyms of 'courage' in the wordlist."
+        next_encounter: enc_loading_cannon
+
+      # WALKTHROUGH: First patternforge crack command
+      - id: enc_loading_cannon
+        title: "Loading the Cannon"
+        type: walkthrough
+        tier: 1
+        xp_reward: 20
+        intro_text: |
+          A massive siege cannon looms before you.
+
+          "Now you'll fire your first REAL attack," the quartermaster explains.
+
+          "Use PatternForge to crack this hash:
+
+          `patternforge crack <hash> --wordlist common`
+
+          The 'common' wordlist contains the most frequent passwords.
+          This hash hides a simple word—your cannon will find it."
+        objective: "Execute your first wordlist crack"
+
+        keyspace:
+          source: "training_corpus"
+          tokens: ["WORD"]
+          complexity: simple
+          discovery_method: wordlist
+          tier: 1
+          min_length: 4
+          max_length: 6
+
+        hash_type: md5
+        hint: "Run: patternforge crack <hash> --wordlist common"
+        success_text: |
+          The cannon BOOMS! The wall shatters!
+
+          "Excellent! You've executed your first wordlist attack.
+          This is the foundation of all password cracking."
+        failure_text: "Copy the hash and run patternforge crack on it."
         next_encounter: enc_gatekeeper
 
       # KEYSPACE-DRIVEN: Boss encounter with difficulty variants
@@ -327,7 +458,7 @@ chapters:
 
   # =========================================================================
   # CHAPTER 2: THE CRYPTS
-  # Advanced Hashtopia-Driven encounters
+  # Advanced Hashtopia-Driven encounters - Mask Mastery
   # =========================================================================
   - id: ch_crypts
     title: "The Crypts"
@@ -339,9 +470,250 @@ chapters:
       Your wordlist attacks must evolve into mask attacks and rules.
     outro_text: |
       The Crypt Guardian falls. The inner sanctum beckons.
-    first_encounter: enc_name_game
+    first_encounter: enc_mask_merchant
 
     encounters:
+      # TOUR: Introduction to masks
+      - id: enc_mask_merchant
+        title: "The Mask Merchant"
+        type: tour
+        tier: 0
+        xp_reward: 10
+        intro_text: |
+          A hooded figure beckons from a shadowy alcove.
+
+          "Greetings, Initiate. I deal in MASKS—patterns that describe
+          password structures without knowing the exact characters.
+
+          MASK CHARSETS:
+          ◈ ?l = lowercase letter (a-z)
+          ◈ ?u = uppercase letter (A-Z)
+          ◈ ?d = digit (0-9)
+          ◈ ?s = special character (!@#$...)
+
+          A mask like ?l?l?l?l describes any 4-letter lowercase word.
+          A mask like ?u?l?l?l?d?d means: Upper, lower, lower, lower, digit, digit."
+        objective: "Learn mask syntax"
+        success_text: |
+          "Masks are the language of pattern attacks.
+          Master them, and you'll crack passwords wordlists can't touch."
+        next_encounter: enc_first_mask
+
+      # FLASH: First mask recognition
+      - id: enc_first_mask
+        title: "The Four-Letter Lock"
+        type: flash
+        tier: 1
+        xp_reward: 15
+        intro_text: |
+          A simple lock glows with runic symbols.
+
+          "This lock requires exactly 4 lowercase letters.
+          The mask is: ?l?l?l?l
+
+          Think of common 4-letter words..."
+        objective: "Identify the 4-letter lowercase pattern"
+
+        keyspace:
+          source: "training_corpus"
+          tokens: ["WORD"]
+          complexity: simple
+          discovery_method: mask
+          tier: 1
+          min_length: 4
+          max_length: 4
+
+        hash_type: md5
+        hint: "Four lowercase letters. Think: love, pass, word, test..."
+        success_text: |
+          The lock clicks open.
+
+          "Simple masks for simple patterns. Now let's add complexity."
+        failure_text: "Try common 4-letter lowercase words."
+        next_encounter: enc_number_lock
+
+      # FLASH: Digit-only mask
+      - id: enc_number_lock
+        title: "The Number Lock"
+        type: flash
+        tier: 1
+        xp_reward: 15
+        intro_text: |
+          A mechanical safe with spinning number wheels.
+
+          "This vault requires exactly 4 DIGITS.
+          The mask is: ?d?d?d?d
+
+          Think of common 4-digit patterns humans choose..."
+        objective: "Crack the 4-digit code"
+
+        keyspace:
+          source: "training_corpus"
+          tokens: ["DIGIT"]
+          complexity: simple
+          discovery_method: mask
+          tier: 1
+          min_length: 4
+          max_length: 4
+
+        hash_type: md5
+        hint: "Four digits. Humans love sequences: 1234, 0000, 1111..."
+        success_text: |
+          The safe swings open.
+
+          "Digit-only passwords are absurdly weak—
+          only 10,000 possible combinations for 4 digits."
+        failure_text: "Try common PIN patterns."
+        next_encounter: enc_speed_id
+
+      # RACE: Timed mask identification
+      - id: enc_speed_id
+        title: "Speed Identification"
+        type: race
+        tier: 2
+        xp_reward: 25
+        expected_time: 60
+        intro_text: |
+          An hourglass appears, sand already flowing!
+
+          "QUICK! You have 60 SECONDS to crack these hashes.
+          Each follows a simple mask pattern.
+
+          First hash: ?l?l?l?l?l (5 lowercase letters)
+
+          MOVE FAST!"
+        objective: "Crack 5 hashes in 60 seconds"
+
+        keyspace:
+          source: "training_corpus"
+          tokens: ["WORD"]
+          complexity: simple
+          discovery_method: mask
+          tier: 2
+          min_length: 5
+          max_length: 5
+
+        hash_type: md5
+        hint: "5 lowercase letters. Common words: apple, money, magic..."
+        success_text: |
+          You beat the clock!
+
+          "Speed comes with practice. Pattern recognition becomes instinct."
+        failure_text: "Too slow! Practice your mask attacks."
+        next_encounter: enc_mask_basics
+
+      # WALKTHROUGH: First mask attack
+      - id: enc_mask_basics
+        title: "Mask Attack Basics"
+        type: walkthrough
+        tier: 2
+        xp_reward: 20
+        intro_text: |
+          The Mask Merchant produces a complex lock.
+
+          "Now execute a REAL mask attack:
+
+          `patternforge crack <hash> --mask ?l?l?l?l?d?d`
+
+          This mask describes: 4 letters + 2 digits
+          (like 'pass12' or 'word99')
+
+          Masks test ALL combinations matching the pattern."
+        objective: "Execute a mask attack"
+
+        keyspace:
+          source: "training_corpus"
+          tokens: ["WORD", "DIGIT"]
+          complexity: compound
+          discovery_method: mask
+          tier: 2
+          min_length: 6
+          max_length: 6
+
+        hash_type: md5
+        hint: "Run: patternforge crack <hash> --mask ?l?l?l?l?d?d"
+        success_text: |
+          The lock shatters!
+
+          "Excellent! Mask attacks are EXHAUSTIVE—they try every combination.
+          This makes them slower but guaranteed to find matches."
+        failure_text: "Use the mask flag: --mask ?l?l?l?l?d?d"
+        next_encounter: enc_mixed_patterns
+
+      # FLASH: Complex mixed mask
+      - id: enc_mixed_patterns
+        title: "Mixed Patterns"
+        type: flash
+        tier: 2
+        xp_reward: 20
+        intro_text: |
+          A vault door displays a complex pattern:
+
+          "This password uses MIXED character types:
+          ◈ Starts with uppercase (capital letter)
+          ◈ Middle is lowercase
+          ◈ Ends with digits
+
+          The mask: ?u?l?l?l?d?d (Upper + 3 lower + 2 digits)"
+        objective: "Crack the mixed-character pattern"
+
+        keyspace:
+          source: "training_corpus"
+          tokens: ["WORD", "DIGIT"]
+          mask: "?u?l?l?l?d?d"
+          complexity: compound
+          discovery_method: mask
+          tier: 2
+          min_length: 6
+          max_length: 6
+
+        hash_type: md5
+        hint: "Capital + 3 lowercase + 2 digits. Like 'Pass12' or 'Word99'."
+        success_text: |
+          The vault opens.
+
+          "Corporate passwords often follow this exact pattern—
+          capital first, lowercase, then numbers at the end."
+        failure_text: "Think: Capital letter + word + two digits"
+        next_encounter: enc_find_pattern
+
+      # HUNT: Open exploration
+      - id: enc_find_pattern
+        title: "Find the Pattern"
+        type: hunt
+        tier: 3
+        xp_reward: 30
+        intro_text: |
+          A complex mechanism with no obvious clues.
+
+          "This one has NO HINTS. You must DISCOVER the pattern yourself.
+
+          Analyze the hash. Try different masks. Use your tools:
+          ◈ `patternforge analyze <hash>` - examine structure
+          ◈ `patternforge identify <hash>` - identify hash type
+
+          The pattern is hidden. Hunt for it."
+        objective: "Discover and crack the hidden pattern"
+
+        keyspace:
+          source: "training_corpus"
+          tokens: ["WORD", "YEAR"]
+          complexity: compound
+          discovery_method: mask
+          tier: 3
+          min_length: 8
+          max_length: 8
+
+        hash_type: md5
+        hint: "Try analyzing with patternforge. Common patterns: word+year, name+digits..."
+        success_text: |
+          You found it through exploration!
+
+          "The HUNT teaches you to discover patterns independently.
+          In real scenarios, you won't have hints—only your tools and instincts."
+        failure_text: "Keep exploring. Try word+year patterns."
+        next_encounter: enc_name_game
+
       # KEYSPACE-DRIVEN: Name + Year pattern (Tier 3)
       - id: enc_name_game
         title: "The Name Game"
@@ -399,6 +771,33 @@ chapters:
             hint: "Transformed name+year with leet speak."
             xp_reward: 50
 
+        next_encounter: enc_build_first_mask
+
+      # CRAFT: Build your first mask
+      - id: enc_build_first_mask
+        title: "Build Your First Mask"
+        type: craft
+        tier: 2
+        xp_reward: 25
+        intro_text: |
+          The Mask Merchant presents a crafting station.
+
+          "Now YOU will BUILD a mask from scratch.
+
+          Your target: A 6-character password that follows this pattern:
+          ◈ 4 lowercase letters
+          ◈ 2 digits at the end
+
+          Use the CRAFT interface to assemble: ?l?l?l?l?d?d"
+        objective: "Construct the mask pattern"
+        solution: "?l?l?l?l?d?d"
+        hint: "Four ?l slots, then two ?d slots."
+        success_text: |
+          Perfect construction!
+
+          "You've mastered the basics of mask building.
+          Now you can DESCRIBE any password pattern."
+        failure_text: "Remember: ?l = lowercase, ?d = digit"
         next_encounter: enc_crypt_guardian
 
       # KEYSPACE-DRIVEN: Boss with leet patterns
@@ -459,55 +858,422 @@ chapters:
 
   # =========================================================================
   # CHAPTER 3: THE INNER SANCTUM
-  # Final boss encounters
+  # Rule Mastery - Transform, Repair, Duel
   # =========================================================================
   - id: ch_inner_sanctum
     title: "The Inner Sanctum"
-    description: "Face the Citadel Lord and claim victory"
+    description: "Master the art of rule-based attacks"
     intro_text: |
       The Inner Sanctum—heart of the Dread Citadel.
 
-      Here the patterns converge. Everything you've learned
-      must come together for the final confrontation.
+      Here the patterns converge. You'll learn the power of RULES—
+      transformations that turn simple words into complex passwords.
+
+      Leet speak. Capitalization. Appending. Toggling.
+      The dark arts of password mutation.
     outro_text: |
       The Citadel Lord falls. Victory is yours.
-    first_encounter: enc_citadel_lord
+    first_encounter: enc_rule_codex
 
     encounters:
-      # KEYSPACE-DRIVEN: Final boss
+      # TOUR: Introduction to rules
+      - id: enc_rule_codex
+        title: "The Rule Codex"
+        type: tour
+        tier: 0
+        xp_reward: 10
+        intro_text: |
+          A massive tome floats before you—The Rule Codex.
+
+          "RULES transform passwords," a voice intones.
+
+          COMMON TRANSFORMATIONS:
+          ◈ l33t speak: e→3, a→@, o→0, i→1
+          ◈ Capitalize: password → Password
+          ◈ Append digits: word → word123
+          ◈ Toggle case: password → pAsSwOrD
+
+          "Rules let you crack passwords that LOOK complex
+          but are actually simple words... transformed."
+        objective: "Learn the rule system"
+        success_text: |
+          "Rules are the key to defeating 'clever' passwords."
+        next_encounter: enc_simple_transforms
+
+      # FLASH: Recognize leet speak
+      - id: enc_simple_transforms
+        title: "Simple Transforms"
+        type: flash
+        tier: 2
+        xp_reward: 20
+        intro_text: |
+          A locked chest displays strange runes.
+
+          "This password uses L33T SPEAK—character substitutions.
+          Common patterns:
+          ◈ a → @ or 4
+          ◈ e → 3
+          ◈ i → 1
+          ◈ o → 0
+          ◈ s → 5 or $
+
+          The original word is 'password'... but transformed."
+        objective: "Crack the leet-speak password"
+
+        keyspace:
+          source: "training_corpus"
+          tokens: ["WORD"]
+          complexity: simple
+          discovery_method: rules
+          tier: 2
+          min_length: 6
+          max_length: 10
+
+        hash_type: md5
+        hint: "Think: p@55w0rd, p4ssw0rd, passw0rd..."
+        success_text: |
+          The chest opens.
+
+          "Leet speak is trivially predictable.
+          Rule-based attacks test all common substitutions."
+        failure_text: "Apply leet substitutions to common words."
+        next_encounter: enc_fix_broken_rule
+
+      # REPAIR: Fix broken rule syntax
+      - id: enc_fix_broken_rule
+        title: "Fix the Broken Rule"
+        type: repair
+        tier: 2
+        xp_reward: 25
+        intro_text: |
+          A damaged scroll shows a broken rule command:
+
+          `patternforge crack hash --rules best64.rul`
+
+          The apprentice made ERRORS:
+          ◈ Wrong flag syntax
+          ◈ Missing required parameters
+
+          CORRECT SYNTAX:
+          `patternforge crack <hash> --wordlist common --rules best64`
+
+          Fix the command to proceed.
+        objective: "Correct the rule command syntax"
+        solution: "patternforge crack <hash> --wordlist common --rules best64"
+        hint: "Need --wordlist before --rules. Rules file doesn't need .rul extension."
+        success_text: |
+          The scroll repairs itself.
+
+          "Syntax matters. One wrong character, total failure."
+        failure_text: "Check the syntax guide. --wordlist comes before --rules."
+        next_encounter: enc_first_rule_attack
+
+      # WALKTHROUGH: First rule attack
+      - id: enc_first_rule_attack
+        title: "Your First Rule Attack"
+        type: walkthrough
+        tier: 2
+        xp_reward: 20
+        intro_text: |
+          A training dummy awaits your attack.
+
+          "Execute a RULE-BASED attack:
+
+          `patternforge crack <hash> --wordlist common --rules best64`
+
+          The 'best64' ruleset applies the 64 most effective
+          transformations to every word in your wordlist.
+
+          One wordlist + rules = MILLIONS of candidates."
+        objective: "Execute a rule-based attack"
+
+        keyspace:
+          source: "training_corpus"
+          tokens: ["WORD"]
+          complexity: simple
+          discovery_method: rules
+          tier: 2
+          min_length: 6
+          max_length: 8
+
+        hash_type: md5
+        hint: "Run: patternforge crack <hash> --wordlist common --rules best64"
+        success_text: |
+          The dummy shatters!
+
+          "Rules multiply your wordlist's power exponentially."
+        failure_text: "Use the --rules flag with best64."
+        next_encounter: enc_craft_rule
+
+      # CRAFT: Create a custom rule
+      - id: enc_craft_rule
+        title: "Forge a Rule"
+        type: craft
+        tier: 3
+        xp_reward: 30
+        intro_text: |
+          The Rule Forge glows with potential.
+
+          "Now CREATE your own rule. Build a mask that describes:
+
+          ◈ Uppercase first letter
+          ◈ 3 lowercase letters
+          ◈ 2 digits at the end
+
+          Pattern: ?u?l?l?l?d?d
+          (Example: Pass12, Word99)"
+        objective: "Construct a rule pattern"
+        solution: "?u?l?l?l?d?d"
+        hint: "Start with ?u (uppercase), then ?l?l?l (lowercase), end with ?d?d (digits)."
+        success_text: |
+          The Rule Forge accepts your creation!
+
+          "Custom rules let you target SPECIFIC password patterns."
+        failure_text: "Remember: ?u = uppercase, ?l = lowercase, ?d = digit"
+        next_encounter: enc_best_vs_dive
+
+      # DUEL: Compare attack strategies
+      - id: enc_best_vs_dive
+        title: "Best64 vs Dive"
+        type: duel
+        tier: 3
+        xp_reward: 25
+        intro_text: |
+          Two paths diverge before you.
+
+          PATH A: best64 ruleset
+          ◈ 64 most common transformations
+          ◈ Fast but limited coverage
+          ◈ Good for quick cracks
+
+          PATH B: dive ruleset
+          ◈ 99,000+ transformations
+          ◈ Slow but thorough
+          ◈ Catches obscure patterns
+
+          Which strategy for a QUICK recon?
+        objective: "Choose the better strategy"
+        choices:
+          - id: choice_best64
+            label: "best64 - Speed"
+            description: "Fast 64-rule attack for quick results"
+            leads_to: enc_predict_transform
+            is_correct: true
+          - id: choice_dive
+            label: "dive - Thorough"
+            description: "99K rules for maximum coverage"
+            leads_to: enc_predict_transform
+            is_correct: false
+        success_text: |
+          "Correct! For quick recon, speed wins.
+          Save thorough attacks for when fast ones fail."
+        failure_text: "Think about the goal: QUICK recon means FAST attack."
+        next_encounter: enc_predict_transform
+
+      # FLASH: Predict rule output
+      - id: enc_predict_transform
+        title: "Predict the Transform"
+        type: flash
+        tier: 3
+        xp_reward: 20
+        intro_text: |
+          A test appears:
+
+          "Given the word 'admin' and the rule 'c$1$2$3':
+          ◈ c = capitalize first letter
+          ◈ $1 = append '1'
+          ◈ $2 = append '2'
+          ◈ $3 = append '3'
+
+          What is the OUTPUT?"
+        objective: "Predict the rule transformation result"
+        solution: "Admin123"
+        hint: "c = capitalize → Admin. Then append 1, 2, 3..."
+        success_text: |
+          "Correct! Admin123.
+          Understanding rules means predicting outputs."
+        failure_text: "Apply each rule step: capitalize, then append 1, 2, 3."
+        next_encounter: enc_reverse_engineer
+
+      # HUNT: Reverse engineer a password
+      - id: enc_reverse_engineer
+        title: "Reverse Engineer"
+        type: hunt
+        tier: 3
+        xp_reward: 30
+        intro_text: |
+          You find a cracked password: "P@55w0rd!"
+
+          "Work BACKWARDS. What was the ORIGINAL word
+          before transformations were applied?
+
+          Reverse the leet speak:
+          ◈ @ → a
+          ◈ 5 → s
+          ◈ 0 → o
+
+          Remove the trailing symbol."
+        objective: "Find the original word"
+        solution: "password"
+        hint: "Replace @ with a, 5 with s, 0 with o. Remove the !."
+        success_text: |
+          "Password! The most common word, dressed up to look 'secure'."
+        failure_text: "Reverse each leet substitution step by step."
+        next_encounter: enc_gambit_big_list
+
+      # GAMBIT: Risk/reward choice
+      - id: enc_gambit_big_list
+        title: "Risk the Big List?"
+        type: gambit
+        tier: 3
+        xp_reward: 25
+        intro_text: |
+          A fork in your path. Two wordlists available:
+
+          SAFE PATH: rockyou.txt (14 million words)
+          ◈ Fast - seconds to minutes
+          ◈ Good coverage of common passwords
+          ◈ Guaranteed to finish
+
+          RISKY PATH: hashesorg2019.txt (1.4 billion words)
+          ◈ Slow - could take hours
+          ◈ Massive coverage
+          ◈ Might timeout
+
+          You have LIMITED TIME. Which path?
+        objective: "Choose your attack strategy"
+        choices:
+          - id: choice_safe
+            label: "Safe - rockyou.txt"
+            description: "14M words, fast and reliable"
+            leads_to: enc_left_hand
+            is_correct: true
+          - id: choice_risky
+            label: "Risky - hashesorg"
+            description: "1.4B words, thorough but slow"
+            leads_to: enc_left_hand
+            is_correct: false
+        success_text: |
+          "Wise choice. Start fast, escalate if needed."
+        failure_text: "Time constraints matter. Sometimes speed beats coverage."
+        next_encounter: enc_left_hand
+
+      # BOSS: The Left Hand
+      - id: enc_left_hand
+        title: "The Left Hand"
+        type: flash
+        tier: 4
+        is_checkpoint: true
+        xp_reward: 40
+        intro_text: |
+          The Left Hand of the Citadel Lord rises.
+
+          "I am the guardian of COMPLEXITY.
+          My password combines rules AND masks.
+
+          Pattern: Capitalized word + leet transformations + year
+
+          Example: P@ssword2024"
+        objective: "Defeat the Left Hand"
+
+        keyspace:
+          source: "training_corpus"
+          tokens: ["WORD", "YEAR"]
+          complexity: compound
+          discovery_method: rules
+          tier: 4
+          min_length: 10
+          max_length: 14
+
+        hash_type: md5
+        hint: "Use rules on a word, then append a year. Try: --rules best64"
+        success_text: |
+          The Left Hand crumbles.
+
+          "You... have mastered transformation. The Lord awaits."
+        failure_text: "Combine wordlist attack with rules and year appending."
+        next_encounter: enc_right_hand
+
+      # BOSS: The Right Hand
+      - id: enc_right_hand
+        title: "The Right Hand"
+        type: flash
+        tier: 4
+        is_checkpoint: true
+        xp_reward: 40
+        intro_text: |
+          The Right Hand emerges from shadow.
+
+          "I guard the path of PATTERN.
+          My password follows a strict structure.
+
+          Mask: ?u?l?l?l?l?d?d?d?d (Name + Year format)
+
+          But the name uses leet substitutions..."
+        objective: "Defeat the Right Hand"
+
+        keyspace:
+          source: "training_corpus"
+          tokens: ["WORD", "YEAR"]
+          mask: "?u?l?l?l?l?d?d?d?d"
+          complexity: compound
+          discovery_method: mask
+          tier: 4
+          min_length: 9
+          max_length: 9
+
+        hash_type: md5
+        hint: "5-letter capitalized word + 4-digit year. Try name+year patterns."
+        success_text: |
+          The Right Hand falls.
+
+          "Both guardians defeated. The throne room opens..."
+        failure_text: "Use a mask attack: ?u?l?l?l?l?d?d?d?d"
+        next_encounter: enc_citadel_lord
+
+      # BOSS: The Citadel Lord (Midpoint Boss)
       - id: enc_citadel_lord
         title: "The Citadel Lord"
         type: flash
-        tier: 2
+        tier: 5
         is_checkpoint: true
-        xp_reward: 50
+        xp_reward: 75
         intro_text: |
           The Citadel Lord descends from his obsidian throne.
 
-          "So, another initiate seeks to join the Circle?
-          Show me you understand the truth of human nature..."
+          "So, you've defeated my guardians.
+          But can you crack MY password?
 
-          This is the final test. Use everything you've learned.
+          I use EVERYTHING:
+          ◈ Wordlist base
+          ◈ Rule transformations
+          ◈ Mask structure
+          ◈ Year appending
+
+          Show me you understand the FULL ARSENAL."
         objective: "Defeat the Citadel Lord"
 
         keyspace:
           source: "training_corpus"
           tokens: ["WORD", "DIGIT"]
           complexity: compound
-          discovery_method: mask
-          tier: 2
+          discovery_method: pipeline
+          tier: 5
           min_length: 8
-          max_length: 12
+          max_length: 14
 
         hash_type: md5
-        hint: "A classic compound pattern: word + digits."
+        hint: "Combine everything: wordlist + rules + mask. A compound pattern."
         success_text: |
           The Citadel Lord falls to his knees.
 
-          "You... you see the patterns. You are worthy of the Circle."
+          "You... you see the patterns. But there is MORE to learn.
 
-          CONGRATULATIONS, INFILTRATOR!
-        failure_text: "Use your full arsenal: wordlists, masks, rules."
+          Beyond these walls lie the Archive of Souls—
+          where true understanding awaits.
+
+          Go. Learn to ANALYZE before you attack."
+        failure_text: "Use your full arsenal: wordlists, masks, AND rules together."
 
         variants:
           heroic:
@@ -518,7 +1284,7 @@ chapters:
               tier: 3
             hash_type: sha1
             hint: "Transformed compound pattern."
-            xp_reward: 80
+            xp_reward: 100
 
           mythic:
             keyspace:
@@ -528,6 +1294,923 @@ chapters:
               tier: 5
             hash_type: sha256
             hint: "Full attack pipeline required."
-            xp_reward: 125
+            xp_reward: 150
+
+        next_encounter: null
+
+  # =========================================================================
+  # CHAPTER 4: ARCHIVE OF SOULS
+  # SCARAB Corpus Analysis - Learning to analyze before attacking
+  # =========================================================================
+  - id: ch_archive_souls
+    title: "Archive of Souls"
+    description: "Master corpus analysis with SCARAB"
+    intro_text: |
+      Beyond the Inner Sanctum lies the Archive of Souls.
+
+      Here, the memories of millions of passwords are stored—
+      a corpus of human predictability waiting to be analyzed.
+
+      You'll learn SCARAB: the pattern analysis engine.
+      Observe. Analyze. Understand. Then attack.
+    outro_text: |
+      The Archive yields its secrets. You understand the patterns.
+    first_encounter: enc_memory_keeper
+
+    encounters:
+      # TOUR: Introduction to corpus analysis
+      - id: enc_memory_keeper
+        title: "The Memory Keeper"
+        type: tour
+        tier: 0
+        xp_reward: 10
+        intro_text: |
+          A spectral librarian materializes among towering shelves.
+
+          "Welcome to the Archive. I am the Memory Keeper.
+
+          Here you'll learn CORPUS ANALYSIS—studying password patterns
+          BEFORE you attack. Knowledge is power.
+
+          SCARAB analyzes:
+          ◈ Token frequency (WORD, DIGIT, YEAR, SYMBOL)
+          ◈ Pattern distribution (word+digits, Name+year, etc.)
+          ◈ Character position statistics
+          ◈ Common substitutions and transforms
+
+          Understand the corpus. Craft better attacks."
+        objective: "Learn about corpus analysis"
+        success_text: |
+          "The Archive contains wisdom. Let me show you how to extract it."
+        next_encounter: enc_feed_scarab
+
+      # WALKTHROUGH: First ingest command
+      - id: enc_feed_scarab
+        title: "Feeding SCARAB"
+        type: walkthrough
+        tier: 2
+        xp_reward: 20
+        intro_text: |
+          A glowing terminal awaits.
+
+          "To analyze patterns, first INGEST a corpus:
+
+          `patternforge ingest corpus.txt --name training`
+
+          This feeds passwords to SCARAB for analysis.
+          The corpus becomes your intelligence source."
+        objective: "Execute corpus ingestion"
+        solution: "patternforge ingest corpus.txt --name training"
+        hint: "Run: patternforge ingest corpus.txt --name training"
+        success_text: |
+          SCARAB awakens, consuming the data.
+
+          "Excellent. The corpus is loaded. Now we analyze."
+        failure_text: "Use the ingest command with a corpus file."
+        next_encounter: enc_token_recognition
+
+      # HUNT: Identify token types
+      - id: enc_token_recognition
+        title: "Token Recognition"
+        type: hunt
+        tier: 2
+        xp_reward: 25
+        intro_text: |
+          Analysis output scrolls before you.
+
+          "SCARAB categorizes passwords into TOKENS:
+
+          ◈ WORD: alphabetic sequences (password, admin)
+          ◈ DIGIT: numeric sequences (123, 99)
+          ◈ YEAR: 4-digit years (2024, 1990)
+          ◈ SYMBOL: special characters (!@#$)
+
+          Examine this password: 'Admin2024!'
+
+          What tokens does it contain?"
+        objective: "Identify the token types"
+        solution: "WORD YEAR SYMBOL"
+        hint: "Admin = WORD, 2024 = YEAR, ! = SYMBOL"
+        success_text: |
+          "Correct! WORD + YEAR + SYMBOL.
+          Token recognition is the foundation of pattern analysis."
+        failure_text: "Break down each part: Admin, 2024, !"
+        next_encounter: enc_pattern_stats
+
+      # FLASH: Read frequency output
+      - id: enc_pattern_stats
+        title: "Pattern Statistics"
+        type: flash
+        tier: 2
+        xp_reward: 20
+        intro_text: |
+          SCARAB displays analysis results:
+
+          ```
+          PATTERN FREQUENCY:
+          word+digits    34.2%  (most common)
+          Word+year      22.1%
+          word+symbol    15.8%
+          word           12.4%
+          digits         10.2%
+          other           5.3%
+          ```
+
+          Which pattern should you attack FIRST?
+        objective: "Interpret the statistics"
+        solution: "word+digits"
+        hint: "34.2% is the highest frequency. Attack the most common first."
+        success_text: |
+          "Always attack high-frequency patterns first.
+          Maximum coverage with minimum effort."
+        failure_text: "Look at the percentages. Which is highest?"
+        next_encounter: enc_watch_scarab
+
+      # SIEGE: Progressive analysis observation
+      - id: enc_watch_scarab
+        title: "Watch SCARAB Work"
+        type: siege
+        tier: 3
+        xp_reward: 30
+        intro_text: |
+          The Memory Keeper gestures to a display.
+
+          "Now OBSERVE SCARAB's full analysis cycle.
+          Watch each phase. Understand the process.
+
+          Analysis takes TIME. Patience reveals patterns."
+        objective: "Observe the complete analysis"
+        success_text: |
+          "You've witnessed the full cycle.
+          Analysis before action. Always."
+        failure_text: "Watch the output. Press SPACE when prompted."
+        next_encounter: enc_full_analysis
+
+      # WALKTHROUGH: Full analysis command
+      - id: enc_full_analysis
+        title: "Full Analysis Run"
+        type: walkthrough
+        tier: 3
+        xp_reward: 25
+        intro_text: |
+          The terminal awaits your command.
+
+          "Execute a COMPLETE analysis:
+
+          `patternforge analyze --corpus training --output report.json`
+
+          This generates a full pattern report."
+        objective: "Run complete analysis"
+        solution: "patternforge analyze --corpus training --output report.json"
+        hint: "Run: patternforge analyze --corpus training --output report.json"
+        success_text: |
+          Report generated. Patterns documented.
+
+          "Now you have intelligence. Use it wisely."
+        failure_text: "Include --corpus and --output flags."
+        next_encounter: enc_build_from_analysis
+
+      # CRAFT: Build attack from analysis
+      - id: enc_build_from_analysis
+        title: "Build Attack from Analysis"
+        type: craft
+        tier: 3
+        xp_reward: 30
+        intro_text: |
+          SCARAB's report shows the dominant pattern:
+
+          "word+digits (6 letters + 2 digits)"
+
+          Build a MASK that matches this pattern:
+          ◈ 6 lowercase letters
+          ◈ 2 digits
+
+          Construct: ?l?l?l?l?l?l?d?d
+        objective: "Build a mask from analysis"
+        solution: "?l?l?l?l?l?l?d?d"
+        hint: "Six ?l for letters, two ?d for digits."
+        success_text: |
+          Perfect mask construction!
+
+          "Analysis → Mask → Attack. The complete workflow."
+        failure_text: "Remember: ?l = lowercase, ?d = digit"
+        next_encounter: enc_locked_memory
+
+      # PUZZLE_BOX: Multi-step unlock
+      - id: enc_locked_memory
+        title: "The Locked Memory"
+        type: flash
+        tier: 4
+        xp_reward: 35
+        intro_text: |
+          A sealed vault contains ancient passwords.
+
+          "This vault requires the FULL WORKFLOW:
+          1. Ingest the corpus
+          2. Analyze patterns
+          3. Extract the dominant pattern
+
+          The password follows: Word + 2 digits"
+        objective: "Execute the full pipeline"
+
+        keyspace:
+          source: "training_corpus"
+          tokens: ["WORD", "DIGIT"]
+          complexity: compound
+          discovery_method: mask
+          tier: 4
+          min_length: 6
+          max_length: 8
+
+        hash_type: md5
+        hint: "Use analysis to identify the pattern, then crack."
+        success_text: |
+          The vault unseals.
+
+          "You've mastered the analysis pipeline."
+        failure_text: "Think: analyze first, then attack."
+        next_encounter: enc_which_corpus
+
+      # FORK: Corpus selection
+      - id: enc_which_corpus
+        title: "Which Corpus?"
+        type: fork
+        tier: 3
+        xp_reward: 20
+        intro_text: |
+          Two corpuses available for analysis:
+
+          CORPORATE CORPUS:
+          ◈ 50,000 passwords from enterprise breaches
+          ◈ Formal patterns (Name+year, department codes)
+          ◈ Policy-influenced (8+ chars, mixed case required)
+
+          GAMING CORPUS:
+          ◈ 100,000 passwords from gaming sites
+          ◈ Casual patterns (leetspeak, nicknames)
+          ◈ No strict requirements
+
+          Your target is a CORPORATE database. Which corpus?
+        objective: "Choose the right corpus"
+        choices:
+          - id: choice_corporate
+            label: "Corporate Corpus"
+            description: "Enterprise passwords match enterprise targets"
+            leads_to: enc_archive_keeper
+            is_correct: true
+          - id: choice_gaming
+            label: "Gaming Corpus"
+            description: "Larger but different demographic"
+            leads_to: enc_archive_keeper
+            is_correct: false
+        success_text: |
+          "Correct! Match your corpus to your target.
+          Corporate patterns differ from casual ones."
+        failure_text: "Target demographics matter. Corporate targets need corporate patterns."
+        next_encounter: enc_archive_keeper
+
+      # BOSS: Archive Keeper
+      - id: enc_archive_keeper
+        title: "Archive Keeper"
+        type: flash
+        tier: 5
+        is_checkpoint: true
+        xp_reward: 50
+        intro_text: |
+          The Archive Keeper manifests—a towering spectral figure.
+
+          "You seek to master the Archive?
+          Prove you understand the FULL WORKFLOW:
+
+          Analysis → Pattern Recognition → Targeted Attack
+
+          My password follows corporate patterns:
+          Capitalized word + year"
+        objective: "Defeat the Archive Keeper"
+
+        keyspace:
+          source: "training_corpus"
+          tokens: ["WORD", "YEAR"]
+          mask: "?u?l?l?l?l?d?d?d?d"
+          complexity: compound
+          discovery_method: pipeline
+          tier: 5
+          min_length: 9
+          max_length: 9
+
+        hash_type: md5
+        hint: "Corporate pattern: Name2024 format. Use mask ?u?l?l?l?l?d?d?d?d"
+        success_text: |
+          The Archive Keeper bows.
+
+          "You have mastered analysis. The Archive is yours.
+          Now... deeper secrets await in the Forge."
+        failure_text: "Apply what you learned: analyze, identify pattern, attack."
+        next_encounter: null
+
+  # =========================================================================
+  # CHAPTER 5: THE FORGE ETERNAL
+  # EntropySmith Password Generation - Create and understand password patterns
+  # =========================================================================
+  - id: ch_forge_eternal
+    title: "The Forge Eternal"
+    description: "Master password generation with EntropySmith"
+    intro_text: |
+      Beyond the Archive lies the Forge Eternal.
+
+      Here, passwords are CREATED, not just cracked.
+      You'll learn EntropySmith—the pattern generation engine.
+
+      Understand HOW passwords are made to understand
+      how they can be broken.
+    outro_text: |
+      The Forge yields its secrets. You command the patterns.
+    first_encounter: enc_chained_smith
+
+    encounters:
+      # TOUR: Introduction to EntropySmith
+      - id: enc_chained_smith
+        title: "The Chained Smith"
+        type: tour
+        tier: 0
+        xp_reward: 10
+        intro_text: |
+          A massive forge dominates the chamber. Chained to it—
+          the EntropySmith, ancient creator of passwords.
+
+          "I am bound to create what you seek to destroy.
+
+          ENTROPYSMITH generates passwords using:
+          ◈ Grammar-based generation (patterns from corpus)
+          ◈ Mutation rules (transformations on base words)
+          ◈ Hybrid attacks (wordlist + mask combinations)
+
+          Understand creation. Master destruction."
+        objective: "Learn about password generation"
+        success_text: |
+          "The forge is ready. Let me show you its power."
+        next_encounter: enc_first_forge
+
+      # WALKTHROUGH: First forge command
+      - id: enc_first_forge
+        title: "First Forging"
+        type: walkthrough
+        tier: 2
+        xp_reward: 20
+        intro_text: |
+          The EntropySmith gestures to the controls.
+
+          "Generate passwords from your corpus analysis:
+
+          `patternforge forge --corpus training --count 1000`
+
+          This creates 1000 passwords following corpus patterns.
+          These become candidates for your attacks."
+        objective: "Generate passwords"
+        solution: "patternforge forge --corpus training --count 1000"
+        hint: "Run: patternforge forge --corpus training --count 1000"
+        success_text: |
+          The forge roars! Passwords flow like molten metal.
+
+          "A thousand candidates, crafted from pattern analysis."
+        failure_text: "Use the forge command with --corpus and --count."
+        next_encounter: enc_mutations_grammar
+
+      # DUEL: Mutations vs Grammar
+      - id: enc_mutations_grammar
+        title: "Mutations vs Grammar"
+        type: duel
+        tier: 3
+        xp_reward: 25
+        intro_text: |
+          Two generation methods available:
+
+          MUTATIONS:
+          ◈ Transform existing words (leet speak, case toggle)
+          ◈ Fast, predictable variations
+          ◈ Good for known base words
+
+          GRAMMAR:
+          ◈ Generate from pattern rules
+          ◈ Novel combinations
+          ◈ Good for unknown patterns
+
+          Your target: Cracking a corporate DB with KNOWN base words.
+        objective: "Choose the better method"
+        choices:
+          - id: choice_mutations
+            label: "Mutations"
+            description: "Transform known words"
+            leads_to: enc_custom_generation
+            is_correct: true
+          - id: choice_grammar
+            label: "Grammar"
+            description: "Generate from patterns"
+            leads_to: enc_custom_generation
+            is_correct: false
+        success_text: |
+          "Correct! Known bases + mutations = targeted attack.
+          Grammar is for when you don't know the bases."
+        failure_text: "With known words, mutations are more efficient."
+        next_encounter: enc_custom_generation
+
+      # CRAFT: Custom generation parameters
+      - id: enc_custom_generation
+        title: "Custom Generation"
+        type: craft
+        tier: 3
+        xp_reward: 30
+        intro_text: |
+          The EntropySmith presents the configuration forge.
+
+          "Configure a CUSTOM generator mask:
+
+          Target: 8-character passwords
+          Pattern: Capital + 5 lowercase + 2 digits
+
+          Build: ?u?l?l?l?l?l?d?d"
+        objective: "Configure generation pattern"
+        solution: "?u?l?l?l?l?l?d?d"
+        hint: "8 chars: ?u (1) + ?l?l?l?l?l (5) + ?d?d (2)"
+        success_text: |
+          The forge accepts your configuration!
+
+          "Custom masks let you target SPECIFIC password policies."
+        failure_text: "Count the characters: 1 upper + 5 lower + 2 digits = 8"
+        next_encounter: enc_predict_output
+
+      # FLASH: Predict generation output
+      - id: enc_predict_output
+        title: "Predict the Output"
+        type: flash
+        tier: 3
+        xp_reward: 20
+        intro_text: |
+          The EntropySmith tests your understanding.
+
+          "Given this grammar rule:
+          <word> + <symbol> + <year>
+
+          And corpus containing: admin, root, user
+          Years: 2020-2024
+          Symbols: !, @, #
+
+          How many TOTAL combinations?"
+        objective: "Calculate the keyspace"
+        solution: "45"
+        hint: "3 words × 3 symbols × 5 years = ?"
+        success_text: |
+          "45 combinations! 3 × 3 × 5.
+          Understanding keyspace helps you estimate attack time."
+        failure_text: "Multiply: words × symbols × years"
+        next_encounter: enc_full_pipeline
+
+      # PIPELINE: Chain commands together
+      - id: enc_full_pipeline
+        title: "The Complete Pipeline"
+        type: pipeline
+        tier: 4
+        xp_reward: 40
+        intro_text: |
+          The EntropySmith presents the ultimate challenge.
+
+          "Execute the FULL PIPELINE:
+
+          STEP 1: Ingest corpus
+          STEP 2: Analyze patterns
+          STEP 3: Generate candidates
+
+          Each step builds on the last."
+        objective: "Execute the full generation pipeline"
+        choices:
+          - id: step_ingest
+            label: "INGEST"
+            description: "patternforge ingest"
+            leads_to: enc_watch_forge
+          - id: step_analyze
+            label: "ANALYZE"
+            description: "patternforge analyze"
+            leads_to: enc_watch_forge
+          - id: step_forge
+            label: "FORGE"
+            description: "patternforge forge"
+            leads_to: enc_watch_forge
+        success_text: |
+          The pipeline executes flawlessly!
+
+          "Ingest → Analyze → Forge. The complete workflow."
+        failure_text: "Execute each step in order."
+        next_encounter: enc_watch_forge
+
+      # SIEGE: Watch generation
+      - id: enc_watch_forge
+        title: "Watch the Forge"
+        type: siege
+        tier: 3
+        xp_reward: 30
+        intro_text: |
+          The EntropySmith begins forging.
+
+          "OBSERVE the generation process.
+          Watch how patterns become passwords.
+
+          Generation takes time. Patience."
+        objective: "Observe password generation"
+        success_text: |
+          "You've witnessed creation.
+          Now use these candidates for attack."
+        failure_text: "Watch the output. Press SPACE when prompted."
+        next_encounter: enc_free_smith
+
+      # PUZZLE_BOX: Free EntropySmith
+      - id: enc_free_smith
+        title: "Free EntropySmith"
+        type: puzzle_box
+        tier: 4
+        xp_reward: 45
+        intro_text: |
+          The EntropySmith strains against chains.
+
+          "THREE KEYS hold me bound.
+          Speak them to free me:
+
+          KEY 1: The first command (ingest)
+          KEY 2: The analysis command (analyze)
+          KEY 3: The generation command (forge)"
+        objective: "Unlock the three keys"
+        choices:
+          - id: key_ingest
+            label: "KEY 1"
+            description: "The ingestion command"
+            leads_to: enc_strategy_choice
+          - id: key_analyze
+            label: "KEY 2"
+            description: "The analysis command"
+            leads_to: enc_strategy_choice
+          - id: key_forge
+            label: "KEY 3"
+            description: "The generation command"
+            leads_to: enc_strategy_choice
+        solution: "ingest analyze forge"
+        hint: "The three commands in order."
+        success_text: |
+          The chains shatter!
+
+          "I am FREE! You have mastered the forge."
+        failure_text: "Enter each key in sequence."
+        next_encounter: enc_strategy_choice
+
+      # FORK: Strategy selection
+      - id: enc_strategy_choice
+        title: "Strategy Choice"
+        type: fork
+        tier: 3
+        xp_reward: 20
+        intro_text: |
+          The freed EntropySmith offers a choice:
+
+          PATH OF SPEED:
+          ◈ Generate fewer, targeted candidates
+          ◈ Fast attacks on likely patterns
+          ◈ Risk: might miss unusual passwords
+
+          PATH OF DEPTH:
+          ◈ Generate comprehensive candidates
+          ◈ Thorough but slow
+          ◈ Risk: time-consuming
+
+          Your target: Quick initial recon.
+        objective: "Choose your generation strategy"
+        choices:
+          - id: choice_speed
+            label: "Path of Speed"
+            description: "Targeted, fast generation"
+            leads_to: enc_forge_master
+            is_correct: true
+          - id: choice_depth
+            label: "Path of Depth"
+            description: "Comprehensive, thorough"
+            leads_to: enc_forge_master
+            is_correct: false
+        success_text: |
+          "Speed for recon, depth when needed.
+          Adapt your strategy to your goal."
+        failure_text: "Quick recon = targeted speed."
+        next_encounter: enc_forge_master
+
+      # BOSS: Forge Master
+      - id: enc_forge_master
+        title: "Forge Master"
+        type: flash
+        tier: 5
+        is_checkpoint: true
+        xp_reward: 60
+        intro_text: |
+          The Forge Master emerges—guardian of all creation.
+
+          "You freed my servant. But can you master ME?
+
+          My password was GENERATED using:
+          ◈ Grammar-based pattern
+          ◈ Corporate corpus
+          ◈ Standard transforms
+
+          Pattern: Capitalized word + year + symbol"
+        objective: "Defeat the Forge Master"
+
+        keyspace:
+          source: "training_corpus"
+          tokens: ["WORD", "YEAR", "SYMBOL"]
+          complexity: compound
+          discovery_method: pipeline
+          tier: 5
+          min_length: 9
+          max_length: 12
+
+        hash_type: md5
+        hint: "Generated pattern: Word2024! format. Try common words + years + symbols."
+        success_text: |
+          The Forge Master kneels.
+
+          "You command both analysis AND generation.
+          The ultimate challenge awaits in the Throne Room..."
+        failure_text: "Apply generation knowledge: word + year + symbol pattern."
+        next_encounter: null
+
+  # =========================================================================
+  # CHAPTER 6: THRONE OF SECRETS
+  # The Final Battle - Everything combined
+  # =========================================================================
+  - id: ch_throne_secrets
+    title: "Throne of Secrets"
+    description: "Face the ultimate challenge and claim victory"
+    intro_text: |
+      The Throne Room of the Dread Citadel.
+
+      Everything you've learned converges here:
+      ◈ Wordlists and pattern recognition
+      ◈ Mask attacks and character analysis
+      ◈ Rule transformations
+      ◈ Corpus analysis with SCARAB
+      ◈ Password generation with EntropySmith
+
+      The Skeleton Key awaits. Break it, and the Citadel falls.
+    outro_text: |
+      The Skeleton Key shatters. The Citadel crumbles.
+
+      You are now a true INFILTRATOR of the Cipher Circle.
+    first_encounter: enc_throne_room
+
+    encounters:
+      # TOUR: Final briefing
+      - id: enc_throne_room
+        title: "The Throne Room"
+        type: tour
+        tier: 0
+        xp_reward: 15
+        intro_text: |
+          The Null Cipher appears one final time.
+
+          "Infiltrator. You have come far.
+
+          Beyond these doors lies the Skeleton Key—
+          the ultimate password, guarded by the Citadel's final defenses.
+
+          You will face:
+          ◈ Strategic decisions
+          ◈ Multi-step challenges
+          ◈ Progressive siege
+          ◈ The final gambit
+
+          Everything you've learned. One final test.
+
+          Are you ready?"
+        objective: "Receive the final briefing"
+        success_text: |
+          "Then go. Break the Key. Free the secrets."
+        next_encounter: enc_approach_choice
+
+      # FORK: Strategic approach
+      - id: enc_approach_choice
+        title: "Choose Your Approach"
+        type: fork
+        tier: 3
+        xp_reward: 25
+        intro_text: |
+          Three paths lead to the Skeleton Key:
+
+          PATH OF ANALYSIS:
+          ◈ Thorough corpus analysis first
+          ◈ Identify patterns before attacking
+          ◈ Slower but methodical
+
+          PATH OF SPEED:
+          ◈ Quick wordlist attacks
+          ◈ Escalate as needed
+          ◈ Faster but riskier
+
+          PATH OF POWER:
+          ◈ Full pipeline attack
+          ◈ Maximum resources
+          ◈ Comprehensive but demanding
+        objective: "Choose your strategic approach"
+        choices:
+          - id: choice_analysis
+            label: "Analysis First"
+            description: "Methodical, pattern-focused"
+            leads_to: enc_first_seal
+            is_correct: true
+          - id: choice_speed
+            label: "Speed Attack"
+            description: "Fast escalation"
+            leads_to: enc_first_seal
+            is_correct: true
+          - id: choice_power
+            label: "Full Power"
+            description: "Maximum resources"
+            leads_to: enc_first_seal
+            is_correct: true
+        success_text: |
+          "All paths lead to the Key. Your strategy will be tested."
+        failure_text: "Choose your approach."
+        next_encounter: enc_first_seal
+
+      # PUZZLE_BOX: First seal
+      - id: enc_first_seal
+        title: "The First Seal"
+        type: puzzle_box
+        tier: 4
+        xp_reward: 40
+        intro_text: |
+          A massive seal blocks your path.
+
+          "THREE COMPONENTS protect me:
+
+          COMPONENT 1: The hash type (md5)
+          COMPONENT 2: The attack type (wordlist)
+          COMPONENT 3: The ruleset (best64)
+
+          Speak each to proceed."
+        objective: "Unlock the three components"
+        choices:
+          - id: comp_hash
+            label: "HASH"
+            description: "md5"
+            leads_to: enc_siege_core
+          - id: comp_attack
+            label: "ATTACK"
+            description: "wordlist"
+            leads_to: enc_siege_core
+          - id: comp_rules
+            label: "RULES"
+            description: "best64"
+            leads_to: enc_siege_core
+        hint: "Enter: md5, then wordlist, then best64"
+        success_text: |
+          The seal crumbles!
+
+          "You understand the attack stack."
+        failure_text: "Enter each component in sequence."
+        next_encounter: enc_siege_core
+
+      # SIEGE: Break the Key's core
+      - id: enc_siege_core
+        title: "Break the Key's Core"
+        type: siege
+        tier: 4
+        xp_reward: 45
+        intro_text: |
+          The Skeleton Key's core is exposed.
+
+          "Watch as we BREACH its defenses.
+          Each layer falls. Each pattern reveals itself.
+
+          This is the final analysis."
+        objective: "Observe the breach"
+        success_text: |
+          The core cracks!
+
+          "One final choice remains..."
+        failure_text: "Observe the breach sequence."
+        next_encounter: enc_final_gambit
+
+      # GAMBIT: All or nothing
+      - id: enc_final_gambit
+        title: "All or Nothing"
+        type: gambit
+        tier: 5
+        xp_reward: 50
+        intro_text: |
+          The Skeleton Key pulses with power.
+
+          SAFE PATH:
+          ◈ Conservative attack
+          ◈ 70% success chance
+          ◈ Small XP bonus on success
+
+          RISKY PATH:
+          ◈ All-out assault
+          ◈ 50% success chance
+          ◈ MASSIVE XP bonus on success
+          ◈ Significant penalty on failure
+
+          This is your final gambit.
+        objective: "Make your final choice"
+        choices:
+          - id: choice_safe_final
+            label: "Safe Path"
+            description: "Conservative, 70% chance"
+            leads_to: enc_skeleton_key
+            is_correct: true
+          - id: choice_risky_final
+            label: "Risky Path"
+            description: "All-out, 50% chance, big reward"
+            leads_to: enc_skeleton_key
+            is_correct: true
+        success_text: |
+          "Your choice is made. Face the Key."
+        failure_text: "Choose your final gambit."
+        next_encounter: enc_skeleton_key
+
+      # BOSS: The Skeleton Key (FINAL BOSS)
+      - id: enc_skeleton_key
+        title: "THE SKELETON KEY"
+        type: flash
+        tier: 6
+        is_checkpoint: true
+        xp_reward: 150
+        intro_text: |
+          THE SKELETON KEY materializes before you.
+
+          The ultimate password. The master of all patterns.
+
+          "I AM the culmination of human predictability.
+          I contain EVERY pattern you've learned:
+
+          ◈ Common words
+          ◈ Transformations
+          ◈ Masks
+          ◈ Years and symbols
+          ◈ Corporate conventions
+
+          BREAK ME... if you can."
+
+          Use EVERYTHING. This is the final test.
+        objective: "SHATTER THE SKELETON KEY"
+
+        keyspace:
+          source: "training_corpus"
+          tokens: ["WORD", "YEAR", "SYMBOL"]
+          complexity: transformed
+          discovery_method: pipeline
+          tier: 6
+          min_length: 10
+          max_length: 16
+
+        hash_type: md5
+        hint: "The ultimate pattern: Transformed word + year + symbol. Use your full arsenal."
+        success_text: |
+          THE SKELETON KEY SHATTERS!
+
+          The Dread Citadel CRUMBLES around you.
+
+          From the ruins, the Null Cipher appears one final time:
+
+          "You have done it, Infiltrator.
+
+          You see the patterns. You understand the weakness.
+          You have become what you were born to be.
+
+          Welcome to the Cipher Circle.
+
+          The Skeleton Key is broken.
+          The Citadel falls.
+          The Circle remembers."
+
+          ═══════════════════════════════════════
+                    V I C T O R Y
+          ═══════════════════════════════════════
+        failure_text: "Use everything: wordlists + masks + rules + analysis. The Key will fall."
+
+        variants:
+          heroic:
+            keyspace:
+              source: "training_corpus"
+              complexity: transformed
+              discovery_method: pipeline
+              tier: 6
+            hash_type: sha256
+            hint: "Heroic Key: Maximum transformation."
+            xp_reward: 250
+
+          mythic:
+            keyspace:
+              source: "training_corpus"
+              complexity: transformed
+              discovery_method: pipeline
+              tier: 6
+            hash_type: sha512
+            hint: "Mythic Key: The ultimate challenge."
+            xp_reward: 500
 
         next_encounter: null

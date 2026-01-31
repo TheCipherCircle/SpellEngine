@@ -274,3 +274,148 @@ class Toggle:
         text_x = self.toggle_x + (self.toggle_width - text_surface.get_width()) // 2
         text_y = self.toggle_y + (self.toggle_height - text_surface.get_height()) // 2
         surface.blit(text_surface, (text_x, text_y))
+
+
+class TimerWidget:
+    """Countdown timer widget for RACE encounters.
+
+    Displays a countdown with visual urgency indicators:
+    - Green: > 50% time remaining
+    - Yellow: 25-50% time remaining
+    - Red + pulse: < 25% time remaining
+    """
+
+    def __init__(
+        self,
+        x: int,
+        y: int,
+        width: int,
+        duration: float,
+        on_expire: Callable[[], None] | None = None,
+    ):
+        """Initialize timer.
+
+        Args:
+            x: X position
+            y: Y position
+            width: Widget width
+            duration: Total duration in seconds
+            on_expire: Callback when timer expires
+        """
+        import pygame
+
+        self.x = x
+        self.y = y
+        self.width = width
+        self.height = 40
+        self.duration = duration
+        self.remaining = duration
+        self.on_expire = on_expire
+
+        self._running = False
+        self._expired = False
+        self._pulse_timer = 0.0
+
+        self.rect = pygame.Rect(x, y, width, self.height)
+
+    def start(self) -> None:
+        """Start the countdown."""
+        self._running = True
+        self._expired = False
+        self.remaining = self.duration
+
+    def stop(self) -> None:
+        """Stop the countdown."""
+        self._running = False
+
+    def reset(self, duration: float | None = None) -> None:
+        """Reset the timer."""
+        if duration is not None:
+            self.duration = duration
+        self.remaining = self.duration
+        self._running = False
+        self._expired = False
+
+    @property
+    def is_running(self) -> bool:
+        """Check if timer is running."""
+        return self._running
+
+    @property
+    def is_expired(self) -> bool:
+        """Check if timer has expired."""
+        return self._expired
+
+    @property
+    def progress(self) -> float:
+        """Get progress as 0.0-1.0 (1.0 = full, 0.0 = expired)."""
+        return max(0.0, self.remaining / self.duration)
+
+    def update(self, dt: float) -> None:
+        """Update timer state."""
+        if not self._running or self._expired:
+            return
+
+        self.remaining -= dt
+        self._pulse_timer += dt
+
+        if self.remaining <= 0:
+            self.remaining = 0
+            self._running = False
+            self._expired = True
+            if self.on_expire:
+                self.on_expire()
+
+    def render(self, surface: "pygame.Surface") -> None:
+        """Render the timer widget."""
+        import pygame
+        import math
+
+        fonts = get_fonts()
+
+        # Calculate time display
+        minutes = int(self.remaining // 60)
+        seconds = int(self.remaining % 60)
+        time_str = f"{minutes}:{seconds:02d}"
+
+        # Determine color based on remaining time
+        progress = self.progress
+        if progress > 0.5:
+            bar_color = Colors.SUCCESS
+            text_color = Colors.SUCCESS
+        elif progress > 0.25:
+            bar_color = Colors.YELLOW
+            text_color = Colors.YELLOW
+        else:
+            # Red with pulse effect
+            pulse = 0.7 + 0.3 * math.sin(self._pulse_timer * 8.0)
+            bar_color = (int(255 * pulse), int(50 * pulse), int(50 * pulse))
+            text_color = Colors.ERROR
+
+        # Draw background bar
+        bar_height = 12
+        bar_y = self.y + 24
+        bar_rect = pygame.Rect(self.x, bar_y, self.width, bar_height)
+        pygame.draw.rect(surface, Colors.BG_DARKEST, bar_rect, border_radius=6)
+
+        # Draw fill
+        fill_width = int(self.width * progress)
+        if fill_width > 0:
+            fill_rect = pygame.Rect(self.x, bar_y, fill_width, bar_height)
+            pygame.draw.rect(surface, bar_color, fill_rect, border_radius=6)
+
+        # Draw border
+        pygame.draw.rect(surface, Colors.BORDER, bar_rect, width=1, border_radius=6)
+
+        # Draw time text
+        time_font = fonts.get_font(Typography.SIZE_SUBHEADER, bold=True)
+        time_surface = time_font.render(time_str, Typography.ANTIALIAS, text_color)
+        time_x = self.x + (self.width - time_surface.get_width()) // 2
+        surface.blit(time_surface, (time_x, self.y))
+
+        # Draw "TIME" label if space permits
+        if self.width > 100:
+            label_font = fonts.get_font(Typography.SIZE_SMALL)
+            label_surface = label_font.render("TIME", Typography.ANTIALIAS, Colors.TEXT_MUTED)
+            label_x = self.x + 5
+            surface.blit(label_surface, (label_x, self.y + 4))

@@ -23,6 +23,10 @@ from spellengine.engine.game.ui import (
     get_fonts,
     TextValidator,
     UIAuditLog,
+    TimerWidget,
+    CraftPanel,
+    SiegePanel,
+    PuzzlePanel,
 )
 from spellengine.engine.game.ui.terminal import TerminalPanel, TheatricalCracker
 from spellengine.adventures.models import DifficultyLevel, EncounterType, OutcomeType
@@ -108,6 +112,18 @@ class EncounterScene(Scene):
         self.hash_index: CampaignHashIndex | None = None
         self.textbox: TextBox | None = None  # Fallback for non-hash encounters
         self.choice_buttons: list[tuple[str, str]] = []  # (key, label) for fork choices
+
+        # Timer for RACE encounters
+        self.race_timer: TimerWidget | None = None
+
+        # Craft panel for CRAFT encounters
+        self.craft_panel: CraftPanel | None = None
+
+        # Siege panel for SIEGE encounters
+        self.siege_panel: SiegePanel | None = None
+
+        # Puzzle panel for PUZZLE_BOX and PIPELINE encounters
+        self.puzzle_panel: PuzzlePanel | None = None
 
         # State
         self.show_hint = False
@@ -278,11 +294,67 @@ class EncounterScene(Scene):
         if is_narrative_only:
             self.terminal = None
             self.textbox = None
-        elif encounter.encounter_type in (EncounterType.FORK, EncounterType.GAMBIT):
-            # FORK and GAMBIT have choices - show choice buttons
+        elif encounter.encounter_type in (EncounterType.FORK, EncounterType.GAMBIT, EncounterType.DUEL):
+            # FORK, GAMBIT, and DUEL have choices - show choice buttons
             self.terminal = None
             self.textbox = None
             self._create_choice_buttons(encounter.choices)
+        elif encounter.encounter_type == EncounterType.CRAFT:
+            # CRAFT encounters use the craft panel for mask/rule building
+            import pygame
+            hash_content = self.hash_panel.content_rect
+
+            self.craft_panel = CraftPanel(
+                x=hash_content.x,
+                y=hash_content.y,
+                width=hash_content.width,
+                height=hash_content.height,
+                max_slots=8,
+                expected_pattern=encounter.solution,  # Expected mask pattern
+                on_submit=self._on_craft_submit,
+            )
+            self.terminal = None
+            self.textbox = None
+        elif encounter.encounter_type == EncounterType.SIEGE:
+            # SIEGE encounters use progressive observation panel
+            import pygame
+            hash_content = self.hash_panel.content_rect
+
+            # Get siege lines from encounter (use intro_text or generate default)
+            siege_lines = self._get_siege_lines(encounter)
+
+            self.siege_panel = SiegePanel(
+                x=hash_content.x,
+                y=hash_content.y,
+                width=hash_content.width,
+                height=hash_content.height,
+                lines=siege_lines,
+                line_delay=0.2,
+                on_complete=self._on_siege_complete,
+            )
+            self.siege_panel.start()
+            self.terminal = None
+            self.textbox = None
+        elif encounter.encounter_type in (EncounterType.PUZZLE_BOX, EncounterType.PIPELINE):
+            # PUZZLE_BOX and PIPELINE use multi-step verification
+            import pygame
+            hash_content = self.hash_panel.content_rect
+
+            # Get puzzle steps from encounter or generate defaults
+            puzzle_steps = self._get_puzzle_steps(encounter)
+            panel_title = "PIPELINE" if encounter.encounter_type == EncounterType.PIPELINE else "PUZZLE BOX"
+
+            self.puzzle_panel = PuzzlePanel(
+                x=hash_content.x,
+                y=hash_content.y,
+                width=hash_content.width,
+                height=hash_content.height,
+                steps=puzzle_steps,
+                title=panel_title,
+                on_complete=self._on_puzzle_complete,
+            )
+            self.terminal = None
+            self.textbox = None
         else:
             # Create embedded terminal for hash cracking (FLASH, CHALLENGE, BOSS, etc.)
             import pygame
@@ -315,6 +387,24 @@ class EncounterScene(Scene):
                 self.terminal.add_output("Type password to submit, or 'crack' to auto-crack.")
 
             self.textbox = None  # Not using textbox when terminal is active
+
+        # Initialize RACE timer if this is a RACE encounter
+        if encounter.encounter_type == EncounterType.RACE:
+            # Get timer duration from encounter (default 60 seconds)
+            race_duration = getattr(encounter, 'expected_time', 60) or 60
+            status_content = self.status_panel.rect if self.status_panel else None
+            if status_content:
+                timer_width = 150
+                timer_x = status_content.x + (status_content.width - timer_width) // 2
+                timer_y = status_content.y + status_content.height - 60
+                self.race_timer = TimerWidget(
+                    timer_x, timer_y, timer_width,
+                    duration=float(race_duration),
+                    on_expire=self._on_race_timer_expire,
+                )
+                self.race_timer.start()
+        else:
+            self.race_timer = None
 
         # Create prompt bar
         narrative_content = self.narrative_panel.content_rect
@@ -531,6 +621,10 @@ class EncounterScene(Scene):
         self.theatrical_cracker = None
         self.textbox = None
         self.choice_buttons = []
+        self.race_timer = None
+        self.craft_panel = None
+        self.siege_panel = None
+        self.puzzle_panel = None
         self.viewport_panel = None
         self.status_panel = None
         self.narrative_panel = None
@@ -956,6 +1050,128 @@ class EncounterScene(Scene):
         if self.client.audio:
             self.client.audio.play_sfx("hint_reveal")
 
+    def _on_race_timer_expire(self) -> None:
+        """Handle RACE timer expiration - player ran out of time."""
+        encounter = self.client.adventure_state.current_encounter
+
+        # Screen shake and failure flash
+        self.client.shake(intensity=6, duration=0.4)
+        self.client.flash_failure()
+
+        # Play failure sound
+        if self.client.audio:
+            self.client.audio.play_sfx("error")
+
+        # Show feedback
+        self.feedback_message = "TIME'S UP!"
+        self.feedback_color = Colors.ERROR
+        self.feedback_timer = 2.0
+
+        if self.terminal:
+            self.terminal.add_error("RACE FAILED - Time expired!")
+
+        # Record as failure and handle result
+        result = self.client.adventure_state.record_outcome(OutcomeType.FAILURE)
+        self._handle_result(result)
+
+    def _on_craft_submit(self, pattern: str) -> None:
+        """Handle CRAFT panel submission."""
+        encounter = self.client.adventure_state.current_encounter
+        expected = encounter.solution
+
+        # Track attempt
+        self._attempts_this_encounter += 1
+
+        # Compare submitted pattern with expected
+        if expected and pattern.lower().strip() == expected.lower().strip():
+            self._process_correct_answer(encounter)
+        else:
+            # Wrong pattern
+            self.feedback_message = f"Pattern '{pattern}' doesn't match the target."
+            self.feedback_color = Colors.ERROR
+            self.feedback_timer = 2.0
+
+            self.client.shake(intensity=3, duration=0.15)
+            self.client.flash_failure()
+
+            if self.client.audio:
+                self.client.audio.play_sfx("error")
+
+    def _get_siege_lines(self, encounter: "Encounter") -> list[str]:
+        """Generate siege output lines for an encounter.
+
+        Creates simulated analysis output based on encounter context.
+        """
+        # Default analysis lines if none specified
+        title = encounter.title.upper()
+        lines = [
+            f"> Initializing {title}...",
+            "> Loading corpus data...",
+            "> Found 15,847 tokens in training set",
+            "",
+            "> Analyzing password patterns...",
+            "> WORD tokens: 45.2%",
+            "> DIGIT tokens: 23.8%",
+            "> YEAR tokens: 12.1%",
+            "> SYMBOL tokens: 8.4%",
+            "> MIXED tokens: 10.5%",
+            "",
+            "[CHECKPOINT]Patterns identified. Press SPACE...",
+            "",
+            "> *** COMMON PATTERNS DISCOVERED ***",
+            "> Pattern 1: word+digits (34.2%)",
+            "> Pattern 2: Word+year (22.1%)",
+            "> Pattern 3: word+symbol+digits (15.8%)",
+            "",
+            "> Generating attack strategy...",
+            "> Recommended: Wordlist + best64 rules",
+            "> Estimated keyspace: 2.4 million candidates",
+            "> Estimated time: 12 seconds",
+            "",
+            "> *** ANALYSIS COMPLETE ***",
+        ]
+        return lines
+
+    def _on_siege_complete(self) -> None:
+        """Handle SIEGE panel completion."""
+        encounter = self.client.adventure_state.current_encounter
+        self._process_correct_answer(encounter)
+
+    def _get_puzzle_steps(self, encounter: "Encounter") -> list[tuple[str, str, str]]:
+        """Generate puzzle steps for PUZZLE_BOX or PIPELINE encounters.
+
+        Returns list of (label, expected, hint) tuples.
+        """
+        # Check if encounter has choices that define steps
+        if encounter.choices:
+            steps = []
+            for i, choice in enumerate(encounter.choices):
+                label = f"STEP {i + 1}"
+                expected = choice.id  # Use choice ID as expected value
+                hint = choice.description or ""
+                steps.append((label, expected, hint))
+            return steps
+
+        # Default pipeline steps
+        if encounter.encounter_type == EncounterType.PIPELINE:
+            return [
+                ("INGEST", "patternforge ingest", "First command: ingest the corpus"),
+                ("ANALYZE", "patternforge analyze", "Second: analyze patterns"),
+                ("ATTACK", "patternforge crack", "Finally: execute the attack"),
+            ]
+
+        # Default puzzle box steps
+        return [
+            ("KEY 1", "pattern", "The first key is 'pattern'"),
+            ("KEY 2", "analysis", "The second key is 'analysis'"),
+            ("KEY 3", "attack", "The third key is 'attack'"),
+        ]
+
+    def _on_puzzle_complete(self) -> None:
+        """Handle PUZZLE_BOX/PIPELINE completion."""
+        encounter = self.client.adventure_state.current_encounter
+        self._process_correct_answer(encounter)
+
     def _log_crack_to_session(self, hash_value: str, command: str, result: str) -> None:
         """Log a crack attempt to the test session log.
 
@@ -1104,6 +1320,18 @@ class EncounterScene(Scene):
         # Handle terminal input (for hash-cracking encounters)
         if self.terminal:
             self.terminal.handle_event(event)
+        # Handle craft panel input
+        elif self.craft_panel:
+            if self.craft_panel.handle_event(event):
+                return  # Event consumed by craft panel
+        # Handle siege panel input
+        elif self.siege_panel:
+            if self.siege_panel.handle_event(event):
+                return  # Event consumed by siege panel
+        # Handle puzzle panel input
+        elif self.puzzle_panel:
+            if self.puzzle_panel.handle_event(event):
+                return  # Event consumed by puzzle panel
         # Fallback to textbox if no terminal
         elif self.textbox:
             self.textbox.handle_event(event)
@@ -1260,6 +1488,22 @@ class EncounterScene(Scene):
         if self.textbox:
             self.textbox.update(dt)
 
+        # Update RACE timer
+        if self.race_timer:
+            self.race_timer.update(dt)
+
+        # Update CRAFT panel
+        if self.craft_panel:
+            self.craft_panel.update(dt)
+
+        # Update SIEGE panel
+        if self.siege_panel:
+            self.siege_panel.update(dt)
+
+        # Update PUZZLE panel
+        if self.puzzle_panel:
+            self.puzzle_panel.update(dt)
+
         # Update feedback timer
         if self.feedback_timer > 0:
             self.feedback_timer -= dt
@@ -1379,6 +1623,10 @@ class EncounterScene(Scene):
 
         # Draw hash panel content
         self._draw_hash_panel(surface, encounter)
+
+        # Draw RACE timer overlay (on top of status panel)
+        if self.race_timer:
+            self.race_timer.render(surface)
 
     def _draw_viewport(self, surface: "pygame.Surface", encounter: "Encounter") -> None:
         """Draw the viewport panel content (art + boss)."""
@@ -1670,6 +1918,21 @@ class EncounterScene(Scene):
         # If terminal is active, render it and return
         if self.terminal:
             self.terminal.render(surface)
+            return
+
+        # If craft panel is active, render it and return
+        if self.craft_panel:
+            self.craft_panel.render(surface)
+            return
+
+        # If siege panel is active, render it and return
+        if self.siege_panel:
+            self.siege_panel.render(surface)
+            return
+
+        # If puzzle panel is active, render it and return
+        if self.puzzle_panel:
+            self.puzzle_panel.render(surface)
             return
 
         # === Fallback rendering (when no terminal) ===

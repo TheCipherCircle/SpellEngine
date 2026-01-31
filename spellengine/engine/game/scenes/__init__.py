@@ -15,6 +15,7 @@ from spellengine.engine.game.scenes.game_over import GameOverScene
 from spellengine.engine.game.scenes.victory import VictoryScene
 from spellengine.engine.game.scenes.credits import CreditsScene
 from spellengine.engine.game.scenes.prologue_gate import PrologueGateScene
+from spellengine.engine.game.scenes.chapter_complete import ChapterCompleteScene
 
 __all__ = [
     "Scene",
@@ -24,4 +25,5 @@ __all__ = [
     "VictoryScene",
     "CreditsScene",
     "PrologueGateScene",
+    "ChapterCompleteScene",
 ]

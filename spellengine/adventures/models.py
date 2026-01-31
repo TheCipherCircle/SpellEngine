@@ -327,6 +327,12 @@ class PlayerState(BaseModel):
         description="campaign_id -> list of completed difficulty levels (for unlocking higher difficulties)"
     )
 
+    # Artifact collection (campaign-specific rewards)
+    artifacts: dict[str, list[str]] = Field(
+        default_factory=dict,
+        description="campaign_id -> list of artifact IDs collected (e.g., skeleton_key_fragment_normal)"
+    )
+
 
 class GameOverOptions(str, Enum):
     """Options presented on game over."""

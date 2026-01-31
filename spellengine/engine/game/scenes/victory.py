@@ -18,10 +18,41 @@ from spellengine.engine.game.ui import (
     get_fonts,
     draw_double_border_title,
 )
+from spellengine.adventures.models import DifficultyLevel
 
 if TYPE_CHECKING:
     import pygame
     from spellengine.engine.game.client import GameClient
+
+
+# Campaign-specific artifacts
+CAMPAIGN_ARTIFACTS = {
+    "dread_citadel": {
+        "name": "Skeleton Key",
+        "fragments": {
+            DifficultyLevel.NORMAL: {
+                "id": "skeleton_key_fragment_normal",
+                "name": "Skeleton Key Fragment (Normal)",
+                "description": "A shard of the shattered Skeleton Key. It pulses with faint power.",
+            },
+            DifficultyLevel.HEROIC: {
+                "id": "skeleton_key_fragment_heroic",
+                "name": "Skeleton Key Fragment (Heroic)",
+                "description": "A glowing fragment of the Skeleton Key. Its power is unmistakable.",
+            },
+            DifficultyLevel.MYTHIC: {
+                "id": "skeleton_key_fragment_mythic",
+                "name": "Skeleton Key Fragment (Mythic)",
+                "description": "A blazing shard of the Skeleton Key. It burns with ancient secrets.",
+            },
+        },
+        "complete_artifact": {
+            "id": "skeleton_key_restored",
+            "name": "THE SKELETON KEY (RESTORED)",
+            "description": "All three fragments united. The Skeleton Key is whole once more.",
+        },
+    },
+}
 
 
 class VictoryScene(Scene):
@@ -63,6 +94,13 @@ class VictoryScene(Scene):
         # Assets
         self._xp_icon: "pygame.Surface | None" = None
 
+        # Artifact state
+        self._awarded_fragment: dict | None = None
+        self._has_complete_artifact: bool = False
+        self._owned_fragments: list[str] = []
+        self._celebration_timer: float = 0.0
+        self._show_key_celebration: bool = False
+
     def enter(self, **kwargs: Any) -> None:
         """Enter the victory scene.
 
@@ -94,6 +132,9 @@ class VictoryScene(Scene):
         self._xp_icon = self.client.assets.get_ui_element(
             self.client.campaign.id, "icon_xp"
         )
+
+        # Award campaign artifact fragment
+        self._award_artifact_fragment()
 
         margin = LAYOUT["panel_margin"]
 
@@ -241,6 +282,301 @@ class VictoryScene(Scene):
 
         return stars, titles.get(stars, "COMPLETE")
 
+    def _award_artifact_fragment(self) -> None:
+        """Award the campaign artifact fragment for the completed difficulty."""
+        campaign_id = self.client.campaign.id
+        difficulty = self.client.adventure_state.difficulty
+        state = self.client.adventure_state.state
+
+        # Check if this campaign has artifacts
+        artifact_config = CAMPAIGN_ARTIFACTS.get(campaign_id)
+        if not artifact_config:
+            return
+
+        # Get the fragment for this difficulty
+        fragments = artifact_config.get("fragments", {})
+        fragment_info = fragments.get(difficulty)
+        if not fragment_info:
+            return
+
+        fragment_id = fragment_info["id"]
+
+        # Initialize artifacts dict for this campaign if needed
+        if campaign_id not in state.artifacts:
+            state.artifacts[campaign_id] = []
+
+        # Award fragment if not already owned
+        if fragment_id not in state.artifacts[campaign_id]:
+            state.artifacts[campaign_id].append(fragment_id)
+            self._awarded_fragment = fragment_info
+
+            # Play artifact sound
+            if self.client.audio:
+                self.client.audio.play_sfx("artifact_acquired")
+
+        # Track owned fragments
+        self._owned_fragments = state.artifacts.get(campaign_id, [])
+
+        # Check if all three fragments are now owned
+        all_fragment_ids = [f["id"] for f in fragments.values()]
+        if all(fid in self._owned_fragments for fid in all_fragment_ids):
+            self._has_complete_artifact = True
+            self._show_key_celebration = True
+
+            # Add the complete artifact achievement
+            complete_artifact = artifact_config.get("complete_artifact", {})
+            if complete_artifact.get("id") and complete_artifact["id"] not in state.achievements:
+                state.achievements.append(complete_artifact["id"])
+
+            # Play special celebration sound
+            if self.client.audio:
+                self.client.audio.play_sfx("legendary_unlock")
+
+        # Save the updated state
+        self.client.adventure_state.save()
+
+    def _get_fragment_display_info(self) -> list[tuple[str, bool, str]]:
+        """Get display info for all fragments.
+
+        Returns:
+            List of (fragment_name, is_owned, difficulty_color) tuples
+        """
+        campaign_id = self.client.campaign.id
+        artifact_config = CAMPAIGN_ARTIFACTS.get(campaign_id)
+        if not artifact_config:
+            return []
+
+        fragments = artifact_config.get("fragments", {})
+        result = []
+
+        difficulty_colors = {
+            DifficultyLevel.NORMAL: Colors.SUCCESS,
+            DifficultyLevel.HEROIC: Colors.BLUE,
+            DifficultyLevel.MYTHIC: Colors.PURPLE,
+        }
+
+        for diff in [DifficultyLevel.NORMAL, DifficultyLevel.HEROIC, DifficultyLevel.MYTHIC]:
+            frag = fragments.get(diff)
+            if frag:
+                is_owned = frag["id"] in self._owned_fragments
+                color = difficulty_colors.get(diff, Colors.TEXT_MUTED)
+                result.append((diff.value.upper(), is_owned, color))
+
+        return result
+
+    def _draw_artifact_section(
+        self,
+        surface: "pygame.Surface",
+        fonts: Any,
+        content: "pygame.Rect",
+    ) -> None:
+        """Draw the artifact fragment section.
+
+        Args:
+            surface: Surface to draw on
+            fonts: Font manager
+            content: Content rect from main panel
+        """
+        import pygame
+        import math
+
+        campaign_id = self.client.campaign.id
+        artifact_config = CAMPAIGN_ARTIFACTS.get(campaign_id)
+        if not artifact_config:
+            return
+
+        # Position artifact display in the stats panel area (bottom section)
+        if not self.stats_panel:
+            return
+
+        stats_content = self.stats_panel.content_rect
+        artifact_y = stats_content.y + stats_content.height - 140
+
+        # Draw artifact header
+        header_font = fonts.get_font(Typography.SIZE_SMALL, bold=True)
+        artifact_name = artifact_config.get("name", "Artifact")
+
+        # Check if showing special celebration
+        if self._show_key_celebration:
+            self._draw_key_celebration(surface, fonts, content)
+            return
+
+        # Draw "SKELETON KEY FRAGMENTS" header
+        header_text = f"{artifact_name.upper()} FRAGMENTS"
+        header_surface = header_font.render(
+            header_text, Typography.ANTIALIAS, Colors.TEXT_HEADER
+        )
+        header_x = stats_content.x + 10
+        surface.blit(header_surface, (header_x, artifact_y))
+
+        # Draw fragment slots
+        fragment_info = self._get_fragment_display_info()
+        slot_y = artifact_y + 25
+        slot_font = fonts.get_font(Typography.SIZE_SMALL)
+
+        for diff_name, is_owned, color in fragment_info:
+            # Draw slot indicator
+            if is_owned:
+                # Filled slot with pulsing glow
+                pulse = 0.7 + 0.3 * math.sin(self._celebration_timer * 3)
+                glow_color = (
+                    int(color[0] * pulse),
+                    int(color[1] * pulse),
+                    int(color[2] * pulse),
+                )
+                indicator = "◆"
+                slot_surface = slot_font.render(
+                    f"{indicator} {diff_name}", Typography.ANTIALIAS, glow_color
+                )
+            else:
+                # Empty slot
+                indicator = "◇"
+                slot_surface = slot_font.render(
+                    f"{indicator} {diff_name}", Typography.ANTIALIAS, Colors.TEXT_MUTED
+                )
+
+            surface.blit(slot_surface, (header_x + 10, slot_y))
+            slot_y += slot_font.get_height() + 4
+
+        # Draw awarded fragment notification if just earned
+        if self._awarded_fragment:
+            notif_y = slot_y + 10
+            notif_font = fonts.get_font(Typography.SIZE_SMALL, bold=True)
+
+            # Pulsing "FRAGMENT ACQUIRED" text
+            pulse = 0.6 + 0.4 * math.sin(self._celebration_timer * 5)
+            notif_color = (
+                int(Colors.YELLOW[0] * pulse),
+                int(Colors.YELLOW[1] * pulse),
+                int(Colors.YELLOW[2] * pulse),
+            )
+
+            notif_text = "+ FRAGMENT ACQUIRED!"
+            notif_surface = notif_font.render(
+                notif_text, Typography.ANTIALIAS, notif_color
+            )
+            surface.blit(notif_surface, (header_x, notif_y))
+
+    def _draw_key_celebration(
+        self,
+        surface: "pygame.Surface",
+        fonts: Any,
+        content: "pygame.Rect",
+    ) -> None:
+        """Draw the special Skeleton Key restoration celebration.
+
+        Args:
+            surface: Surface to draw on
+            fonts: Font manager
+            content: Content rect from main panel
+        """
+        import pygame
+        import math
+
+        screen_w, screen_h = self.client.screen_size
+        center_x = screen_w // 2
+
+        campaign_id = self.client.campaign.id
+        artifact_config = CAMPAIGN_ARTIFACTS.get(campaign_id)
+        if not artifact_config:
+            return
+
+        complete_artifact = artifact_config.get("complete_artifact", {})
+
+        # Draw celebration overlay (semi-transparent darkening)
+        overlay = pygame.Surface((screen_w, screen_h), pygame.SRCALPHA)
+        overlay.fill((0, 0, 0, 100))
+        surface.blit(overlay, (0, 0))
+
+        # Pulsing golden glow effect
+        pulse = 0.5 + 0.5 * math.sin(self._celebration_timer * 2)
+        glow_intensity = int(50 * pulse)
+
+        # Draw golden border glow
+        glow_rect = pygame.Rect(
+            center_x - 250 - glow_intensity,
+            200 - glow_intensity,
+            500 + glow_intensity * 2,
+            250 + glow_intensity * 2,
+        )
+        pygame.draw.rect(surface, Colors.YELLOW, glow_rect, 3)
+
+        # Draw inner celebration box
+        box_rect = pygame.Rect(center_x - 240, 210, 480, 230)
+        pygame.draw.rect(surface, Colors.BG_DARK, box_rect)
+        pygame.draw.rect(surface, Colors.YELLOW, box_rect, 2)
+
+        # Draw "THE SKELETON KEY" title with shimmer
+        title_font = fonts.get_font(Typography.SIZE_HEADER, bold=True)
+        shimmer = 0.8 + 0.2 * math.sin(self._celebration_timer * 4)
+        title_color = (
+            int(255 * shimmer),
+            int(215 * shimmer),
+            int(0 * shimmer + 50),
+        )
+        title_text = complete_artifact.get("name", "ARTIFACT RESTORED")
+        title_surface = title_font.render(
+            title_text, Typography.ANTIALIAS, title_color
+        )
+        title_x = center_x - title_surface.get_width() // 2
+        surface.blit(title_surface, (title_x, 230))
+
+        # Draw decorative line
+        line_y = 280
+        pygame.draw.line(
+            surface,
+            Colors.YELLOW,
+            (center_x - 180, line_y),
+            (center_x + 180, line_y),
+            2,
+        )
+
+        # Draw "RESTORED" subtitle
+        subtitle_font = fonts.get_font(Typography.SIZE_SUBHEADER, bold=True)
+        subtitle_surface = subtitle_font.render(
+            "★ RESTORED ★", Typography.ANTIALIAS, Colors.SUCCESS
+        )
+        subtitle_x = center_x - subtitle_surface.get_width() // 2
+        surface.blit(subtitle_surface, (subtitle_x, 295))
+
+        # Draw description
+        desc_font = fonts.get_font(Typography.SIZE_BODY)
+        desc_text = complete_artifact.get(
+            "description", "All fragments united."
+        )
+        # Word wrap if needed
+        words = desc_text.split()
+        lines = []
+        current_line = []
+        for word in words:
+            test_line = " ".join(current_line + [word])
+            if desc_font.size(test_line)[0] > 420:
+                lines.append(" ".join(current_line))
+                current_line = [word]
+            else:
+                current_line.append(word)
+        if current_line:
+            lines.append(" ".join(current_line))
+
+        desc_y = 335
+        for line in lines[:3]:  # Max 3 lines
+            desc_surface = desc_font.render(
+                line, Typography.ANTIALIAS, Colors.TEXT_PRIMARY
+            )
+            desc_x = center_x - desc_surface.get_width() // 2
+            surface.blit(desc_surface, (desc_x, desc_y))
+            desc_y += desc_font.get_height() + 2
+
+        # Draw fragment completion indicators
+        frag_y = 395
+        frag_font = fonts.get_font(Typography.SIZE_SMALL)
+        frag_text = "◆ NORMAL  ◆ HEROIC  ◆ MYTHIC"
+        frag_surface = frag_font.render(
+            frag_text, Typography.ANTIALIAS, Colors.YELLOW
+        )
+        frag_x = center_x - frag_surface.get_width() // 2
+        surface.blit(frag_surface, (frag_x, frag_y))
+
     def _on_chronicle(self) -> None:
         """Handle chronicle button click."""
         # Not implemented yet
@@ -271,7 +607,7 @@ class VictoryScene(Scene):
 
     def update(self, dt: float) -> None:
         """Update scene."""
-        pass
+        self._celebration_timer += dt
 
     def draw(self, surface: "pygame.Surface") -> None:
         """Draw the victory scene."""
@@ -391,3 +727,6 @@ class VictoryScene(Scene):
                 outro_x = content.x + (content.width - outro_surface.get_width()) // 2
                 surface.blit(outro_surface, (outro_x, outro_y))
                 outro_y += outro_font.get_height() + 4
+
+        # Draw artifact fragment display
+        self._draw_artifact_section(surface, fonts, content)
