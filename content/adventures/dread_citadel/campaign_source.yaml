@@ -1785,15 +1785,15 @@ chapters:
         choices:
           - id: step_ingest
             label: "INGEST"
-            description: "patternforge ingest"
+            description: "ingest"
             leads_to: enc_watch_forge
           - id: step_analyze
             label: "ANALYZE"
-            description: "patternforge analyze"
+            description: "analyze"
             leads_to: enc_watch_forge
           - id: step_forge
             label: "FORGE"
-            description: "patternforge forge"
+            description: "forge"
             leads_to: enc_watch_forge
         success_text: |
           The pipeline executes flawlessly!
@@ -1841,15 +1841,15 @@ chapters:
         choices:
           - id: key_ingest
             label: "KEY 1"
-            description: "The ingestion command"
+            description: "ingest"
             leads_to: enc_strategy_choice
           - id: key_analyze
             label: "KEY 2"
-            description: "The analysis command"
+            description: "analyze"
             leads_to: enc_strategy_choice
           - id: key_forge
             label: "KEY 3"
-            description: "The generation command"
+            description: "forge"
             leads_to: enc_strategy_choice
         solution: "ingest analyze forge"
         hint: "The three commands in order."
@@ -2118,13 +2118,13 @@ chapters:
         objective: "Make your final choice"
         choices:
           - id: choice_safe_final
-            label: "Safe Path"
+            label: "Play It Safe"
             description: "Conservative, 70% chance"
             leads_to: enc_skeleton_key
             is_correct: true
-          - id: choice_risky_final
-            label: "Risky Path"
-            description: "All-out, 50% chance, big reward"
+          - id: choice_all_in
+            label: "All In"
+            description: "All-out assault, 50% chance, big reward"
             leads_to: enc_skeleton_key
             is_correct: true
         success_text: |

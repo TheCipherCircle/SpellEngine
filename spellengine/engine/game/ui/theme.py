@@ -24,8 +24,8 @@ LAYOUT = {
     "status_width": 0.40,        # Right side - status panel
 
     # Vertical splits
-    "viewport_height": 0.65,     # Top portion for art/status
-    "narrative_height": 0.35,    # Bottom portion for text/input
+    "viewport_height": 0.70,     # Top portion for art/status (increased for more narrative text)
+    "narrative_height": 0.30,    # Bottom portion for text/input
 
     # Padding and margins (bumped for breathing room)
     "panel_padding": 16,         # Was 12
@@ -55,6 +55,7 @@ class Colors:
     # Backgrounds
     BG_DARKEST = (29, 32, 33)        # #1d2021 - deepest shadows, screen bg
     BG_DARK = (40, 40, 40)           # #282828 - main panel fill
+    BG_HIGHLIGHT = (50, 48, 47)      # #32302f - hover state, slightly raised
     BG_MEDIUM = (60, 56, 54)         # #3c3836 - slightly raised panels
     BG_LIGHT = (80, 73, 69)          # #504945 - elevated elements
 
@@ -133,7 +134,7 @@ class Typography:
     SIZE_HEADER = 32       # Panel headers
     SIZE_SUBHEADER = 26    # Section headers
     SIZE_BODY = 20         # Body text
-    SIZE_INTRO = 20        # Intro/narrative text (now has 65% height - plenty of room!)
+    SIZE_INTRO = 16        # Intro/narrative text - reduced to fit more content
     SIZE_LABEL = 18        # Labels
     SIZE_SMALL = 16        # Hints, prompts (was 14 - too small)
     SIZE_TINY = 14         # Only for truly minor elements

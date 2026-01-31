@@ -196,6 +196,13 @@ class EncounterScene(Scene):
         self._hint_used_this_encounter = False
         self._attempts_this_encounter = 0
 
+        # Reset all input panels (prevents leftover panels from consuming events)
+        self.terminal = None
+        self.textbox = None
+        self.craft_panel = None
+        self.siege_panel = None
+        self.puzzle_panel = None
+
         # Reset celebration state
         self._celebrating_success = False
         self._celebration_timer = 0.0
@@ -448,7 +455,7 @@ class EncounterScene(Scene):
         header_height = 60  # Title + tier line
         footer_height = 50  # Objective + hint
         available_height = content.height - header_height - footer_height
-        line_height = int(intro_font.get_height() * 1.4)
+        line_height = int(intro_font.get_height() * 1.2)  # Tighter spacing to fit more lines
         max_lines = max(1, available_height // line_height)
 
         # Validate the intro text
@@ -1141,30 +1148,37 @@ class EncounterScene(Scene):
         """Generate puzzle steps for PUZZLE_BOX or PIPELINE encounters.
 
         Returns list of (label, expected, hint) tuples.
+
+        For PUZZLE_BOX/PIPELINE choices:
+        - label: Use choice.label (e.g., "KEY 1", "INGEST")
+        - expected: Use choice.description (the answer to type)
+        - hint: Generated from the label
         """
         # Check if encounter has choices that define steps
         if encounter.choices:
             steps = []
-            for i, choice in enumerate(encounter.choices):
-                label = f"STEP {i + 1}"
-                expected = choice.id  # Use choice ID as expected value
-                hint = choice.description or ""
+            for choice in encounter.choices:
+                label = choice.label  # Use the choice label directly
+                # Use description as the expected value (the answer)
+                expected = choice.description or choice.id
+                # Generate hint from the label
+                hint = f"Enter the {label.lower()}"
                 steps.append((label, expected, hint))
             return steps
 
         # Default pipeline steps
         if encounter.encounter_type == EncounterType.PIPELINE:
             return [
-                ("INGEST", "patternforge ingest", "First command: ingest the corpus"),
-                ("ANALYZE", "patternforge analyze", "Second: analyze patterns"),
-                ("ATTACK", "patternforge crack", "Finally: execute the attack"),
+                ("INGEST", "ingest", "First command: ingest"),
+                ("ANALYZE", "analyze", "Second: analyze patterns"),
+                ("FORGE", "forge", "Finally: generate candidates"),
             ]
 
         # Default puzzle box steps
         return [
-            ("KEY 1", "pattern", "The first key is 'pattern'"),
-            ("KEY 2", "analysis", "The second key is 'analysis'"),
-            ("KEY 3", "attack", "The third key is 'attack'"),
+            ("KEY 1", "pattern", "The first key"),
+            ("KEY 2", "analysis", "The second key"),
+            ("KEY 3", "attack", "The third key"),
         ]
 
     def _on_puzzle_complete(self) -> None:
@@ -1819,12 +1833,15 @@ class EncounterScene(Scene):
         surface.blit(title_surface, (content.x, y))
         y += title_font.get_height() + SPACING["sm"]
 
-        # Tier/XP indicator (difficulty-adjusted)
+        # Tier/XP indicator (difficulty-adjusted) - hide XP for TOUR encounters (0 XP)
         state = self.client.adventure_state
         xp_reward = state.get_current_xp_reward()
         tier_str = "*" * encounter.tier + "." * (6 - encounter.tier)
         info_font = fonts.get_label_font()
-        info_text = f"[{tier_str}]  +{xp_reward} XP"
+        if xp_reward > 0:
+            info_text = f"[{tier_str}]  +{xp_reward} XP"
+        else:
+            info_text = f"[{tier_str}]"  # Hide +0 XP for TOUR/WALKTHROUGH
         info_surface = info_font.render(info_text, Typography.ANTIALIAS, Colors.YELLOW)
         surface.blit(info_surface, (content.x, y))
         y += info_font.get_height() + SPACING["md"]
@@ -1834,7 +1851,7 @@ class EncounterScene(Scene):
             wrapped = self.typewriter.render_wrapped(content.width - 10)  # Slight padding
             fonts = get_fonts()
             intro_font = fonts.get_intro_font()  # Dedicated intro font for better fit
-            line_height = int(intro_font.get_height() * 1.4)  # More spacing between lines
+            line_height = int(intro_font.get_height() * 1.2)  # Tighter spacing to fit more lines
 
             # Calculate available space for text (leave room for objective/hint)
             # Reduced from 80 to 45 to allow more narrative text
@@ -1889,14 +1906,25 @@ class EncounterScene(Scene):
             )
             surface.blit(hint_surface, (content.x, hint_y))
 
-        # Feedback message
+        # Feedback message - positioned at bottom with background to avoid overlap
         if self.feedback_message:
-            feedback_font = fonts.get_header_font()
+            feedback_font = fonts.get_font(Typography.SIZE_LABEL, bold=True)
             feedback_surface = feedback_font.render(
                 self.feedback_message, Typography.ANTIALIAS, self.feedback_color
             )
             feedback_x = content.x + (content.width - feedback_surface.get_width()) // 2
-            feedback_y = content.y + content.height // 2
+            # Position above the objective/hint area with a background box
+            feedback_y = content.y + content.height - 85
+            # Draw background box for readability
+            padding = 8
+            bg_rect = pygame.Rect(
+                feedback_x - padding,
+                feedback_y - padding // 2,
+                feedback_surface.get_width() + padding * 2,
+                feedback_surface.get_height() + padding,
+            )
+            pygame.draw.rect(surface, Colors.BG_DARK, bg_rect, border_radius=4)
+            pygame.draw.rect(surface, self.feedback_color, bg_rect, width=1, border_radius=4)
             surface.blit(feedback_surface, (feedback_x, feedback_y))
 
     def _draw_hash_panel(self, surface: "pygame.Surface", encounter: "Encounter") -> None:
