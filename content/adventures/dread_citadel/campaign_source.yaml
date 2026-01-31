@@ -100,10 +100,10 @@ chapters:
           "Now let me teach you the first truth of human passwords..."
         next_encounter: enc_obvious_choice
 
-      # BRITTLE: The answer is literally stated
+      # FORK: Multiple choice - the answer is obvious
       - id: enc_obvious_choice
         title: "The Obvious Choice"
-        type: walkthrough
+        type: fork
         tier: 0
         xp_reward: 5
         intro_text: |
@@ -114,40 +114,66 @@ chapters:
 
           "And then they type exactly that."
 
-          The answer is literally in the question. Type: password
-        objective: "Understand why humans choose obvious passwords"
-        hash: "5f4dcc3b5aa765d61d8327deb882cf99"
-        hash_type: md5
-        solution: "password"
-        hint: "The answer is in the question itself."
+          Which of these is the #1 most common password?
+        objective: "Identify the most common password"
+        choices:
+          - id: choice_password
+            label: "password"
+            description: "The most literal choice"
+            leads_to: enc_sequential_pattern
+            is_correct: true
+          - id: choice_admin
+            label: "admin"
+            description: "A system role"
+            leads_to: enc_sequential_pattern
+            is_correct: false
+          - id: choice_letmein
+            label: "letmein"
+            description: "A request"
+            leads_to: enc_sequential_pattern
+            is_correct: false
         success_text: |
-          "Yes! 'password'—the most common password in history."
-        failure_text: "Read the narrative again. The answer is literally stated."
+          "Yes! 'password'—the most common password in history.
+          Humans are predictable. This is your advantage."
+        failure_text: "Think literally. What IS a password?"
         next_encounter: enc_sequential_pattern
 
-      # BRITTLE: Sequential digits
+      # FORK: Multiple choice - sequential pattern
       - id: enc_sequential_pattern
         title: "The Sequential Pattern"
-        type: walkthrough
+        type: fork
         tier: 0
         xp_reward: 5
         intro_text: |
           "Now observe another human tendency," the Null Cipher continues.
 
           "When forced to use numbers, humans start counting:
-          1, 2, 3, 4, 5, 6..."
+          1, 2, 3..."
 
           "Sequential. Predictable. Exploitable."
 
-          Press [H] for a hint if you need guidance.
-        objective: "Learn the hint system and sequential patterns"
-        hash: "e10adc3949ba59abbe56e057f20f883e"
-        hash_type: md5
-        solution: "123456"
-        hint: "Six digits, starting from one, counting up."
+          Which sequence is the #2 most common password?
+        objective: "Identify the sequential pattern"
+        choices:
+          - id: choice_123456
+            label: "123456"
+            description: "Counting up from 1"
+            leads_to: enc_keyboard_walk
+            is_correct: true
+          - id: choice_111111
+            label: "111111"
+            description: "All the same digit"
+            leads_to: enc_keyboard_walk
+            is_correct: false
+          - id: choice_654321
+            label: "654321"
+            description: "Counting down"
+            leads_to: enc_keyboard_walk
+            is_correct: false
         success_text: |
-          "'123456'—the second most common password worldwide."
-        failure_text: "Press [H] for a hint. Count from 1 to 6."
+          "'123456'—the second most common password worldwide.
+          Sequential patterns are trivially predictable."
+        failure_text: "Think about how humans count. Start from 1."
         next_encounter: enc_keyboard_walk
 
       # BRITTLE: Keyboard walk
@@ -194,7 +220,7 @@ chapters:
     first_encounter: enc_welcome_mat
 
     encounters:
-      # KEYSPACE-DRIVEN: Simple dictionary word
+      # Fixed solution - matches narrative (greeting theme)
       - id: enc_welcome_mat
         title: "The Welcome Mat"
         type: flash
@@ -210,24 +236,15 @@ chapters:
           This password exists in the training corpus.
           Use wordlist analysis to find it.
         objective: "Crack using wordlist attack"
-
-        # KEYSPACE DEFINITION - password generated at build time
-        keyspace:
-          source: "training_corpus"
-          tokens: ["WORD"]
-          complexity: simple
-          discovery_method: wordlist
-          tier: 1
-          min_length: 5
-          max_length: 8
-
+        solution: "welcome"
         hash_type: md5
-        hint: "A common greeting word found in any wordlist."
+        hint: "What do you find on a doormat? A common greeting."
         success_text: |
           The guardian steps aside.
 
-          "You understand the basics. Simple patterns yield to simple attacks."
-        failure_text: "Try a wordlist attack with common words."
+          "'Welcome'—the word on every doormat.
+          Simple patterns yield to simple attacks."
+        failure_text: "Think about what's written on a doormat."
         next_encounter: enc_root_access
 
       # KEYSPACE-DRIVEN: Role-based thinking
@@ -1005,31 +1022,31 @@ chapters:
         failure_text: "Use the --rules flag with best64."
         next_encounter: enc_craft_rule
 
-      # CRAFT: Create a custom rule
+      # CRAFT: Create a custom mask (NOTE: This is a MASK, not a rule)
       - id: enc_craft_rule
-        title: "Forge a Rule"
+        title: "Forge a Mask"
         type: craft
         tier: 3
         xp_reward: 30
         intro_text: |
-          The Rule Forge glows with potential.
+          The Mask Forge glows with potential.
 
-          "Now CREATE your own rule. Build a mask that describes:
+          "Create a MASK pattern describing:
 
-          ◈ Uppercase first letter
-          ◈ 3 lowercase letters
-          ◈ 2 digits at the end
+          ◈ 1 Uppercase letter (?u)
+          ◈ 3 lowercase letters (?l?l?l)
+          ◈ 2 digits (?d?d)
 
-          Pattern: ?u?l?l?l?d?d
-          (Example: Pass12, Word99)"
-        objective: "Construct a rule pattern"
+          Build: ?u?l?l?l?d?d
+          Matches: Pass12, Word99, Jake23"
+        objective: "Construct the mask pattern"
         solution: "?u?l?l?l?d?d"
-        hint: "Start with ?u (uppercase), then ?l?l?l (lowercase), end with ?d?d (digits)."
+        hint: "Use the CRAFT panel: U L L L D D"
         success_text: |
-          The Rule Forge accepts your creation!
+          The Mask Forge accepts your creation!
 
-          "Custom rules let you target SPECIFIC password patterns."
-        failure_text: "Remember: ?u = uppercase, ?l = lowercase, ?d = digit"
+          "Masks let you target SPECIFIC password structures."
+        failure_text: "Use the CRAFT panel: click U, then L L L, then D D"
         next_encounter: enc_best_vs_dive
 
       # DUEL: Compare attack strategies
@@ -1326,15 +1343,17 @@ chapters:
         xp_reward: 10
         intro_text: |
           A spectral librarian materializes among towering shelves.
+          On her shoulder, a golden beetle pulses with arcane light.
 
-          "Welcome to the Archive. I am the Memory Keeper.
+          "Welcome to the Archive. I am the Memory Keeper,
+          and this is SCARAB—my pattern-seeking familiar.
 
-          Here you'll learn CORPUS ANALYSIS—studying password patterns
-          BEFORE you attack. Knowledge is power.
+          The beetle feeds on password corpuses, digesting them
+          into pure pattern intelligence.
 
-          SCARAB analyzes:
+          SCARAB reveals:
           ◈ Token frequency (WORD, DIGIT, YEAR, SYMBOL)
-          ◈ Pattern distribution (word+digits, Name+year, etc.)
+          ◈ Pattern distribution (word+digits, Name+year)
           ◈ Character position statistics
           ◈ Common substitutions and transforms
 
@@ -1351,21 +1370,22 @@ chapters:
         tier: 2
         xp_reward: 20
         intro_text: |
-          A glowing terminal awaits.
+          The golden beetle clicks its mandibles expectantly.
 
-          "To analyze patterns, first INGEST a corpus:
+          "SCARAB hungers for data. Feed it a corpus:
 
           `patternforge ingest corpus.txt --name training`
 
-          This feeds passwords to SCARAB for analysis.
-          The corpus becomes your intelligence source."
-        objective: "Execute corpus ingestion"
+          Watch the beetle consume each password,
+          extracting patterns from the chaos."
+        objective: "Feed the corpus to SCARAB"
         solution: "patternforge ingest corpus.txt --name training"
         hint: "Run: patternforge ingest corpus.txt --name training"
         success_text: |
-          SCARAB awakens, consuming the data.
+          SCARAB's carapace glows as it devours the data.
+          Thousands of passwords, digested in seconds.
 
-          "Excellent. The corpus is loaded. Now we analyze."
+          "The beetle is satisfied. Now it will reveal what it learned."
         failure_text: "Use the ingest command with a corpus file."
         next_encounter: enc_token_recognition
 
@@ -1406,24 +1426,22 @@ chapters:
         intro_text: |
           SCARAB displays analysis results:
 
-          ```
           PATTERN FREQUENCY:
-          word+digits    34.2%  (most common)
-          Word+year      22.1%
-          word+symbol    15.8%
-          word           12.4%
-          digits         10.2%
-          other           5.3%
-          ```
+          ► word+digits    34.2%  ◄ HIGHEST
+            Word+year      22.1%
+            word+symbol    15.8%
+            word           12.4%
+            digits         10.2%
 
-          Which pattern should you attack FIRST?
-        objective: "Interpret the statistics"
+          "Attack the MOST COMMON pattern first.
+          Type the pattern name exactly as shown above."
+        objective: "Which pattern has the highest frequency?"
         solution: "word+digits"
-        hint: "34.2% is the highest frequency. Attack the most common first."
+        hint: "Look for the highest percentage. Type it exactly: word+digits"
         success_text: |
           "Always attack high-frequency patterns first.
           Maximum coverage with minimum effort."
-        failure_text: "Look at the percentages. Which is highest?"
+        failure_text: "Type the pattern name: word+digits (the 34.2% one)"
         next_encounter: enc_watch_scarab
 
       # SIEGE: Progressive analysis observation
@@ -1433,13 +1451,13 @@ chapters:
         tier: 3
         xp_reward: 30
         intro_text: |
-          The Memory Keeper gestures to a display.
+          The beetle unfolds crystalline wings, projecting data.
 
-          "Now OBSERVE SCARAB's full analysis cycle.
-          Watch each phase. Understand the process.
+          "Watch SCARAB's analysis ritual unfold.
+          Each phase reveals deeper pattern wisdom.
 
-          Analysis takes TIME. Patience reveals patterns."
-        objective: "Observe the complete analysis"
+          The beetle works methodically. Patience."
+        objective: "Observe the beetle's analysis"
         success_text: |
           "You've witnessed the full cycle.
           Analysis before action. Always."
