@@ -99,7 +99,7 @@ class Choice(BaseModel):
     id: str = Field(..., description="Unique choice identifier")
     label: str = Field(..., description="Display text for the choice")
     description: str | None = Field(None, description="Additional context")
-    leads_to: str = Field(..., description="Encounter ID this choice leads to")
+    leads_to: str | None = Field(None, description="Encounter ID this choice leads to (optional for PIPELINE/PUZZLE_BOX)")
     is_correct: bool = Field(True, description="Whether this is a 'winning' path")
 
 

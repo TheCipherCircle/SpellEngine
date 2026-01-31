@@ -245,6 +245,20 @@ chapters:
           "'Welcome'—the word on every doormat.
           Simple patterns yield to simple attacks."
         failure_text: "Think about what's written on a doormat."
+
+        variants:
+          heroic:
+            solution: "welcome1"
+            hash_type: sha1
+            hint: "A greeting with a simple suffix."
+            xp_reward: 25
+
+          mythic:
+            solution: "w3lc0me!"
+            hash_type: sha256
+            hint: "The greeting speaks in tongues of the initiated."
+            xp_reward: 35
+
         next_encounter: enc_root_access
 
       # KEYSPACE-DRIVEN: Role-based thinking
@@ -278,6 +292,20 @@ chapters:
 
           "Role-based passwords reveal the user's identity."
         failure_text: "Think about administrator roles."
+
+        variants:
+          heroic:
+            solution: "admin123"
+            hash_type: sha1
+            hint: "The role, plus a lazy sequence."
+            xp_reward: 25
+
+          mythic:
+            solution: "@dm1n!str@t0r"
+            hash_type: sha256
+            hint: "The full title, corrupted by ancient runes."
+            xp_reward: 35
+
         next_encounter: enc_armory_tour
 
       # TOUR: Introduction to wordlists
@@ -337,6 +365,20 @@ chapters:
           "Repetition is a common crutch. Users think 'longer = safer'
           but repeating patterns are trivially predictable."
         failure_text: "Try doubling a common 3-letter word."
+
+        variants:
+          heroic:
+            solution: "passpass1"
+            hash_type: sha1
+            hint: "A repeated word with a trailing digit."
+            xp_reward: 25
+
+          mythic:
+            solution: "p@55p@55!"
+            hash_type: sha256
+            hint: "The echo speaks in corrupted tongue, sealed with fury."
+            xp_reward: 35
+
         next_encounter: enc_wordsmith_index
 
       # LOOKUP: Find password in wordlist
@@ -371,6 +413,20 @@ chapters:
 
           "Lookup before crack—always. It saves time and resources."
         failure_text: "Search for synonyms of 'courage' in the wordlist."
+
+        variants:
+          heroic:
+            solution: "courage1"
+            hash_type: sha1
+            hint: "The virtue itself, marked with unity."
+            xp_reward: 25
+
+          mythic:
+            solution: "br@v3ry!"
+            hash_type: sha256
+            hint: "Valor encoded in the cipher-tongue of the ancients."
+            xp_reward: 35
+
         next_encounter: enc_loading_cannon
 
       # WALKTHROUGH: First patternforge crack command
@@ -547,6 +603,20 @@ chapters:
 
           "Simple masks for simple patterns. Now let's add complexity."
         failure_text: "Try common 4-letter lowercase words."
+
+        variants:
+          heroic:
+            solution: "Love99"
+            hash_type: sha1
+            hint: "A feeling, capitalized, followed by doubles."
+            xp_reward: 25
+
+          mythic:
+            solution: "l0v3!"
+            hash_type: sha256
+            hint: "The heart speaks in numbers now."
+            xp_reward: 35
+
         next_encounter: enc_number_lock
 
       # FLASH: Digit-only mask
@@ -581,6 +651,20 @@ chapters:
           "Digit-only passwords are absurdly weak—
           only 10,000 possible combinations for 4 digits."
         failure_text: "Try common PIN patterns."
+
+        variants:
+          heroic:
+            solution: "123456"
+            hash_type: sha1
+            hint: "The sequence extends. Keep counting."
+            xp_reward: 25
+
+          mythic:
+            solution: "31337"
+            hash_type: sha256
+            hint: "The elite know this number well."
+            xp_reward: 35
+
         next_encounter: enc_speed_id
 
       # RACE: Timed mask identification
@@ -617,6 +701,20 @@ chapters:
 
           "Speed comes with practice. Pattern recognition becomes instinct."
         failure_text: "Too slow! Practice your mask attacks."
+
+        variants:
+          heroic:
+            expected_time: 45
+            hash_type: sha1
+            hint: "Less time. More pressure. Think fast."
+            xp_reward: 40
+
+          mythic:
+            expected_time: 30
+            hash_type: sha256
+            hint: "The sand falls faster in the shadow realm."
+            xp_reward: 60
+
         next_encounter: enc_mask_basics
 
       # WALKTHROUGH: First mask attack
@@ -692,6 +790,20 @@ chapters:
           "Corporate passwords often follow this exact pattern—
           capital first, lowercase, then numbers at the end."
         failure_text: "Think: Capital letter + word + two digits"
+
+        variants:
+          heroic:
+            solution: "Admin2024"
+            hash_type: sha1
+            hint: "A role, marked by the year of reckoning."
+            xp_reward: 35
+
+          mythic:
+            solution: "P@55w0rd!"
+            hash_type: sha256
+            hint: "The obvious choice, dressed in corrupted regalia."
+            xp_reward: 50
+
         next_encounter: enc_find_pattern
 
       # HUNT: Open exploration
@@ -729,6 +841,30 @@ chapters:
           "The HUNT teaches you to discover patterns independently.
           In real scenarios, you won't have hints—only your tools and instincts."
         failure_text: "Keep exploring. Try word+year patterns."
+
+        variants:
+          heroic:
+            keyspace:
+              source: "training_corpus"
+              tokens: ["WORD", "YEAR", "SYMBOL"]
+              complexity: compound
+              discovery_method: mask
+              tier: 4
+            hash_type: sha1
+            hint: "The pattern grows. A symbol lurks at the end."
+            xp_reward: 50
+
+          mythic:
+            keyspace:
+              source: "training_corpus"
+              tokens: ["WORD", "SYMBOL", "YEAR"]
+              complexity: transformed
+              discovery_method: rules
+              tier: 5
+            hash_type: sha256
+            hint: "No clues remain. Only your instincts and the void."
+            xp_reward: 75
+
         next_encounter: enc_name_game
 
       # KEYSPACE-DRIVEN: Name + Year pattern (Tier 3)
@@ -954,6 +1090,20 @@ chapters:
           "Leet speak is trivially predictable.
           Rule-based attacks test all common substitutions."
         failure_text: "Apply leet substitutions to common words."
+
+        variants:
+          heroic:
+            solution: "p@$$w0rd123"
+            hash_type: sha1
+            hint: "The classic, fully corrupted, with a sequence at the end."
+            xp_reward: 35
+
+          mythic:
+            solution: "P@$$W0RD!@#"
+            hash_type: sha256
+            hint: "Screaming in corrupted tongues, sealed with symbols of power."
+            xp_reward: 50
+
         next_encounter: enc_fix_broken_rule
 
       # REPAIR: Fix broken rule syntax - simplified
@@ -1108,6 +1258,39 @@ chapters:
           "Correct! Admin123.
           Understanding rules means predicting outputs."
         failure_text: "Apply each rule step: capitalize, then append 1, 2, 3."
+
+        variants:
+          heroic:
+            intro_text: |
+              A more complex test appears:
+
+              "Given 'password' and rules 'c so0 sa@ $!'":
+              ◈ c = capitalize first
+              ◈ so0 = replace o with 0
+              ◈ sa@ = replace a with @
+              ◈ $! = append '!'
+
+              What is the OUTPUT?"
+            solution: "P@ssw0rd!"
+            hint: "Apply each rule in order: capitalize, then substitutions, then append."
+            xp_reward: 35
+
+          mythic:
+            intro_text: |
+              The ultimate transformation test:
+
+              "Given 'security' and rules 'c se3 si1 su@ $2024'":
+              ◈ c = capitalize first
+              ◈ se3 = replace e with 3
+              ◈ si1 = replace i with 1
+              ◈ su@ = replace u with @
+              ◈ $2024 = append '2024'
+
+              What is the OUTPUT?"
+            solution: "S3c@r1ty2024"
+            hint: "Each vowel transforms. The year follows."
+            xp_reward: 50
+
         next_encounter: enc_reverse_engineer
 
       # HUNT: Reverse engineer a password
@@ -1134,6 +1317,30 @@ chapters:
         success_text: |
           "Password! The most common word, dressed up to look 'secure'."
         failure_text: "Reverse each leet substitution step by step."
+
+        variants:
+          heroic:
+            intro_text: |
+              You find a cracked password: "$3cur1ty2024!"
+
+              "Work BACKWARDS. Identify the ORIGINAL word.
+
+              ◈ 3 → e
+              ◈ 1 → i
+              ◈ Remove the year and symbol."
+            solution: "security"
+            hint: "Replace 3 with e, 1 with i. The year and ! are decorations."
+            xp_reward: 50
+
+          mythic:
+            intro_text: |
+              You find a cracked password: "@dM1n!$+r@+0R#2025"
+
+              "A complex transformation. Find the ROOT WORD."
+            solution: "administrator"
+            hint: "Strip all corruption. What role hides beneath?"
+            xp_reward: 75
+
         next_encounter: enc_gambit_big_list
 
       # GAMBIT: Risk/reward choice
@@ -1207,6 +1414,30 @@ chapters:
 
           "You... have mastered transformation. The Lord awaits."
         failure_text: "Combine wordlist attack with rules and year appending."
+
+        variants:
+          heroic:
+            keyspace:
+              source: "training_corpus"
+              tokens: ["WORD", "SYMBOL", "YEAR"]
+              complexity: transformed
+              discovery_method: rules
+              tier: 5
+            hash_type: sha1
+            hint: "Word, symbol, year—fully transformed. The Left Hand strikes harder."
+            xp_reward: 65
+
+          mythic:
+            keyspace:
+              source: "training_corpus"
+              tokens: ["WORD", "SYMBOL", "YEAR"]
+              complexity: transformed
+              discovery_method: pipeline
+              tier: 6
+            hash_type: sha256
+            hint: "The Left Hand reveals its true form. Full arsenal required."
+            xp_reward: 100
+
         next_encounter: enc_right_hand
 
       # BOSS: The Right Hand
@@ -1244,6 +1475,30 @@ chapters:
 
           "Both guardians defeated. The throne room opens..."
         failure_text: "Use a mask attack: ?u?l?l?l?l?d?d?d?d"
+
+        variants:
+          heroic:
+            keyspace:
+              source: "training_corpus"
+              tokens: ["WORD", "SYMBOL", "YEAR"]
+              complexity: compound
+              discovery_method: mask
+              tier: 5
+            hash_type: sha1
+            hint: "The pattern shifts. A symbol divides word from year."
+            xp_reward: 65
+
+          mythic:
+            keyspace:
+              source: "training_corpus"
+              tokens: ["WORD", "SYMBOL", "YEAR"]
+              complexity: transformed
+              discovery_method: pipeline
+              tier: 6
+            hash_type: sha256
+            hint: "The Right Hand strikes from shadow. Pattern recognition fails. Instinct prevails."
+            xp_reward: 100
+
         next_encounter: enc_citadel_lord
 
       # BOSS: The Citadel Lord (Midpoint Boss)
@@ -1413,6 +1668,27 @@ chapters:
           "Correct! WORD + YEAR + SYMBOL.
           Token recognition is the foundation of pattern analysis."
         failure_text: "Break down each part: Admin, 2024, !"
+
+        variants:
+          heroic:
+            intro_text: |
+              A more complex password: 'P@55w0rd#2024!'
+
+              "Some tokens are TRANSFORMED. Look past the corruption.
+              What are the BASE token types?"
+            solution: "WORD SYMBOL YEAR SYMBOL"
+            hint: "P@55w0rd = transformed WORD, # = SYMBOL, 2024 = YEAR, ! = SYMBOL"
+            xp_reward: 40
+
+          mythic:
+            intro_text: |
+              The ultimate test: 'R00t@Dm1n!$+r@+0R#2025!@#'
+
+              "Chaos and corruption. Find the underlying pattern."
+            solution: "WORD WORD SYMBOL YEAR SYMBOL"
+            hint: "Two transformed words, a symbol, a year, then more symbols."
+            xp_reward: 60
+
         next_encounter: enc_pattern_stats
 
       # FLASH: Read frequency output
@@ -1440,6 +1716,40 @@ chapters:
           "Always attack high-frequency patterns first.
           Maximum coverage with minimum effort."
         failure_text: "Type the pattern name: word+digits (the 34.2% one)"
+
+        variants:
+          heroic:
+            intro_text: |
+              A new corpus yields different results:
+
+              PATTERN FREQUENCY:
+                word+digits     18.3%
+              ► Word+year+sym   31.7%  ◄ HIGHEST
+                word+symbol     24.1%
+                Name+year       15.4%
+                digits          10.5%
+
+              "This is a CORPORATE corpus. Which pattern dominates?"
+            solution: "Word+year+sym"
+            hint: "Look for the highest percentage. Type exactly as shown."
+            xp_reward: 35
+
+          mythic:
+            intro_text: |
+              An encrypted corpus reveals chaos:
+
+              PATTERN FREQUENCY:
+                word+digits     12.1%
+                Word+year       18.9%
+              ► L33T+symbol+yr  28.4%  ◄ HIGHEST
+                Name+sym+year   22.3%
+                pure_random     18.3%
+
+              "The corrupted speak loudest. What pattern rules?"
+            solution: "L33T+symbol+yr"
+            hint: "Corruption prevails. Type the exact pattern name."
+            xp_reward: 50
+
         next_encounter: enc_watch_scarab
 
       # SIEGE: Progressive analysis observation
@@ -1537,7 +1847,20 @@ chapters:
           "Pattern recognition + wordlist = cracked.
           You've mastered corpus analysis."
         failure_text: "The pattern is word+year. Try: born2003"
-        next_encounter: enc_which_corpus
+
+        variants:
+          heroic:
+            solution: "Born2003!"
+            hash_type: sha1
+            hint: "The memory awakens—capitalized, dated, punctuated."
+            xp_reward: 55
+
+          mythic:
+            solution: "b0rn#2003!"
+            hash_type: sha256
+            hint: "The locked memory speaks in tongues of the ancients."
+            xp_reward: 80
+
         next_encounter: enc_which_corpus
 
       # FORK: Corpus selection
@@ -1615,6 +1938,30 @@ chapters:
           "You have mastered analysis. The Archive is yours.
           Now... deeper secrets await in the Forge."
         failure_text: "Apply what you learned: analyze, identify pattern, attack."
+
+        variants:
+          heroic:
+            keyspace:
+              source: "training_corpus"
+              tokens: ["WORD", "SYMBOL", "YEAR"]
+              complexity: transformed
+              discovery_method: pipeline
+              tier: 5
+            hash_type: sha1
+            hint: "The Keeper reveals hidden depths. Word, symbol, year—transformed."
+            xp_reward: 80
+
+          mythic:
+            keyspace:
+              source: "training_corpus"
+              tokens: ["WORD", "SYMBOL", "YEAR"]
+              complexity: transformed
+              discovery_method: pipeline
+              tier: 6
+            hash_type: sha256
+            hint: "The Archive contains all patterns. The Keeper guards the deepest."
+            xp_reward: 125
+
         next_encounter: null
 
   # =========================================================================
@@ -1771,6 +2118,40 @@ chapters:
           "45 combinations! 3 × 3 × 5.
           Keyspace calculation predicts attack time."
         failure_text: "3 words × 3 symbols × 5 years = ?"
+
+        variants:
+          heroic:
+            intro_text: |
+              "A LARGER keyspace:
+
+              Words: admin, root, user, guest, test (5 words)
+              Leet variants per word: 4
+              Symbols: !, @, #, $, % (5 symbols)
+              Years: 2020-2025 (6 years)
+
+              Pattern: (word × leet) + symbol + year
+
+              TOTAL = (5 × 4) × 5 × 6 = ?"
+            solution: "600"
+            hint: "20 word variants × 5 symbols × 6 years = 600"
+            xp_reward: 35
+
+          mythic:
+            intro_text: |
+              "The ULTIMATE keyspace calculation:
+
+              Words: 100 words from corpus
+              Rules: 64 transformations (best64)
+              Symbols: 10 options
+              Years: 10 options
+
+              Pattern: (word × rules) + symbol + year
+
+              How many MILLION combinations?"
+            solution: "64"
+            hint: "(100 × 64) × 10 × 10 = 6,400,000 = 6.4 million. Answer: 64 (×100,000)"
+            xp_reward: 50
+
         next_encounter: enc_full_pipeline
 
       # PIPELINE: Chain commands together
@@ -1943,6 +2324,30 @@ chapters:
           "You command both analysis AND generation.
           The ultimate challenge awaits in the Throne Room..."
         failure_text: "Apply generation knowledge: word + year + symbol pattern."
+
+        variants:
+          heroic:
+            keyspace:
+              source: "training_corpus"
+              tokens: ["WORD", "SYMBOL", "YEAR", "SYMBOL"]
+              complexity: transformed
+              discovery_method: pipeline
+              tier: 5
+            hash_type: sha1
+            hint: "The Forge Master transforms. Word, symbol, year, symbol—all corrupted."
+            xp_reward: 95
+
+          mythic:
+            keyspace:
+              source: "training_corpus"
+              tokens: ["WORD", "SYMBOL", "YEAR", "SYMBOL"]
+              complexity: transformed
+              discovery_method: pipeline
+              tier: 6
+            hash_type: sha256
+            hint: "The Master reveals ultimate creation. Your full arsenal is required."
+            xp_reward: 150
+
         next_encounter: null
 
   # =========================================================================
@@ -2079,6 +2484,41 @@ chapters:
 
           "You understand the attack stack."
         failure_text: "Enter each component in sequence."
+
+        variants:
+          heroic:
+            intro_text: |
+              The seal glows with stronger magic.
+
+              "FIVE COMPONENTS guard this path:
+
+              1: Hash algorithm (sha1)
+              2: Attack mode (hybrid)
+              3: Wordlist (rockyou)
+              4: Mask suffix (?d?d?d?d)
+              5: Ruleset (dive)
+
+              Speak the complete attack chain."
+            hint: "sha1, hybrid, rockyou, ?d?d?d?d, dive"
+            xp_reward: 65
+
+          mythic:
+            intro_text: |
+              The seal blazes with ancient power.
+
+              "SIX COMPONENTS of the ultimate attack:
+
+              1: Hash algorithm (sha256)
+              2: Attack mode (combinator)
+              3: Left wordlist (passwords)
+              4: Right wordlist (years)
+              5: Ruleset (toggles)
+              6: Output format (john)
+
+              Only the worthy may pass."
+            hint: "sha256, combinator, passwords, years, toggles, john"
+            xp_reward: 100
+
         next_encounter: enc_siege_core
 
       # SIEGE: Break the Key's core

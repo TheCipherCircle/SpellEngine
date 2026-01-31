@@ -2,9 +2,12 @@
 
 The core gameplay screen following the sacred M&M layout:
 - 60% left: Encounter viewport (art + boss)
-- 40% right: Status panel (chapter, XP, hints, clean solves)
-- Bottom left: Narrative panel (boss text, prompts)
-- Bottom right: Hash/Terminal panel (embedded terminal for theatrical cracking)
+- 40% right: Narrative panel (story, XP, objectives) + Status panel
+- Bottom left: Expandable terminal panel (primary input, slides up/down)
+
+The expandable panel is THE input interface:
+- Collapsed: Compact terminal view with input prompt
+- Expanded: Full workspace with history, special challenge panels (CRAFT, PUZZLE_BOX, etc.)
 """
 
 from typing import TYPE_CHECKING, Any
@@ -17,7 +20,6 @@ from spellengine.engine.game.ui import (
     Typography,
     Panel,
     StatusPanel,
-    TextBox,
     TypewriterText,
     PromptBar,
     get_fonts,
@@ -25,8 +27,9 @@ from spellengine.engine.game.ui import (
     UIAuditLog,
     TimerWidget,
     CraftPanel,
-    SiegePanel,
     PuzzlePanel,
+    ExpandablePanel,
+    LearnMoreContent,
 )
 from spellengine.engine.game.ui.terminal import TerminalPanel, TheatricalCracker
 from spellengine.adventures.models import DifficultyLevel, EncounterType, OutcomeType
@@ -104,13 +107,13 @@ class EncounterScene(Scene):
         self.viewport_panel: Panel | None = None
         self.status_panel: StatusPanel | None = None
         self.narrative_panel: Panel | None = None
-        self.hash_panel: Panel | None = None
+        # NOTE: hash_panel removed - expandable panel is the primary input area
 
-        # Input - Terminal for hash cracking, TextBox as fallback
+        # Input - Terminal is the primary input interface
         self.terminal: TerminalPanel | None = None
         self.theatrical_cracker: TheatricalCracker | None = None
         self.hash_index: CampaignHashIndex | None = None
-        self.textbox: TextBox | None = None  # Fallback for non-hash encounters
+        self.textbox = None  # Deprecated - kept for compatibility
         self.choice_buttons: list[tuple[str, str]] = []  # (key, label) for fork choices
 
         # Timer for RACE encounters
@@ -120,10 +123,26 @@ class EncounterScene(Scene):
         self.craft_panel: CraftPanel | None = None
 
         # Siege panel for SIEGE encounters
-        self.siege_panel: SiegePanel | None = None
+        self.siege_panel = None  # Deprecated - siege now rendered via _siege_lines
 
         # Puzzle panel for PUZZLE_BOX and PIPELINE encounters
         self.puzzle_panel: PuzzlePanel | None = None
+
+        # Expandable panel for context-aware slide-up content
+        self.expandable_panel: ExpandablePanel | None = None
+        self._learn_more: LearnMoreContent | None = None
+
+        # Siege panel state (for rendering inside expandable panel)
+        self._siege_lines: list[str] = []
+        self._siege_line_index: int = 0
+        self._siege_timer: float = 0.0
+        self._siege_delay: float = 0.2
+        self._siege_visible_lines: list[tuple[str, tuple[int, int, int]]] = []
+
+        # Puzzle panel state (for rendering inside expandable panel)
+        self._puzzle_steps: list[tuple[str, str, str]] = []
+        self._puzzle_current_step: int = 0
+        self._puzzle_title: str = ""
 
         # State
         self.show_hint = False
@@ -246,22 +265,13 @@ class EncounterScene(Scene):
         # Get current encounter
         encounter = state.current_encounter
 
-        # Determine panel title based on encounter type
+        # Determine if this is a narrative-only encounter
         is_narrative_only = encounter.encounter_type in (
             EncounterType.TOUR,
             EncounterType.WALKTHROUGH,
         )
-        hash_panel_title = "CONTINUE" if is_narrative_only else "TARGET HASH"
 
-        # Create hash panel (bottom-left, 60% x 35%)
-        self.hash_panel = Panel(
-            margin,
-            margin * 2 + top_height,
-            viewport_width,
-            bottom_height,
-            title=hash_panel_title,
-            major=True,
-        )
+        # NOTE: hash_panel removed - expandable panel is now the primary input area
 
         # Create status panel (bottom-right, 40% x 35%)
         chapter = state.current_chapter
@@ -296,108 +306,16 @@ class EncounterScene(Scene):
         if self.hash_index is None:
             self.hash_index = CampaignHashIndex(self.client.campaign)
 
-        # Create input or choice buttons
-        # TOUR/WALKTHROUGH encounters don't need input - just Enter to continue
-        if is_narrative_only:
-            self.terminal = None
-            self.textbox = None
-        elif encounter.encounter_type in (EncounterType.FORK, EncounterType.GAMBIT, EncounterType.DUEL):
-            # FORK, GAMBIT, and DUEL have choices - show choice buttons
-            self.terminal = None
-            self.textbox = None
-            self._create_choice_buttons(encounter.choices)
-        elif encounter.encounter_type == EncounterType.CRAFT:
-            # CRAFT encounters use the craft panel for mask/rule building
-            import pygame
-            hash_content = self.hash_panel.content_rect
+        # Create prompt bar
+        narrative_content = self.narrative_panel.content_rect
+        prompt_y = narrative_content.y + narrative_content.height - 20
+        self.prompt_bar = PromptBar(narrative_content.x, prompt_y)
 
-            self.craft_panel = CraftPanel(
-                x=hash_content.x,
-                y=hash_content.y,
-                width=hash_content.width,
-                height=hash_content.height,
-                max_slots=8,
-                expected_pattern=encounter.solution,  # Expected mask pattern
-                on_submit=self._on_craft_submit,
-            )
-            self.terminal = None
-            self.textbox = None
-        elif encounter.encounter_type == EncounterType.SIEGE:
-            # SIEGE encounters use progressive observation panel
-            import pygame
-            hash_content = self.hash_panel.content_rect
-
-            # Get siege lines from encounter (use intro_text or generate default)
-            siege_lines = self._get_siege_lines(encounter)
-
-            self.siege_panel = SiegePanel(
-                x=hash_content.x,
-                y=hash_content.y,
-                width=hash_content.width,
-                height=hash_content.height,
-                lines=siege_lines,
-                line_delay=0.2,
-                on_complete=self._on_siege_complete,
-            )
-            self.siege_panel.start()
-            self.terminal = None
-            self.textbox = None
-        elif encounter.encounter_type in (EncounterType.PUZZLE_BOX, EncounterType.PIPELINE):
-            # PUZZLE_BOX and PIPELINE use multi-step verification
-            import pygame
-            hash_content = self.hash_panel.content_rect
-
-            # Get puzzle steps from encounter or generate defaults
-            puzzle_steps = self._get_puzzle_steps(encounter)
-            panel_title = "PIPELINE" if encounter.encounter_type == EncounterType.PIPELINE else "PUZZLE BOX"
-
-            self.puzzle_panel = PuzzlePanel(
-                x=hash_content.x,
-                y=hash_content.y,
-                width=hash_content.width,
-                height=hash_content.height,
-                steps=puzzle_steps,
-                title=panel_title,
-                on_complete=self._on_puzzle_complete,
-            )
-            self.terminal = None
-            self.textbox = None
-        else:
-            # Create embedded terminal for hash cracking (FLASH, CHALLENGE, BOSS, etc.)
-            import pygame
-            hash_content = self.hash_panel.content_rect
-
-            # Terminal fills most of the hash panel
-            terminal_rect = pygame.Rect(
-                hash_content.x,
-                hash_content.y,
-                hash_content.width,
-                hash_content.height,
-            )
-
-            self.terminal = TerminalPanel(
-                rect=terminal_rect,
-                on_command=self._on_terminal_command,
-            )
-            self.terminal.focus()
-
-            # Initialize theatrical cracker
-            self.theatrical_cracker = TheatricalCracker(self.terminal)
-
-            # Welcome message in terminal
-            current_hash = state.get_current_hash()
-            if current_hash:
-                hash_type = (encounter.hash_type or "MD5").upper()
-                self.terminal.add_system_message(f"Target acquired: {hash_type} hash")
-                self.terminal.add_info(f"Hash: {current_hash[:32]}{'...' if len(current_hash) > 32 else ''}")
-                self.terminal.add_output("")
-                self.terminal.add_output("Type password to submit, or 'crack' to auto-crack.")
-
-            self.textbox = None  # Not using textbox when terminal is active
+        # Create expandable panel FIRST - it's the primary input area now
+        self._create_expandable_panel(encounter, screen_w, screen_h, margin, viewport_width, bottom_height)
 
         # Initialize RACE timer if this is a RACE encounter
         if encounter.encounter_type == EncounterType.RACE:
-            # Get timer duration from encounter (default 60 seconds)
             race_duration = getattr(encounter, 'expected_time', 60) or 60
             status_content = self.status_panel.rect if self.status_panel else None
             if status_content:
@@ -413,10 +331,6 @@ class EncounterScene(Scene):
         else:
             self.race_timer = None
 
-        # Create prompt bar
-        narrative_content = self.narrative_panel.content_rect
-        prompt_y = narrative_content.y + narrative_content.height - 20
-        self.prompt_bar = PromptBar(narrative_content.x, prompt_y)
         self._update_prompts()
 
         # In Observer Mode, auto-reveal the answer for hash encounters
@@ -607,10 +521,387 @@ class EncounterScene(Scene):
         if is_boss and (state.state.last_checkpoint or state.state.last_fork):
             prompts.append(("B", "Retreat"))
 
+        # Add expandable panel toggle
+        if self.expandable_panel:
+            panel_label = self.expandable_panel.label
+            prompts.append(("Tab", panel_label.title()))
+
         prompts.append(("Space", "Skip Text"))
         prompts.append(("Esc", "Menu"))
 
         self.prompt_bar.set_prompts(prompts)
+
+    def _create_expandable_panel(
+        self, encounter: "Encounter", screen_w: int, screen_h: int,
+        margin: int, viewport_width: int, bottom_height: int
+    ) -> None:
+        """Create the expandable panel - THE primary input area.
+
+        This replaces the old hash_panel. The expandable panel shows:
+        - Collapsed: Compact terminal with input prompt
+        - Expanded: Full workspace with terminal history OR special challenge panel
+
+        Content adapts based on encounter type:
+        - STANDARD/RACE/HUNT/etc: Terminal (default)
+        - CRAFT: Mask builder panel (auto-expands)
+        - PUZZLE_BOX/PIPELINE: Step tracker panel (auto-expands)
+        - SIEGE: Progressive output (auto-expands)
+        - TOUR/WALKTHROUGH: Hidden (narrative only)
+        - FORK/GAMBIT: Choice panel
+
+        Args:
+            encounter: Current encounter
+            screen_w: Screen width
+            screen_h: Screen height
+            margin: Layout margin
+            viewport_width: Width of left column (60%)
+            bottom_height: Height of bottom row
+        """
+        import pygame
+
+        enc_type = encounter.encounter_type
+        state = self.client.adventure_state
+
+        # Panel dimensions
+        panel_width = viewport_width
+
+        # Collapsed: Shows compact terminal (same size as old hash panel)
+        collapsed_height = bottom_height
+
+        # Expanded: 3x height for full workspace
+        expanded_height = bottom_height * 3
+
+        # Position so panel bottom aligns with screen bottom
+        panel_y = screen_h - expanded_height - margin
+
+        # Determine if this is a narrative-only encounter (no input needed)
+        is_narrative_only = enc_type in (EncounterType.TOUR, EncounterType.WALKTHROUGH)
+
+        # --- Create Terminal (always, unless narrative-only) ---
+        if not is_narrative_only:
+            # Terminal rect for collapsed state (compact view)
+            terminal_rect = pygame.Rect(
+                margin + SPACING["sm"],
+                screen_h - bottom_height - margin + SPACING["sm"],
+                panel_width - SPACING["sm"] * 2,
+                bottom_height - SPACING["sm"] * 2,
+            )
+
+            self.terminal = TerminalPanel(
+                rect=terminal_rect,
+                on_command=self._on_terminal_command,
+            )
+            self.terminal.focus()
+
+            # Initialize theatrical cracker
+            self.theatrical_cracker = TheatricalCracker(self.terminal)
+
+            # Welcome message in terminal
+            current_hash = state.get_current_hash()
+            if current_hash:
+                hash_type = (encounter.hash_type or "MD5").upper()
+                self.terminal.add_system_message(f"Target acquired: {hash_type} hash")
+                self.terminal.add_info(f"Hash: {current_hash[:32]}{'...' if len(current_hash) > 32 else ''}")
+                self.terminal.add_output("")
+                self.terminal.add_output("Type password to submit, or 'crack' to auto-crack.")
+        else:
+            self.terminal = None
+            self.theatrical_cracker = None
+
+        # --- Determine panel label and content renderer ---
+        # Special encounters auto-expand and show their custom UI
+        auto_expand = False
+
+        if is_narrative_only:
+            # TOUR/WALKTHROUGH - panel hidden, just press Enter
+            label = "INFO"
+            self._setup_learn_more_content(encounter)
+            content_renderer = self._render_learn_more
+            collapsed_height = 0  # Hidden when collapsed
+        elif enc_type == EncounterType.CRAFT:
+            # CRAFT - Mask builder auto-expands
+            label = "MASK FORGE"
+            content_renderer = self._render_craft_content
+            auto_expand = True
+            self._setup_craft_panel(encounter, margin, panel_width, expanded_height)
+        elif enc_type == EncounterType.SIEGE:
+            # SIEGE - Progressive output auto-expands
+            label = "ANALYSIS"
+            content_renderer = self._render_siege_content
+            auto_expand = True
+            self._setup_siege_panel(encounter)
+        elif enc_type in (EncounterType.PUZZLE_BOX, EncounterType.PIPELINE):
+            # PUZZLE_BOX/PIPELINE - Step tracker auto-expands
+            label = "PUZZLE BOX" if enc_type == EncounterType.PUZZLE_BOX else "PIPELINE"
+            content_renderer = self._render_puzzle_content
+            auto_expand = True
+            self._setup_puzzle_panel(encounter)
+        elif enc_type in (EncounterType.FORK, EncounterType.GAMBIT, EncounterType.DUEL):
+            # FORK/GAMBIT/DUEL - Choices panel
+            label = "CHOICES"
+            self._setup_learn_more_content(encounter)
+            self._create_choice_buttons(encounter.choices)
+            content_renderer = self._render_choices_content
+        else:
+            # Default: Terminal for all hash-cracking encounters
+            label = "TERMINAL"
+            content_renderer = self._render_terminal_content
+
+        # Create the expandable panel
+        self.expandable_panel = ExpandablePanel(
+            x=margin,
+            y=panel_y,
+            width=panel_width,
+            collapsed_height=collapsed_height,
+            expanded_height=expanded_height,
+            label=label,
+            toggle_key="TAB",  # Tab - switch panel focus
+            content_renderer=content_renderer,
+        )
+
+        # Auto-expand for special encounters
+        if auto_expand:
+            self.expandable_panel.expand()
+
+    def _setup_craft_panel(
+        self, encounter: "Encounter", margin: int, width: int, height: int
+    ) -> None:
+        """Set up craft panel for CRAFT encounters."""
+        self.craft_panel = CraftPanel(
+            x=margin + SPACING["sm"],
+            y=0,  # Will be positioned by content renderer
+            width=width - SPACING["sm"] * 2,
+            height=height - 50,
+            max_slots=8,
+            expected_pattern=encounter.solution,
+            on_submit=self._on_craft_submit,
+        )
+
+    def _setup_siege_panel(self, encounter: "Encounter") -> None:
+        """Set up siege panel for SIEGE encounters."""
+        siege_lines = self._get_siege_lines(encounter)
+        # Siege panel state - we'll render directly in content renderer
+        self._siege_lines = siege_lines
+        self._siege_line_index = 0
+        self._siege_timer = 0.0
+        self._siege_delay = 0.2
+        self._siege_visible_lines: list[tuple[str, tuple[int, int, int]]] = []
+
+    def _setup_puzzle_panel(self, encounter: "Encounter") -> None:
+        """Set up puzzle panel for PUZZLE_BOX/PIPELINE encounters."""
+        puzzle_steps = self._get_puzzle_steps(encounter)
+        panel_title = "PIPELINE" if encounter.encounter_type == EncounterType.PIPELINE else "PUZZLE BOX"
+
+        # Store puzzle steps for rendering
+        self._puzzle_steps = puzzle_steps
+        self._puzzle_current_step = 0
+        self._puzzle_title = panel_title
+
+        # Create the actual puzzle panel (position will be set by content renderer)
+        self.puzzle_panel = PuzzlePanel(
+            x=0,
+            y=0,
+            width=400,  # Will be updated by content renderer
+            height=300,  # Will be updated by content renderer
+            steps=puzzle_steps,
+            title=panel_title,
+            on_complete=self._on_puzzle_complete,
+        )
+
+    def _render_craft_content(
+        self, surface: "pygame.Surface", content_rect: "pygame.Rect"
+    ) -> None:
+        """Render craft panel content inside expandable panel."""
+        if self.craft_panel:
+            # Update craft panel position to match content rect
+            self.craft_panel.x = content_rect.x
+            self.craft_panel.y = content_rect.y
+            self.craft_panel.width = content_rect.width
+            self.craft_panel.height = content_rect.height
+            self.craft_panel.render(surface)
+
+    def _render_siege_content(
+        self, surface: "pygame.Surface", content_rect: "pygame.Rect"
+    ) -> None:
+        """Render siege output inside expandable panel."""
+        import pygame
+        from spellengine.engine.game.ui.terminal import TerminalColors
+
+        fonts = get_fonts()
+        line_font = fonts.get_font(Typography.SIZE_SMALL)
+        line_height = line_font.get_height() + 2
+
+        y = content_rect.y
+        for text, color in self._siege_visible_lines:
+            if y > content_rect.bottom - line_height:
+                break
+            line_surface = line_font.render(text, True, color)
+            surface.blit(line_surface, (content_rect.x, y))
+            y += line_height
+
+        # Show waiting indicator if not complete
+        if self._siege_line_index < len(self._siege_lines):
+            dots = "." * (int(self._siege_timer * 3) % 4)
+            waiting = line_font.render(f"> Processing{dots}", True, TerminalColors.SYSTEM)
+            surface.blit(waiting, (content_rect.x, y))
+
+    def _render_puzzle_content(
+        self, surface: "pygame.Surface", content_rect: "pygame.Rect"
+    ) -> None:
+        """Render puzzle panel content inside expandable panel."""
+        if self.puzzle_panel:
+            # Update puzzle panel position to match content rect
+            self.puzzle_panel.x = content_rect.x
+            self.puzzle_panel.y = content_rect.y
+            self.puzzle_panel.width = content_rect.width
+            self.puzzle_panel.height = content_rect.height
+            self.puzzle_panel.render(surface)
+
+    def _render_choices_content(
+        self, surface: "pygame.Surface", content_rect: "pygame.Rect"
+    ) -> None:
+        """Render choice buttons inside expandable panel."""
+        import pygame
+
+        fonts = get_fonts()
+        label_font = fonts.get_font(Typography.SIZE_SMALL, bold=True)
+        desc_font = fonts.get_font(Typography.SIZE_TINY)
+
+        y = content_rect.y + SPACING["sm"]
+
+        for key, label in self.choice_buttons:
+            # Key badge
+            key_text = f"[{key.upper()}]"
+            key_surface = label_font.render(key_text, True, Colors.AQUA)
+            surface.blit(key_surface, (content_rect.x, y))
+
+            # Label
+            label_surface = label_font.render(label, True, Colors.TEXT_PRIMARY)
+            surface.blit(label_surface, (content_rect.x + key_surface.get_width() + SPACING["sm"], y))
+
+            y += label_font.get_height() + SPACING["sm"]
+
+    def _setup_learn_more_content(self, encounter: "Encounter") -> None:
+        """Set up learn more content for TOUR/WALKTHROUGH encounters."""
+        self._learn_more = LearnMoreContent()
+
+        # Build educational content from encounter data
+        title = f"Understanding: {encounter.title}"
+
+        # Parse intro text into paragraphs for deeper explanation
+        paragraphs = []
+
+        # Add context based on encounter type
+        enc_type = encounter.encounter_type
+        if enc_type == EncounterType.TOUR:
+            paragraphs.append(
+                "This is a guided introduction. No password needed - just absorb the knowledge."
+            )
+        elif enc_type == EncounterType.WALKTHROUGH:
+            paragraphs.append(
+                "Follow along with the demonstration. The answer will be revealed as you progress."
+            )
+        elif enc_type in (EncounterType.FORK, EncounterType.GAMBIT):
+            paragraphs.append(
+                "Your choice here affects your path. Consider the trade-offs carefully."
+            )
+            # Add choice descriptions
+            for choice in encounter.choices:
+                if choice.description:
+                    paragraphs.append(f"• {choice.label}: {choice.description}")
+
+        # Add hint as highlight if available
+        state = self.client.adventure_state
+        hint = state.get_current_hint() if state else ""
+        highlight = hint if hint else "Every pattern teaches something. Pay attention."
+
+        self._learn_more.set_content(title, paragraphs, highlight)
+
+    def _render_terminal_content(
+        self, surface: "pygame.Surface", content_rect: "pygame.Rect"
+    ) -> None:
+        """Render terminal output in the expandable panel with embedded input prompt."""
+        import pygame
+        from spellengine.engine.game.ui.terminal import TerminalColors
+
+        fonts = get_fonts()
+        line_font = fonts.get_font(Typography.SIZE_SMALL)
+        line_height = line_font.get_height() + 2
+
+        if not self.terminal:
+            # No terminal - show placeholder
+            placeholder = line_font.render(
+                "Terminal not active for this encounter type.",
+                True,
+                Colors.TEXT_DIM
+            )
+            surface.blit(placeholder, (content_rect.x, content_rect.y))
+            return
+
+        # Reserve space for input prompt at bottom (2 lines: separator + input)
+        input_area_height = line_height * 2 + SPACING["sm"]
+        history_rect_bottom = content_rect.bottom - input_area_height
+
+        # Render terminal history above input area
+        y = content_rect.y
+        max_y = history_rect_bottom - line_height
+
+        # Get terminal output lines (most recent at bottom)
+        output_lines = list(self.terminal._output)
+
+        # Calculate how many lines fit in history area
+        history_height = history_rect_bottom - content_rect.y
+        visible_lines = max(1, (history_height - 10) // line_height)
+
+        # Show last N lines
+        display_lines = output_lines[-visible_lines:] if len(output_lines) > visible_lines else output_lines
+
+        for terminal_line in display_lines:
+            if y > max_y:
+                break
+
+            text = terminal_line.text
+            color = terminal_line.color
+
+            line_surface = line_font.render(text, True, color)
+            surface.blit(line_surface, (content_rect.x, y))
+            y += line_height
+
+        # Draw separator line above input
+        separator_y = history_rect_bottom + SPACING["xs"]
+        pygame.draw.line(
+            surface,
+            Colors.BORDER,
+            (content_rect.x, separator_y),
+            (content_rect.right - SPACING["sm"], separator_y),
+            1
+        )
+
+        # Draw input prompt
+        input_y = separator_y + SPACING["sm"]
+        prompt_text = "> "
+        prompt_surface = line_font.render(prompt_text, True, TerminalColors.PROMPT)
+        surface.blit(prompt_surface, (content_rect.x, input_y))
+
+        # Draw current input text
+        input_text = self.terminal._input_buffer
+        input_x = content_rect.x + prompt_surface.get_width()
+        input_surface = line_font.render(input_text, True, TerminalColors.INPUT)
+        surface.blit(input_surface, (input_x, input_y))
+
+        # Draw blinking cursor
+        if self.terminal._cursor_visible:
+            cursor_x = input_x + input_surface.get_width()
+            cursor_text = "_"
+            cursor_surface = line_font.render(cursor_text, True, TerminalColors.PROMPT)
+            surface.blit(cursor_surface, (cursor_x, input_y))
+
+    def _render_learn_more(
+        self, surface: "pygame.Surface", content_rect: "pygame.Rect"
+    ) -> None:
+        """Render learn more content."""
+        if self._learn_more:
+            self._learn_more.render(surface, content_rect)
 
     def _create_choice_buttons(self, choices: list["Choice"]) -> None:
         """Create choice options for fork encounters."""
@@ -632,10 +923,11 @@ class EncounterScene(Scene):
         self.craft_panel = None
         self.siege_panel = None
         self.puzzle_panel = None
+        self.expandable_panel = None
+        self._learn_more = None
         self.viewport_panel = None
         self.status_panel = None
         self.narrative_panel = None
-        self.hash_panel = None
         self.typewriter = None
         self.prompt_bar = None
         self._background = None
@@ -784,10 +1076,6 @@ class EncounterScene(Scene):
         )
         self._result_panel_timer = 1.0
 
-        if self.textbox:
-            self.textbox.flash_error()
-            self.textbox.clear()
-
         # Screen shake and flash for clear failure feedback
         self.client.shake(intensity=4, duration=0.2)
         self.client.flash_failure()
@@ -815,7 +1103,7 @@ class EncounterScene(Scene):
         self.feedback_color = Colors.ERROR
         self.feedback_timer = 2.0
 
-        # Show error in terminal too
+        # Show error in terminal
         if self.terminal:
             self.terminal.add_error("Incorrect password")
 
@@ -965,11 +1253,7 @@ class EncounterScene(Scene):
             self.enter()
 
         elif action == "chapter_complete":
-            # DISABLED - chapter transition music too intrusive
-            # if self.client.audio:
-            #     self.client.audio.play_music("chapter_transition", loop=False)
-            pass
-
+            # Chapter transition music disabled (too intrusive)
             self.feedback_message = f"Chapter Complete! {result.get('message', '')}"
             self.feedback_color = Colors.SUCCESS
             self.client.adventure_state.save()
@@ -999,11 +1283,6 @@ class EncounterScene(Scene):
                 message=result.get("message", ""),
                 xp_earned=result.get("xp_earned", 0),
             )
-
-    def _on_keystroke(self) -> None:
-        """Handle keystroke in textbox."""
-        if self.client.audio:
-            self.client.audio.play_sfx("typing_key")
 
     def _on_hint_click(self) -> None:
         """Toggle hint visibility and track hint usage with difficulty restrictions."""
@@ -1302,10 +1581,6 @@ class EncounterScene(Scene):
         self._crack_result = None  # Will be set by background thread
         self._cracked_solution = ""
 
-        # Clear any existing text
-        if self.textbox:
-            self.textbox.clear()
-
         # Start crack in background thread
         threading.Thread(target=run_crack, daemon=True).start()
 
@@ -1338,17 +1613,15 @@ class EncounterScene(Scene):
         elif self.craft_panel:
             if self.craft_panel.handle_event(event):
                 return  # Event consumed by craft panel
-        # Handle siege panel input
-        elif self.siege_panel:
-            if self.siege_panel.handle_event(event):
-                return  # Event consumed by siege panel
         # Handle puzzle panel input
         elif self.puzzle_panel:
             if self.puzzle_panel.handle_event(event):
                 return  # Event consumed by puzzle panel
-        # Fallback to textbox if no terminal
-        elif self.textbox:
-            self.textbox.handle_event(event)
+
+        # Handle expandable panel toggle (T key)
+        if self.expandable_panel:
+            if self.expandable_panel.handle_event(event):
+                return  # Event consumed by expandable panel
 
         # Keyboard shortcuts
         if event.type == pygame.KEYDOWN:
@@ -1488,6 +1761,10 @@ class EncounterScene(Scene):
         if self.terminal:
             self.terminal.update(dt)
 
+        # Update expandable panel animation
+        if self.expandable_panel:
+            self.expandable_panel.update(dt)
+
         # Update theatrical cracker
         if self.theatrical_cracker and self.theatrical_cracker.is_active:
             crack_complete = self.theatrical_cracker.update(dt)
@@ -1498,10 +1775,6 @@ class EncounterScene(Scene):
                 if solution:
                     self._on_answer_submit(solution)
 
-        # Update textbox cursor (fallback)
-        if self.textbox:
-            self.textbox.update(dt)
-
         # Update RACE timer
         if self.race_timer:
             self.race_timer.update(dt)
@@ -1510,9 +1783,25 @@ class EncounterScene(Scene):
         if self.craft_panel:
             self.craft_panel.update(dt)
 
-        # Update SIEGE panel
-        if self.siege_panel:
-            self.siege_panel.update(dt)
+        # Update SIEGE lines (progressive reveal)
+        if self._siege_lines and self._siege_line_index < len(self._siege_lines):
+            from spellengine.engine.game.ui.terminal import TerminalColors
+            self._siege_timer += dt
+            if self._siege_timer >= self._siege_delay:
+                self._siege_timer = 0.0
+                line = self._siege_lines[self._siege_line_index]
+                # Determine color based on content
+                if "***" in line or "PATTERN" in line or "DISCOVERED" in line:
+                    color = TerminalColors.SUCCESS
+                elif "error" in line.lower() or "fail" in line.lower():
+                    color = TerminalColors.ERROR
+                else:
+                    color = TerminalColors.OUTPUT
+                self._siege_visible_lines.append((line, color))
+                self._siege_line_index += 1
+                # Auto-complete when all lines shown
+                if self._siege_line_index >= len(self._siege_lines):
+                    self._on_siege_complete()
 
         # Update PUZZLE panel
         if self.puzzle_panel:
@@ -1557,9 +1846,9 @@ class EncounterScene(Scene):
                     if self.terminal:
                         self.terminal.add_output("")
                         self.terminal.add_info(f"CRACKED: {self._cracked_solution}")
-                    # Fill in the cracked password (if textbox exists)
-                    if self.textbox:
-                        self.textbox.set_text(self._cracked_solution)
+                        # Fill terminal input with cracked solution
+                        self.terminal._input_buffer = self._cracked_solution
+                        self.terminal._cursor_pos = len(self._cracked_solution)
                 elif crack_result == "not_found":
                     if self.terminal:
                         self.terminal.add_error("Password not in wordlist")
@@ -1623,8 +1912,6 @@ class EncounterScene(Scene):
             self.status_panel.draw(surface)
         if self.narrative_panel:
             self.narrative_panel.draw(surface)
-        if self.hash_panel:
-            self.hash_panel.draw(surface)
 
         # Draw viewport content - use celebration viewport during success sequence
         if self._celebrating_success and self._celebration_phase >= 1:
@@ -1635,12 +1922,13 @@ class EncounterScene(Scene):
         # Draw narrative content
         self._draw_narrative(surface, encounter)
 
-        # Draw hash panel content
-        self._draw_hash_panel(surface, encounter)
-
         # Draw RACE timer overlay (on top of status panel)
         if self.race_timer:
             self.race_timer.render(surface)
+
+        # Draw expandable panel (slides up from bottom, on top of everything)
+        if self.expandable_panel:
+            self.expandable_panel.draw(surface)
 
     def _draw_viewport(self, surface: "pygame.Surface", encounter: "Encounter") -> None:
         """Draw the viewport panel content (art + boss)."""
@@ -1817,6 +2105,8 @@ class EncounterScene(Scene):
 
     def _draw_narrative(self, surface: "pygame.Surface", encounter: "Encounter") -> None:
         """Draw the narrative panel content."""
+        import pygame
+
         if not self.narrative_panel:
             return
 
@@ -1927,229 +2217,8 @@ class EncounterScene(Scene):
             pygame.draw.rect(surface, self.feedback_color, bg_rect, width=1, border_radius=4)
             surface.blit(feedback_surface, (feedback_x, feedback_y))
 
-    def _draw_hash_panel(self, surface: "pygame.Surface", encounter: "Encounter") -> None:
-        """Draw the hash panel content."""
-        import pygame
-
-        if not self.hash_panel:
-            return
-
-        content = self.hash_panel.content_rect
-        fonts = get_fonts()
-        state = self.client.adventure_state
-
-        # For TOUR/WALKTHROUGH encounters - show narrative continuation prompt
-        if encounter.encounter_type in (EncounterType.TOUR, EncounterType.WALKTHROUGH):
-            self._draw_tour_panel(surface, content, fonts)
-            return
-
-        # If terminal is active, render it and return
-        if self.terminal:
-            self.terminal.render(surface)
-            return
-
-        # If craft panel is active, render it and return
-        if self.craft_panel:
-            self.craft_panel.render(surface)
-            return
-
-        # If siege panel is active, render it and return
-        if self.siege_panel:
-            self.siege_panel.render(surface)
-            return
-
-        # If puzzle panel is active, render it and return
-        if self.puzzle_panel:
-            self.puzzle_panel.render(surface)
-            return
-
-        # === Fallback rendering (when no terminal) ===
-        y = content.y
-
-        # Hash type with color
-        if encounter.hash_type:
-            type_color = Colors.get_hash_color(encounter.hash_type)
-            type_font = fonts.get_font(Typography.SIZE_LABEL, bold=True)
-            type_text = f"[{encounter.hash_type.upper()}]"
-            type_surface = type_font.render(type_text, Typography.ANTIALIAS, type_color)
-            surface.blit(type_surface, (content.x, y))
-            y += type_font.get_height() + SPACING["sm"]
-
-            pygame.draw.line(surface, Colors.BORDER, (content.x, y), (content.x + content.width, y), 1)
-            y += SPACING["sm"]
-
-        # Hash value
-        current_hash = state.get_current_hash()
-        if current_hash:
-            hash_font = fonts.get_font(Typography.SIZE_LABEL)
-
-            if self._crack_complete and self._cracked_solution:
-                cracked_label = fonts.get_font(Typography.SIZE_LABEL, bold=True)
-                label_surface = cracked_label.render("CRACKED!", Typography.ANTIALIAS, Colors.SUCCESS)
-                surface.blit(label_surface, (content.x, y))
-                y += int(cracked_label.get_height() * 1.5)
-
-                password_font = fonts.get_font(Typography.SIZE_SUBHEADER, bold=True)
-                password_surface = password_font.render(self._cracked_solution, Typography.ANTIALIAS, Colors.SUCCESS)
-                surface.blit(password_surface, (content.x, y))
-            else:
-                chars_per_line = max(16, content.width // (hash_font.size("0")[0] + 1))
-                hash_color = Colors.get_hash_color(encounter.hash_type or "MD5")
-
-                for i in range(0, len(current_hash), chars_per_line):
-                    line = current_hash[i:i + chars_per_line]
-                    line_surface = hash_font.render(line, Typography.ANTIALIAS, hash_color)
-                    surface.blit(line_surface, (content.x, y))
-                    y += int(hash_font.get_height() * 1.2)
-
-        # Draw cracking animation overlay (legacy)
-        if self._cracking and not self.terminal:
-            self._draw_cracking_overlay(surface, content, fonts)
-            return
-
-        # Draw textbox fallback
-        if self.textbox:
-            prompt_font = fonts.get_font(Typography.SIZE_LABEL, bold=True)
-            prompt_surface = prompt_font.render("> Enter password:", Typography.ANTIALIAS, Colors.CURSOR)
-            prompt_y = self.textbox.rect.y - prompt_font.get_height() - SPACING["sm"]
-            surface.blit(prompt_surface, (content.x, prompt_y))
-            self.textbox.draw(surface)
-
-        elif self.choice_buttons:
-            # Draw fork choices
-            choice_font = fonts.get_body_font()
-            choice_y = content.y + SPACING["xxl"] + SPACING["xl"]
-
-            for key, label in self.choice_buttons:
-                choice_text = f"[{key}] {label}"
-                choice_surface = choice_font.render(
-                    choice_text, Typography.ANTIALIAS, Colors.TEXT_PRIMARY
-                )
-                surface.blit(choice_surface, (content.x, choice_y))
-                choice_y += int(choice_font.get_height() * Typography.LINE_HEIGHT) + SPACING["sm"]
-
-    def _draw_tour_panel(
-        self, surface: "pygame.Surface", content: "pygame.Rect", fonts: "FontManager"
-    ) -> None:
-        """Draw the panel content for TOUR/WALKTHROUGH encounters (no hash cracking)."""
-        import pygame
-
-        # Center the content vertically
-        center_y = content.y + content.height // 2
-
-        # Draw a decorative separator
-        sep_y = center_y - 40
-        pygame.draw.line(
-            surface,
-            Colors.BORDER_HIGHLIGHT,
-            (content.x + 20, sep_y),
-            (content.x + content.width - 20, sep_y),
-            1,
-        )
-
-        # "NARRATIVE" label (chunky for retro feel)
-        label_font = fonts.get_font(Typography.SIZE_LABEL, bold=True)
-        label_text = "NARRATIVE"
-        label_surface = label_font.render(label_text, Typography.ANTIALIAS_HEADERS, Colors.TEXT_MUTED)
-        label_x = content.x + (content.width - label_surface.get_width()) // 2
-        label_y = center_y - 20
-        surface.blit(label_surface, (label_x, label_y))
-
-        # Main prompt
-        prompt_font = fonts.get_font(Typography.SIZE_BODY)
-        prompt_text = "Press [ENTER] to continue"
-        prompt_surface = prompt_font.render(prompt_text, Typography.ANTIALIAS, Colors.TEXT_PRIMARY)
-        prompt_x = content.x + (content.width - prompt_surface.get_width()) // 2
-        prompt_y = center_y + 10
-        surface.blit(prompt_surface, (prompt_x, prompt_y))
-
-        # Bottom separator
-        sep_y = center_y + 50
-        pygame.draw.line(
-            surface,
-            Colors.BORDER_HIGHLIGHT,
-            (content.x + 20, sep_y),
-            (content.x + content.width - 20, sep_y),
-            1,
-        )
-
-    def _draw_cracking_overlay(
-        self, surface: "pygame.Surface", content: "pygame.Rect", fonts: "FontManager"
-    ) -> None:
-        """Draw the cracking animation overlay.
-
-        Shows a pulsing 'CRACKING...' text with a progress indicator
-        while PatternForge is analyzing the hash.
-        """
-        import math
-
-        # Calculate pulse effect (oscillates between 0.3 and 1.0)
-        pulse = 0.65 + 0.35 * math.sin(self._crack_timer * 6.0)
-        progress = min(self._crack_timer / self._crack_duration, 1.0)
-
-        # Center position for the cracking text
-        center_x = content.x + content.width // 2
-        center_y = content.y + content.height // 2 + 20
-
-        # "CRACKING..." text with pulse effect
-        crack_font = fonts.get_font(Typography.SIZE_SUBHEADER, bold=True)
-
-        # Animate the dots
-        dot_count = int((self._crack_timer * 3) % 4)
-        crack_text = "CRACKING" + "." * dot_count
-
-        # Color pulses between cyan and white
-        pulse_r = int(100 + 155 * pulse)
-        pulse_g = int(200 + 55 * pulse)
-        pulse_b = 255
-        crack_color = (pulse_r, pulse_g, pulse_b)
-
-        crack_surface = crack_font.render(crack_text, Typography.ANTIALIAS, crack_color)
-        crack_x = center_x - crack_surface.get_width() // 2
-        crack_y = center_y - 30
-        surface.blit(crack_surface, (crack_x, crack_y))
-
-        # Progress bar
-        bar_width = content.width - 40
-        bar_height = 8
-        bar_x = content.x + 20
-        bar_y = center_y + 10
-
-        # Bar background
-        import pygame
-        pygame.draw.rect(
-            surface,
-            Colors.BG_DARKEST,
-            (bar_x, bar_y, bar_width, bar_height),
-            border_radius=4,
-        )
-
-        # Bar fill (animated)
-        fill_width = int(bar_width * progress)
-        if fill_width > 0:
-            pygame.draw.rect(
-                surface,
-                crack_color,
-                (bar_x, bar_y, fill_width, bar_height),
-                border_radius=4,
-            )
-
-        # Bar border
-        pygame.draw.rect(
-            surface,
-            Colors.BORDER,
-            (bar_x, bar_y, bar_width, bar_height),
-            width=1,
-            border_radius=4,
-        )
-
-        # Percentage text
-        pct_font = fonts.get_small_font()
-        pct_text = f"{int(progress * 100)}%"
-        pct_surface = pct_font.render(pct_text, Typography.ANTIALIAS, Colors.TEXT_MUTED)
-        pct_x = center_x - pct_surface.get_width() // 2
-        pct_y = bar_y + bar_height + 8
-        surface.blit(pct_surface, (pct_x, pct_y))
+    # NOTE: _draw_hash_panel, _draw_tour_panel, _draw_cracking_overlay removed
+    # All rendering now happens through expandable_panel content renderers
 
     def _draw_result_overlay(self, surface: "pygame.Surface") -> None:
         """Draw the result panel overlay (success/failure)."""

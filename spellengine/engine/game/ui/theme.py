@@ -189,11 +189,27 @@ class BorderChars:
 
 
 # =============================================================================
+# CUSTOM FONT PATHS
+# =============================================================================
+
+# Custom font files (relative to assets/fonts/)
+CUSTOM_FONTS = {
+    "title": "PressStart2P-Regular.ttf",  # Classic 8-bit RPG font for titles/headers
+    "body": "VT323-Regular.ttf",          # CRT terminal font for body text
+    "mono": "SpaceMono-Regular.ttf",      # Clean mono for hash/code display
+}
+
+
+# =============================================================================
 # FONT MANAGER
 # =============================================================================
 
 class FontManager:
-    """Manages font loading and caching with retro fallbacks."""
+    """Manages font loading and caching with retro fallbacks.
+
+    Supports custom TTF fonts for titles/headers while using system
+    monospace for body text and terminal display.
+    """
 
     _instance: "FontManager | None" = None
     _fonts: dict[str, "pygame.font.Font"] = {}
@@ -211,6 +227,9 @@ class FontManager:
         self._fonts = {}
         self._initialized = False
         self._mono_font_name: str | None = None
+        self._title_font_path: str | None = None
+        self._body_font_path: str | None = None
+        self._mono_font_path: str | None = None
 
     def _init_fonts(self) -> None:
         """Initialize pygame fonts if not already done."""
@@ -218,11 +237,12 @@ class FontManager:
             return
 
         import pygame.font
+        from pathlib import Path
 
         if not pygame.font.get_init():
             pygame.font.init()
 
-        # Find best available monospace font
+        # Find best available system monospace font (ultimate fallback)
         available = pygame.font.get_fonts()
         for font_name in Typography.MONO_FONTS:
             normalized = font_name.lower().replace(" ", "").replace("-", "")
@@ -234,14 +254,38 @@ class FontManager:
             # Fallback to any monospace
             self._mono_font_name = "monospace"
 
+        # Locate custom fonts
+        def find_font(font_file: str) -> str | None:
+            """Find a font file in known locations."""
+            font_locations = [
+                Path(__file__).parent.parent.parent.parent.parent / "assets" / "fonts" / font_file,
+                Path.cwd() / "assets" / "fonts" / font_file,
+            ]
+            for font_path in font_locations:
+                if font_path.exists():
+                    return str(font_path)
+            return None
+
+        # Load title font (Press Start 2P)
+        if CUSTOM_FONTS.get("title"):
+            self._title_font_path = find_font(CUSTOM_FONTS["title"])
+
+        # Load body font (VT323)
+        if CUSTOM_FONTS.get("body"):
+            self._body_font_path = find_font(CUSTOM_FONTS["body"])
+
+        # Load mono font (Space Mono)
+        if CUSTOM_FONTS.get("mono"):
+            self._mono_font_path = find_font(CUSTOM_FONTS["mono"])
+
         self._initialized = True
 
     def get_font(self, size: int, bold: bool = False) -> "pygame.font.Font":
-        """Get a monospace font at the specified size.
+        """Get a monospace font at the specified size (Space Mono or fallback).
 
         Args:
             size: Font size in points
-            bold: Whether to use bold variant
+            bold: Whether to use bold variant (ignored for custom fonts)
 
         Returns:
             Pygame font object
@@ -250,41 +294,108 @@ class FontManager:
 
         self._init_fonts()
 
-        key = f"{size}:{bold}"
+        key = f"mono:{size}:{bold}"
         if key not in self._fonts:
-            try:
-                self._fonts[key] = pygame.font.SysFont(
-                    self._mono_font_name, size, bold=bold
-                )
-            except Exception:
-                # Ultimate fallback
-                self._fonts[key] = pygame.font.Font(None, size)
+            # Try custom mono font first (Space Mono)
+            if self._mono_font_path:
+                try:
+                    self._fonts[key] = pygame.font.Font(self._mono_font_path, size)
+                except Exception:
+                    pass
+
+            # Fallback to system mono
+            if key not in self._fonts:
+                try:
+                    self._fonts[key] = pygame.font.SysFont(
+                        self._mono_font_name, size, bold=bold
+                    )
+                except Exception:
+                    # Ultimate fallback
+                    self._fonts[key] = pygame.font.Font(None, size)
+
+        return self._fonts[key]
+
+    def get_title_font_at_size(self, size: int) -> "pygame.font.Font":
+        """Get the custom title font (ByteBounce) at the specified size.
+
+        Falls back to bold monospace if custom font not available.
+
+        Args:
+            size: Font size in points
+
+        Returns:
+            Pygame font object
+        """
+        import pygame.font
+
+        self._init_fonts()
+
+        key = f"title:{size}"
+        if key not in self._fonts:
+            if self._title_font_path:
+                try:
+                    self._fonts[key] = pygame.font.Font(self._title_font_path, size)
+                except Exception:
+                    # Fallback to bold monospace
+                    self._fonts[key] = self.get_font(size, bold=True)
+            else:
+                # No custom font available, use bold monospace
+                self._fonts[key] = self.get_font(size, bold=True)
+
+        return self._fonts[key]
+
+    def get_body_font_at_size(self, size: int) -> "pygame.font.Font":
+        """Get the custom body font (VT323) at the specified size.
+
+        Falls back to regular monospace if custom font not available.
+
+        Args:
+            size: Font size in points
+
+        Returns:
+            Pygame font object
+        """
+        import pygame.font
+
+        self._init_fonts()
+
+        key = f"body:{size}"
+        if key not in self._fonts:
+            if self._body_font_path:
+                try:
+                    self._fonts[key] = pygame.font.Font(self._body_font_path, size)
+                except Exception:
+                    # Fallback to monospace
+                    self._fonts[key] = self.get_font(size)
+            else:
+                # No custom font available, use monospace
+                self._fonts[key] = self.get_font(size)
 
         return self._fonts[key]
 
     def get_header_font(self) -> "pygame.font.Font":
-        """Get the font for headers (bold, large)."""
-        return self.get_font(Typography.SIZE_HEADER, bold=True)
+        """Get the font for headers (ByteBounce or bold monospace)."""
+        return self.get_title_font_at_size(Typography.SIZE_HEADER)
 
     def get_title_font(self) -> "pygame.font.Font":
-        """Get the font for screen titles (bold, extra large)."""
-        return self.get_font(Typography.SIZE_TITLE, bold=True)
+        """Get the font for screen titles (ByteBounce or bold monospace)."""
+        return self.get_title_font_at_size(Typography.SIZE_TITLE)
 
     def get_body_font(self) -> "pygame.font.Font":
-        """Get the font for body text."""
-        return self.get_font(Typography.SIZE_BODY)
+        """Get the font for body text (VT323 or monospace)."""
+        return self.get_body_font_at_size(Typography.SIZE_BODY)
 
     def get_label_font(self) -> "pygame.font.Font":
-        """Get the font for labels."""
-        return self.get_font(Typography.SIZE_LABEL)
+        """Get the font for labels (VT323 or monospace)."""
+        return self.get_body_font_at_size(Typography.SIZE_LABEL)
 
     def get_small_font(self) -> "pygame.font.Font":
-        """Get the font for hints and prompts."""
-        return self.get_font(Typography.SIZE_SMALL)
+        """Get the font for hints and prompts (VT323 or monospace)."""
+        return self.get_body_font_at_size(Typography.SIZE_SMALL)
 
     def get_intro_font(self) -> "pygame.font.Font":
-        """Get the font for intro/narrative text (optimized for 65/35 layout)."""
-        return self.get_font(Typography.SIZE_INTRO)
+        """Get the font for intro/narrative text (VT323 or monospace)."""
+        return self.get_body_font_at_size(Typography.SIZE_INTRO)
 
 
 # Convenience function

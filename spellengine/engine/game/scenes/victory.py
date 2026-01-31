@@ -180,6 +180,7 @@ class VictoryScene(Scene):
             menu_y,
             content.width,
             [
+                MenuItem("Credits", "R", self._on_credits),
                 MenuItem("Chronicle", "C", self._on_chronicle, enabled=False),
                 MenuItem("Exit", "ESC", self._on_quit),
             ],
@@ -576,6 +577,10 @@ class VictoryScene(Scene):
         )
         frag_x = center_x - frag_surface.get_width() // 2
         surface.blit(frag_surface, (frag_x, frag_y))
+
+    def _on_credits(self) -> None:
+        """View credits roll."""
+        self.change_scene("credits", from_victory=True)
 
     def _on_chronicle(self) -> None:
         """Handle chronicle button click."""

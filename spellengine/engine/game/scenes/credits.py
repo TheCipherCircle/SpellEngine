@@ -96,8 +96,16 @@ class CreditsScene(Scene):
         self._auto_scroll: bool = True
         self._content_height: float = 0.0
 
+        # Origin tracking
+        self._from_victory: bool = False
+
     def enter(self, **kwargs: Any) -> None:
-        """Enter the credits scene."""
+        """Enter the credits scene.
+
+        Args:
+            from_victory: Whether navigating from the victory scene
+        """
+        self._from_victory = kwargs.get("from_victory", False)
         screen_w, screen_h = self.client.screen_size
 
         margin = LAYOUT["panel_margin"]
@@ -164,7 +172,8 @@ class CreditsScene(Scene):
                 self._auto_scroll = False
 
     def _on_back(self) -> None:
-        """Return to title screen."""
+        """Return to previous screen (title, regardless of origin)."""
+        # Always return to title after viewing credits
         self.change_scene("title", campaign=self.client.campaign, has_save=False)
 
     def update(self, dt: float) -> None:

@@ -294,6 +294,7 @@ class GameClient:
 
     def _init_scenes(self) -> None:
         """Initialize all scene objects."""
+        from spellengine.engine.game.scenes.bumper import BumperScene
         from spellengine.engine.game.scenes.title import TitleScene
         from spellengine.engine.game.scenes.encounter import EncounterScene
         from spellengine.engine.game.scenes.game_over import GameOverScene
@@ -303,6 +304,7 @@ class GameClient:
         from spellengine.engine.game.scenes.prologue_gate import PrologueGateScene
 
         self._scenes = {
+            "bumper": BumperScene(self),
             "title": TitleScene(self),
             "encounter": EncounterScene(self),
             "game_over": GameOverScene(self),
@@ -457,11 +459,11 @@ class GameClient:
         self._init_adventure(resume)
         self._init_test_session()
 
-        # Start with title screen or encounter depending on mode
+        # Start with bumper screen, or encounter if resuming
         if resume and self.adventure_state:
             self.change_scene("encounter", resume=True)
         else:
-            self.change_scene("title", campaign=self.campaign, has_save=self.has_save())
+            self.change_scene("bumper")
 
         self._running = True
 
@@ -529,7 +531,9 @@ class GameClient:
 
                     pygame.display.flip()
                 except Exception as e:
+                    import traceback
                     print(f"Error in draw: {e}")
+                    traceback.print_exc()
                     # Fill with error color so user knows something is wrong
                     self._screen.fill((80, 0, 0))  # Dark red
                     pygame.display.flip()

@@ -160,7 +160,7 @@ def _parse_encounter(data: dict[str, Any], base_path: Path) -> Encounter:
                 id=choice_data["id"],
                 label=choice_data["label"],
                 description=choice_data.get("description"),
-                leads_to=choice_data["leads_to"],
+                leads_to=choice_data.get("leads_to"),  # Optional for PIPELINE/PUZZLE_BOX types
                 is_correct=choice_data.get("is_correct", True),
             )
         )

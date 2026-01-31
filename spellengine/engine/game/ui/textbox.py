@@ -240,3 +240,11 @@ class TextBox:
         """
         self._success_flash = True
         self._success_timer = duration
+
+    def set_placeholder(self, text: str) -> None:
+        """Update the placeholder text dynamically.
+
+        Args:
+            text: New placeholder text
+        """
+        self.placeholder = text

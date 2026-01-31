@@ -502,7 +502,7 @@ class TitleScene(Scene):
             if line.strip():
                 # Render line
                 text_surface = body_font.render(
-                    line.strip(), Typography.ANTIALIAS, Colors.TEXT
+                    line.strip(), Typography.ANTIALIAS, Colors.TEXT_PRIMARY
                 )
                 # Center horizontally
                 text_x = content.x + (content.width - text_surface.get_width()) // 2

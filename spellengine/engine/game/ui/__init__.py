@@ -48,6 +48,11 @@ from spellengine.engine.game.ui.widgets import Slider, Toggle, TimerWidget
 from spellengine.engine.game.ui.craft_panel import CraftPanel
 from spellengine.engine.game.ui.siege_panel import SiegePanel
 from spellengine.engine.game.ui.puzzle_panel import PuzzlePanel
+from spellengine.engine.game.ui.expandable_panel import (
+    ExpandablePanel,
+    StepTracker,
+    LearnMoreContent,
+)
 
 __all__ = [
     # Theme
@@ -96,4 +101,8 @@ __all__ = [
     "CraftPanel",
     "SiegePanel",
     "PuzzlePanel",
+    # Expandable panel
+    "ExpandablePanel",
+    "StepTracker",
+    "LearnMoreContent",
 ]
