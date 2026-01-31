@@ -90,6 +90,7 @@ The Forge Council is the development team behind PatternForge and PTHAdventures.
 ║                                                              ║
 ║  XP: ██████████████████████████████░  Level 9                ║
 ║  GRAINS OF SAND: 1497                                        ║
+║  LOOT: [The Kindling] [Loreth's Oath]                        ║
 ║                                                              ║
 ╚══════════════════════════════════════════════════════════════╝
 ```
@@ -126,8 +127,9 @@ The Forge Council is the development team behind PatternForge and PTHAdventures.
 ║                                                              ║
 ║  SPECIALTY: "Designed data MUST work quickly"                ║
 ║                                                              ║
-║  XP: ██████████░░░░░░░░░░░░░░░░░░░░  Level 4                ║
-║  GRAINS OF SAND: 331                                         ║
+║  XP: ████████████░░░░░░░░░░░░░░░░░░  Level 4                ║
+║  GRAINS OF SAND: 406                                         ║
+║  LOOT: [Golden Quill] "Words that make bugs into features"   ║
 ║                                                              ║
 ╚══════════════════════════════════════════════════════════════╝
 ```
@@ -244,8 +246,9 @@ The Forge Council is the development team behind PatternForge and PTHAdventures.
 ║                                                              ║
 ║  TOOLS: Python, CLI, Rich, Hashcat integration               ║
 ║                                                              ║
-║  XP: █████████████░░░░░░░░░░░░░░░░░  Level 5                ║
-║  GRAINS OF SAND: 634                                         ║
+║  XP: ██████████████░░░░░░░░░░░░░░░░  Level 5                ║
+║  GRAINS OF SAND: 734                                         ║
+║  LOOT: [Debugging Goggles] "See the invisible"               ║
 ║                                                              ║
 ╚══════════════════════════════════════════════════════════════╝
 ```
@@ -367,8 +370,9 @@ The Forge Council is the development team behind PatternForge and PTHAdventures.
 ║                                                              ║
 ║  DOMAIN: tests/ and platform certification                   ║
 ║                                                              ║
-║  XP: ████████████░░░░░░░░░░░░░░░░░░  Level 4               ║
-║  GRAINS OF SAND: 382                                         ║
+║  XP: █████████████░░░░░░░░░░░░░░░░░  Level 4               ║
+║  GRAINS OF SAND: 432                                         ║
+║  LOOT: [Steadfast Stone] "The foundation holds"              ║
 ║                                                              ║
 ╚══════════════════════════════════════════════════════════════╝
 ```
@@ -679,7 +683,8 @@ Once the review period ends with clean submissions, move to Alumni below.
 ---
 
 *Last Updated: 2026-01-30*
-*Session: FIRST FULL PLAYTHROUGH COMPLETE - pitl0rd & Solace cleared all 59 encounters!*
+*Session: DRAGON SLAIN - All playtest bugs fixed, Hashtopia.org launch prep complete!*
 *Legendary Drop: THE HASH BROWN BADGE - "Hash Brown" achievement name is now CANON forever.*
-*Bugs Found: PUZZLE_BOX/PIPELINE keyboard input broken, text truncation throughout, +0 XP display*
-*Level Ups: pitl0rd → L9, Anvil → L4*
+*Loot Rolled: Forge [Debugging Goggles], Mirth [Golden Quill], Anvil [Steadfast Stone]*
+*Fixes: PUZZLE_BOX keyboard, text truncation (11→19 lines), SCARAB beetle RP, prologue choices*
+*The Circle grows stronger.*
