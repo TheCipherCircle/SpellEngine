@@ -73,6 +73,7 @@ def resolve_keyspace(
     keyspace_data: dict[str, Any],
     generator: KeyspacePasswordGenerator,
     hash_type: str = "md5",
+    used_passwords: set[str] | None = None,
 ) -> dict[str, Any]:
     """Resolve a keyspace definition to concrete hash/solution.
 
@@ -80,14 +81,25 @@ def resolve_keyspace(
         keyspace_data: Dictionary with keyspace fields
         generator: Password generator instance
         hash_type: Hash algorithm to use
+        used_passwords: Set of already-used passwords to avoid duplicates
 
     Returns:
         Dictionary with hash, solution, and keyspace_meta
     """
     keyspace = parse_keyspace(keyspace_data)
-    password, hash_value, meta = generator.generate_encounter_password(
-        keyspace, hash_type
-    )
+
+    # Try multiple times to get a unique password
+    max_attempts = 10
+    for attempt in range(max_attempts):
+        password, hash_value, meta = generator.generate_encounter_password(
+            keyspace, hash_type
+        )
+
+        # Check if this password is already used
+        if used_passwords is None or password not in used_passwords:
+            if used_passwords is not None:
+                used_passwords.add(password)
+            break
 
     return {
         "hash": hash_value,
@@ -105,12 +117,14 @@ def resolve_keyspace(
 def build_encounter(
     encounter_data: dict[str, Any],
     generator: KeyspacePasswordGenerator,
+    used_passwords: set[str],
 ) -> dict[str, Any]:
     """Build a single encounter, resolving keyspace if present.
 
     Args:
         encounter_data: Encounter dictionary from source YAML
         generator: Password generator instance
+        used_passwords: Set of already-used passwords to avoid duplicates
 
     Returns:
         Built encounter dictionary with resolved keyspace
@@ -121,7 +135,7 @@ def build_encounter(
     if "keyspace" in result:
         keyspace_data = result.pop("keyspace")
         hash_type = result.get("hash_type", "md5")
-        resolved = resolve_keyspace(keyspace_data, generator, hash_type)
+        resolved = resolve_keyspace(keyspace_data, generator, hash_type, used_passwords)
         result.update(resolved)
 
     # Resolve variant keyspaces
@@ -137,7 +151,7 @@ def build_encounter(
                     "hash_type",
                     result.get("hash_type", "md5")
                 )
-                resolved = resolve_keyspace(keyspace_data, generator, hash_type)
+                resolved = resolve_keyspace(keyspace_data, generator, hash_type, used_passwords)
                 variant.update(resolved)
 
             new_variants[diff_name] = variant
@@ -150,12 +164,14 @@ def build_encounter(
 def build_chapter(
     chapter_data: dict[str, Any],
     generator: KeyspacePasswordGenerator,
+    used_passwords: set[str],
 ) -> dict[str, Any]:
     """Build a chapter, resolving all encounter keyspaces.
 
     Args:
         chapter_data: Chapter dictionary from source YAML
         generator: Password generator instance
+        used_passwords: Set of already-used passwords to avoid duplicates
 
     Returns:
         Built chapter dictionary
@@ -164,7 +180,7 @@ def build_chapter(
 
     if "encounters" in result:
         result["encounters"] = [
-            build_encounter(enc, generator)
+            build_encounter(enc, generator, used_passwords)
             for enc in result["encounters"]
         ]
 
@@ -212,6 +228,22 @@ def build_campaign(
     if verbose:
         print("Building encounters...")
 
+    # Track used passwords to avoid duplicates
+    # Pre-populate with any hardcoded passwords from source (e.g., prologue)
+    used_passwords: set[str] = set()
+    for chapter_data in campaign_data.get("chapters", []):
+        for enc in chapter_data.get("encounters", []):
+            # If encounter has explicit solution (no keyspace), add to used set
+            if "solution" in enc and "keyspace" not in enc:
+                used_passwords.add(enc["solution"])
+            # Check variants too
+            for variant in enc.get("variants", {}).values():
+                if "solution" in variant and "keyspace" not in variant:
+                    used_passwords.add(variant["solution"])
+
+    if verbose and used_passwords:
+        print(f"  Pre-seeded {len(used_passwords)} hardcoded passwords")
+
     built_chapters = []
     for chapter_data in campaign_data.get("chapters", []):
         # Count encounters
@@ -224,7 +256,7 @@ def build_campaign(
                     if "keyspace" in variant:
                         stats["variants_with_keyspace"] += 1
 
-        built_chapter = build_chapter(chapter_data, generator)
+        built_chapter = build_chapter(chapter_data, generator, used_passwords)
         built_chapters.append(built_chapter)
 
     campaign_data["chapters"] = built_chapters

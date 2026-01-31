@@ -189,6 +189,8 @@ class KeyspacePasswordGenerator:
 
                     # If still no candidates after filtering, return empty to trigger fallback
                     if candidates:
+                        # Shuffle to add variety (don't always return top candidates)
+                        random.shuffle(candidates)
                         return candidates[:count]
 
         except (ImportError, Exception):
@@ -357,8 +359,14 @@ class KeyspacePasswordGenerator:
         ]
 
         if not base_words:
-            base_words = ["password", "dragon", "master", "monkey", "shadow",
-                         "sunshine", "princess", "welcome", "secret", "magic"]
+            base_words = ["dragon", "master", "monkey", "shadow", "sunshine",
+                         "princess", "welcome", "secret", "magic", "thunder",
+                         "warrior", "hunter", "phoenix", "falcon", "tiger",
+                         "panther", "cobra", "viper", "knight", "wizard",
+                         "ranger", "ninja", "samurai", "legend", "storm"]
+
+        # Shuffle to ensure variety
+        random.shuffle(base_words)
 
         # Common years for year-based patterns
         years = ["2024", "2023", "2022", "2021", "2020", "1999", "1998", "1997"]
