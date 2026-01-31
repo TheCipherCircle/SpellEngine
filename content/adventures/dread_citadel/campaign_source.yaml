@@ -956,33 +956,31 @@ chapters:
         failure_text: "Apply leet substitutions to common words."
         next_encounter: enc_fix_broken_rule
 
-      # REPAIR: Fix broken rule syntax
+      # REPAIR: Fix broken rule syntax - simplified
       - id: enc_fix_broken_rule
         title: "Fix the Broken Rule"
-        type: repair
+        type: flash
         tier: 2
         xp_reward: 25
         intro_text: |
-          A damaged scroll shows a broken rule command:
+          A damaged scroll shows a broken command:
 
-          `patternforge crack hash --rules best64.rul`
+          BROKEN: `pf crack hash --rules best64.rul`
 
-          The apprentice made ERRORS:
-          ◈ Wrong flag syntax
-          ◈ Missing required parameters
+          What's MISSING? The command needs a wordlist!
 
-          CORRECT SYNTAX:
-          `patternforge crack <hash> --wordlist common --rules best64`
+          PATTERN: `pf crack <hash> --wordlist ??? --rules best64`
 
-          Fix the command to proceed.
-        objective: "Correct the rule command syntax"
-        solution: "patternforge crack <hash> --wordlist common --rules best64"
-        hint: "Need --wordlist before --rules. Rules file doesn't need .rul extension."
+          Type the missing wordlist name: common
+        objective: "What wordlist is missing?"
+        solution: "common"
+        hint: "The most basic wordlist is called 'common'"
         success_text: |
           The scroll repairs itself.
 
-          "Syntax matters. One wrong character, total failure."
-        failure_text: "Check the syntax guide. --wordlist comes before --rules."
+          "Rules TRANSFORM wordlists. No wordlist = no attack.
+          The full command: patternforge crack <hash> --wordlist common --rules best64"
+        failure_text: "What's the name of the basic wordlist? (Hint: it's common)"
         next_encounter: enc_first_rule_attack
 
       # WALKTHROUGH: First rule attack
@@ -1514,7 +1512,7 @@ chapters:
         failure_text: "Remember: ?l = lowercase, ?d = digit"
         next_encounter: enc_locked_memory
 
-      # PUZZLE_BOX: Multi-step unlock
+      # FLASH: Pattern-based password
       - id: enc_locked_memory
         title: "The Locked Memory"
         type: flash
@@ -1523,30 +1521,23 @@ chapters:
         intro_text: |
           A sealed vault contains ancient passwords.
 
-          "This vault requires the FULL WORKFLOW:
-          1. Ingest the corpus
-          2. Analyze patterns
-          3. Extract the dominant pattern
+          The beetle reveals: "Pattern = word + year"
 
-          The password follows: Word + 2 digits"
-        objective: "Execute the full pipeline"
+          Analysis suggests: a 4-letter word + 4-digit year.
+          Common in corporate environments.
 
-        keyspace:
-          source: "training_corpus"
-          tokens: ["WORD", "DIGIT"]
-          complexity: compound
-          discovery_method: mask
-          tier: 4
-          min_length: 6
-          max_length: 8
-
+          Try: born2003
+        objective: "Apply the pattern analysis"
+        solution: "born2003"
         hash_type: md5
-        hint: "Use analysis to identify the pattern, then crack."
+        hint: "The password is born2003 (word + year pattern)"
         success_text: |
           The vault unseals.
 
-          "You've mastered the analysis pipeline."
-        failure_text: "Think: analyze first, then attack."
+          "Pattern recognition + wordlist = cracked.
+          You've mastered corpus analysis."
+        failure_text: "The pattern is word+year. Try: born2003"
+        next_encounter: enc_which_corpus
         next_encounter: enc_which_corpus
 
       # FORK: Corpus selection
@@ -1764,23 +1755,22 @@ chapters:
         tier: 3
         xp_reward: 20
         intro_text: |
-          The EntropySmith tests your understanding.
+          "Calculate the KEYSPACE:
 
-          "Given this grammar rule:
-          <word> + <symbol> + <year>
+          Words: admin, root, user (3 words)
+          Symbols: !, @, # (3 symbols)
+          Years: 2020-2024 (5 years)
 
-          And corpus containing: admin, root, user
-          Years: 2020-2024
-          Symbols: !, @, #
+          Pattern: word + symbol + year
 
-          How many TOTAL combinations?"
-        objective: "Calculate the keyspace"
+          TOTAL combinations = words × symbols × years = ?"
+        objective: "Calculate: 3 × 3 × 5 = ?"
         solution: "45"
-        hint: "3 words × 3 symbols × 5 years = ?"
+        hint: "Multiply: 3 × 3 × 5 = 45"
         success_text: |
           "45 combinations! 3 × 3 × 5.
-          Understanding keyspace helps you estimate attack time."
-        failure_text: "Multiply: words × symbols × years"
+          Keyspace calculation predicts attack time."
+        failure_text: "3 words × 3 symbols × 5 years = ?"
         next_encounter: enc_full_pipeline
 
       # PIPELINE: Chain commands together
